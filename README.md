@@ -1,7 +1,7 @@
 # cloudera-manager-cli
 Cloudera Manager command-line interface.
 
-Work in progress... The code and documentation will be posted soon.
+Work in progress... The code and documentation will be posted in the near future.
 
 Here is a preview of the available command options:
 ```
@@ -49,3 +49,24 @@ Usage: ./cmcli.pl [-h] [-d] [-api] -cm[=hostname[:port]] [-u=username] [-p=passw
 	 -impalaQueries : Display Impala queries (TODO)
 	 -mgmt (-s=mgmt) : Display Cloudera Management Service information (default: disabled)
 ```
+
+Additionally, I have created a separate all-purpose REST client to interact with the Cloudera Manager API:
+```
+Usage: ./cmapi.pl [-h] [-d] [-u=username] [-p=password]
+	[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] ResourceUrl
+
+	 -h : Display usage
+	 -d : Enable debug mode
+	 -u : CM username (environment variable: $CM_REST_USER | default: admin)
+	 -p : CM password or path to password file (environment variable: $CM_REST_PASS | default: admin)
+	      *Credendials file* /Users/mdom/.cm_rest -> Set variables using colon-separated key/value pairs
+	 -m : Method | GET, POST, PUT, DELETE (default: GET)
+	 -bt : Body type | array, hash, json (default: hash)
+	 -bc : Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)
+	       To set multiple objects, use -bt=json or -f to pass a JSON file
+	 -i : Add 'items' property to the body content (on by default if -bt=array)
+	 -f : JSON file containing body content (implies -bt=json)
+	 ResourceUrl : URL to REST resource (example: [http://]cloudera-manager:7180/api/v10/clusters/)
+```
+
+
