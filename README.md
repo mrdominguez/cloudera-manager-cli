@@ -4,7 +4,7 @@ AUTHOR: Mariano Dominguez, <marianodominguez@hotmail.com>
 
 VERSION: 2.0
 
-BUGS: Please report bugs through GitHub or to <marianodominguez@hotmail.com>
+BUGS: Please report bugs to <marianodominguez@hotmail.com>
 
 The Cloudera Manager CLI (`cmcli.pl`) is a utility that facilitates cluster managament and automation from the command-line thought the Cloudera Manager REST API.
 
