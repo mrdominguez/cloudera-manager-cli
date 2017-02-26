@@ -188,7 +188,7 @@ Service actions:
 Cluster actions:
 - All `/clusters/{clusterName}/commands/{commandName}` endpoints that don't require *Request Body*.
 
-## Cluster|Service|Role output
+## Cluster/Service/Role output
 
 <https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiCluster.html>
 
