@@ -10,7 +10,7 @@ The Cloudera Manager CLI (`cmcli.pl`) is a utility that facilitates cluster mana
 
 It is compatible with Cloudera Manager 5.x (API v6 or higher). Most of the functionaly should also work (not fully tested) with Cloudera Manager 4.x (API v5 or lower), although you may see "Use of uninitialized value" messages and/or failures.
 
-Additionally, a separate REST client (`cmapi.pl`) is provided to call the endpoints not covered by the CLI.
+A separate REST client (`cmapi.pl`) is provided to call the endpoints not covered by the CLI.
 
 Unless overriden by the `-api` option, `cmcli.pl` will use the default API version available:
 
@@ -149,14 +149,14 @@ CM credentials can be passed by using the `-u` (username) and `-p` (password) op
 
 `$ cmcli.pl -u=username -p=/path/to/password_file -cm=...`
 
-Credentials can also be passed by using the `$CM_REST_USER` and `$CM_REST_PASS` enviroment variables. Once again, the `$CM_REST PASS` environment variable can be set to a file containing the password. Additionally, these environment variables can be loaded through a credentials file (`$HOME/.cm_rest`), if it exists:
+Credentials can also be passed by using the `$CM_REST_USER` and `$CM_REST_PASS` enviroment variables. Once again, the `$CM_REST PASS` environment variable can be set to a file containing the password:
 
 ```
 export CM_REST_USER=username
 export CM_REST_PASS=/path/to/password_file
 ```
 
-Or
+The aforementioned environment variables can be loaded through a credentials file (`$HOME/.cm_rest`), if it exists:
 
 ```
 $ cat $HOME/.cm_rest
