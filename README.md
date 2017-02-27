@@ -55,7 +55,7 @@ Then, add the following line to the code:
 
 ## Usage
 
-The only mandatory option is `-cm` to reference the CM server host.
+The only mandatory option for `cmcli.pl` is `-cm` to reference the CM server host, whereas `cmapi.pl` requires `<ResourceUrl>`.
 
 Here is the usage information for both utilities:
 
