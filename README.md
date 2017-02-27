@@ -81,7 +81,7 @@ Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<i
      -p : CM password or path to password file (environment variable: $CM_REST_PASS | default: admin)
           *Credendials file* $HOME/.cm_rest -> Set variables using colon-separated key/value pairs
      -cmVersion : Display Cloudera Manager and default API versions
-     -users : Display CM users/roles (default: all users)
+     -users : Display CM users/roles (default: all)
      -userAction: User action
                   (add) Create user (requires -f)
                   (update) Update user (requires -f)
