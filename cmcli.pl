@@ -965,7 +965,7 @@ sub usage {
 	print "\t -p : CM password or path to password file (environment variable: \$CM_REST_PASS | default: admin)\n";
 	print "\t      *Credendials file* \$HOME/.cm_rest -> Set variables using colon-separated key/value pairs\n";
 	print "\t -cmVersion : Display Cloudera Manager and default API versions\n";
-	print "\t -users : Display CM users/roles (default: all users)\n";
+	print "\t -users : Display CM users/roles (default: all)\n";
 	print "\t -userAction: User action\n";
 	print "\t              (add) Create user (requires -f)\n";
 	print "\t              (update) Update user (requires -f)\n";
