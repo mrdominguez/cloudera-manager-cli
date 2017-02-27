@@ -6,13 +6,13 @@ VERSION: 2.0
 
 BUGS: Please report bugs to <marianodominguez@hotmail.com>
 
-The Cloudera Manager CLI (`cmcli.pl`) is a utility that facilitates cluster managament and automation from the command-line thought the Cloudera Manager REST API.
+The Cloudera Manager CLI (`cmcli.pl`) is a utility that facilitates cluster management and automation from the command-line thought the Cloudera Manager REST API.
 
-It is compatible with Cloudera Manager 5.x (API v6 or higher). Most of the functionaly should also work (not fully tested) with Cloudera Manager 4.x (API v5 or lower), although you may see "Use of uninitialized value" messages and/or failures.
+It is compatible with Cloudera Manager 5.x (API v6 or higher). Most of the functionality should also work (not fully tested) with Cloudera Manager 4.x (API v5 or lower), although you may see `Use of uninitialized value...` messages and/or failures.
 
 A separate REST client (`cmapi.pl`) is provided to call the endpoints not supported by the CLI.
 
-Unless overriden by the `-api` option, `cmcli.pl` will use the default API version available:
+Unless overridden by the `-api` option, `cmcli.pl` will use the default API version available:
 
 http://cloudera.github.io/cm_api/docs/releases/
 
@@ -149,7 +149,7 @@ CM credentials can be passed by using the `-u` (username) and `-p` (password) op
 
 `$ cmcli.pl -u=username -p=/path/to/password_file -cm=...`
 
-Credentials can also be passed by using the `$CM_REST_USER` and `$CM_REST_PASS` enviroment variables. Just like the `-p` option, the `$CM_REST PASS` environment variable can be set to a file containing the password:
+Credentials can also be passed by using the `$CM_REST_USER` and `$CM_REST_PASS` environment variables. Just like the `-p` option, the `$CM_REST PASS` environment variable can be set to a file containing the password:
 
 ```
 export CM_REST_USER=username
