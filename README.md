@@ -1,3 +1,5 @@
+**(03/03/2017) Work in progress: Implementing support for rolling restart of services and roles...**
+
 ## Synopsis
 
 AUTHOR: Mariano Dominguez, <marianodominguez@hotmail.com>
