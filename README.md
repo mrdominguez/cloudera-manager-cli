@@ -172,8 +172,8 @@ The preference is as follows (highest first):
 
 1. Options `-u`, `-p`
 2. Credentials file
-3. Environment variables (using export command)
-4. Default credentials (admin/admin)
+3. Environment variables (using the `export` command)
+4. Default credentials (*admin*/*admin*)
 
 ## Suported cluster/service/role actions
 
