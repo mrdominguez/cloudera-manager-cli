@@ -13,51 +13,51 @@ Examples:
 
 * Delete the selected hosts from CM:
 
-`cmcli.pl -cm=cm_server -hInfo=<perl_regex> -deleteHost`
+    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -deleteHost`
 
 * Remove the selected hosts from 'cluster2' (if using API v10 or lower):
 
-`cmcli.pl -cm=cm_server -hInfo=<perl_regex> -removeFromCluster=cluster2`
+    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -removeFromCluster=cluster2`
 
-If using API v11 or higher, remove hosts from ANY cluster:
+    If using API v11 or higher, remove hosts from ANY cluster:
 
-`cmcmli.pl -cm=cm_server -hInfo=<perl_regex> -hAction=removeFromCluster`
+    `cmcmli.pl -cm=cm_server -hInfo=<perl_regex> -hAction=removeFromCluster`
 
 * Roll restart ALL the roles on the selected hosts:
 
-`cmcli.pl -cm=cm_server -hInfo=<perl_regex> -a=rollingRestart`
+    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -a=rollingRestart`
 
 * Roll restart the HBase roles on the selected hosts:
 
-`cmcli.pl -cm=cm_server -hInfo=<perl_regex> -a=rollingRestart -s=hbase`
+    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -a=rollingRestart -s=hbase`
 
 * Roll restart the NodeManager roles of the YARN service of 'cluster2' with extra options:
 
-`cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
 
 * Roll restart the ResourceManager roles:
 
-`cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -restartRoleTypes=resourcemanager`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -restartRoleTypes=resourcemanager`
 
 * Roll restart YARN roles with stale configs only:
 
-`cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -staleConfigsOnly=true`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -staleConfigsOnly=true`
 
-*or*
+    *or*
 
-`cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -rFilter=stale -a=rollingRestart`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -rFilter=stale -a=rollingRestart`
 
 * Roll restart NameNode and JournalNode roles:
 
-`cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=rollingRestart -restartRoleTypes=namenode,journalnode`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=rollingRestart -restartRoleTypes=namenode,journalnode`
 
-*or*
+    *or*
 
-`cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs —r='name|journal' -a=rollingRestart`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs —r='name|journal' -a=rollingRestart`
 
 * Roll restart ALL ZooKeeper and Flume services:
 
-`cmcli.pl -cm=cm_server -c=cluster2 -s='zoo|flume' -a=rollingRestart`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s='zoo|flume' -a=rollingRestart`
 
 ### ---
 
@@ -257,7 +257,11 @@ Role actions:
 - `/cm/service/roleCommands/{commandName}`
 
 Service actions:
-- All `/clusters/{clusterName}/services/{serviceName}/commands/{commandName}` endpoints that don't require *Request Body*, except `deployClientConfig`, `decommission` and `recommission`, which are supported
+- All `/clusters/{clusterName}/services/{serviceName}/commands/{commandName}` endpoints that don't require *Request Body*, except the following supported commands:
+  * `deployClientConfig`
+  * `decommission`
+  * `recommission`
+  * `rollingRestart`
 - `/cm/service/commands/{commandName}`
 
 Cluster actions:
@@ -359,7 +363,7 @@ Here are some common use cases:
 
     `$ cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -r=datanode -rFilter=stopped -a=start`
 
-    *To execute the action, add* `-confirmed`. *To check the command execution status, add* `-trackCmd`.
+    *To execute the action, use* `-confirmed`. *To check the command execution status, add* `-trackCmd`. *To do both, just use the* `-run` *shortcut instead*.
 
 * Deploy the YARN client configuration at the service level:
 
@@ -387,7 +391,7 @@ Here are some common use cases:
 
 * Decommission the NodeManager instance on a given host:
 
-	`$ cmcli.pl -cm=cm_server -hInfo=host_name -r=nodemanager -a=decommission`
+    `$ cmcli.pl -cm=cm_server -hInfo=host_name -r=nodemanager -a=decommission`
 
 * Restart the DataNode instance on a given host:
 
