@@ -1,4 +1,8 @@
-**(03/03/2017) Work in progress: Implementing support for rolling restart of services and roles...**
+**Work in progress... version 2.1 coming soon**
+
+(03/03/2017) Implementing support for rolling restart of services and roles
+
+(03/06/2017) Improving and expading the code regarding host management
 
 ## Synopsis
 
