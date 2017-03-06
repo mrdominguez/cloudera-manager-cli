@@ -5,7 +5,7 @@
 - Remove hosts from clusters for API v10 or lower: `-removeFromCluster`
 - Shortcut option (`-run`) for a commonly used combination of switches (namely, `-confirmed -trackCmd`)
 - Code enhancements regarding host mananagement
-- Minor changes to improve code readability
+- Minor changes to improve code debugging and readability
 
 Note: Regarding `-removeFromCluster`, this feature was already available in version 2.0 for API v11 via `-hAction=removeFromCluster`. The difference between these two options is that the latter automatically gets the cluster name from `apiHost->clusterRef->clusterName`, whereas the former requires the cluster name to be manually set.
 
