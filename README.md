@@ -1,5 +1,6 @@
 ###Version 3.0 is now available!
 
+The new release includes:
 - Rolling restart of services and roles: `-a=rollingRestart`
 - Delete hosts from Cloudera Manager: `-deleteHost`
 - Remove hosts from clusters for API v10 or lower: `-removeFromCluster`
