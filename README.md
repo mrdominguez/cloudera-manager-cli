@@ -1,4 +1,4 @@
-**Work in progress... version 2.1 coming soon**
+**Work in progress... version 3.0 coming soon**
 
 (03/03/2017) Implementing support for rolling restart of services and roles
 
