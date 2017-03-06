@@ -1,6 +1,6 @@
 #!/usr/bin/perl -ws
 
-# Copyright 2016 Mariano Dominguez
+# Copyright 2017 Mariano Dominguez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,12 +15,10 @@
 # limitations under the License.
 
 # Cloudera Manager REST API client
-# Version: 2.0
+# Version: 3.0
 # Use -help for options
 
-use lib qw(/home/m_dominguez/modules/share/perl5/);
 use strict;
-#use warnings;
 use REST::Client;
 use MIME::Base64;
 use JSON;
@@ -31,8 +29,8 @@ use vars qw($help $version $u $p $m $d $f $i $bt $bc);
 if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 2.0\n";
-	print "Release date: 02/15/2017\n";
+	print "Version: 3.0\n";
+	print "Release date: 03/07/2017\n";
 	exit;
 }
 
@@ -169,7 +167,7 @@ sub usage {
 	print "\t[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] <ResourceUrl>\n\n";
 
 	print "\t -help : Display usage\n";
-	print "\t -version : Show version information\n";
+	print "\t -version : Display version information\n";
 	print "\t -d : Enable debug mode\n";
 	print "\t -u : CM username (environment variable: \$CM_REST_USER | default: admin)\n";
 	print "\t -p : CM password or path to password file (environment variable: \$CM_REST_PASS | default: admin)\n";
@@ -181,6 +179,6 @@ sub usage {
 	print "\t       To set multiple objects, use -bt=json or -f to pass a JSON file\n";
 	print "\t -i : Add 'items' property to the body content (on by default if -bt=array)\n";
 	print "\t -f : JSON file containing body content (implies -bt=json)\n";
-	print "\t <ResourceUrl> : URL to REST resource (example: [http(s)://]cloudera-manager:7180/api/v10/clusters/)\n\n";
+	print "\t <ResourceUrl> : URL to REST resource (example: [http(s)://]cloudera-manager:7180/api/v15/clusters/)\n\n";
 	exit;
 }

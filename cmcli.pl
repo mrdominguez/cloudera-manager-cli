@@ -1,6 +1,6 @@
 #!/usr/bin/perl -ws
 
-# Copyright 2016 Mariano Dominguez
+# Copyright 2017 Mariano Dominguez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,10 +15,9 @@
 # limitations under the License.
 
 # Cloudera Manager Command-Line Interface
-# Version: 2.0
+# Version: 3.0
 # Use -help for options
 
-use lib qw(/home/m_dominguez/modules/share/perl5/);
 use strict;
 use warnings;
 use REST::Client;
@@ -31,13 +30,14 @@ BEGIN { $| = 1 }
 
 use vars qw($help $version $d $cmVersion $users $userAction $f $https $api $sChecks $sMetrics $rChecks $rMetrics $config $u $p $cm
 	$c $s $r $rInfo $rFilter $yarnApps $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles $hChecks $deployment
-	$mgmt $impalaQueries $trackCmd $setRackId $hAction $addToCluster);
+	$mgmt $impalaQueries $trackCmd $setRackId $deleteHost $addToCluster $removeFromCluster $hAction $run
+	$slaveBatchSize $sleepSeconds $slaveFailCountThreshold $staleConfigsOnly $unUpgradedOnly $restartRoleTypes);
 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 2.0\n";
-	print "Release date: 02/17/2017\n";
+	print "Version: 3.0\n";
+	print "Release date: 03/07/2017\n";
 	exit;
 }
 
@@ -45,15 +45,22 @@ if ( $version ) {
 die "-cm is not set. Use -help for options\n" unless $cm;
 
 my %opts = ('cmdId'=>$cmdId, 'cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'userAction'=>$userAction,
-		'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'hAction'=>$hAction, 'addToCluster'=>$addToCluster);
-my %hInfo_opts = ('hRoles'=>$hRoles, 'hChecks'=>$hChecks, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction);
+		'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'removeFromCluster'=>$removeFromCluster, 'hAction'=>$hAction);
+my %hInfo_opts = ('hRoles'=>$hRoles, 'hChecks'=>$hChecks, 'setRackId'=>$setRackId, 'deleteHost'=>$deleteHost,
+			'addToCluster'=>$addToCluster, 'removeFromCluster'=>$removeFromCluster, 'hAction'=>$hAction);
+my %rr_opts = ('slaveBatchSize'=>$slaveBatchSize, 'sleepSeconds'=>$sleepSeconds, 'slaveFailCountThreshold'=>$slaveFailCountThreshold,
+		'staleConfigsOnly'=>$staleConfigsOnly, 'unUpgradedOnly'=>$unUpgradedOnly, 'restartRoleTypes'=>$restartRoleTypes, 'restartRoleNames'=>undef);
 
-foreach ( keys %opts ) {
-	die "-$_ is not set\n" if ( defined $opts{$_} && ( $opts{$_} eq '1' || $opts{$_} =~ /^\s*$/ ) );
-}
 foreach ( keys %hInfo_opts ) {
 	die "-$_ requires -hInfo to be set\n" if ( defined $hInfo_opts{$_} and not $hInfo );
 }
+foreach ( keys %rr_opts ) {
+	die "-$_ requires -s to be set\n" if ( defined $rr_opts{$_} and not $s );
+}
+foreach ( keys %opts ) {
+	die "-$_ is not set\n" if ( defined $opts{$_} && ( $opts{$_} eq '1' || $opts{$_} =~ /^\s*$/ ) );
+}
+
 if ( $cmdAction ) {
 	die "-cmdAction requires -cmdId to be set\n" if not $cmdId;
 	die "Command action '$cmdAction' not supported. Use -help for options\n" if $cmdAction !~ /abort|retry/;
@@ -62,6 +69,9 @@ if ( $userAction ) {
 	die "-userAction requires -users to be set\n" if not $users;
 	die "User action '$userAction' not supported. Use -help for options\n" if $userAction !~ /add|update|delete/;
 }
+
+($confirmed, $trackCmd) = (1, 1) if $run;
+
 die "Host action '$hAction' not supported. Use -help for options\n"
 		if ( $hAction && $hAction !~ /decommission|recommission|startRoles|enterMaintenanceMode|exitMaintenanceMode|removeFromCluster/ );
 die "-trackCmd requires -a, -cmdId or -hAction to be set\n"
@@ -132,7 +142,7 @@ if ( $cmVersion || !$api ) {
 	$api_version = $api;
 }
 $api_version = ($api_version =~ /v(\d+)/) ? $1 : die "Invalid API version format: $api_version";
-print "API version: $api_version\n" if $d;
+print "API version = $api_version\n" if $d;
 
 die "-yarnApps is only available since API v6\n" if ( $api_version < 6 && $yarnApps );
 die "-impalaQueries is only available since API v4\n" if ( $api_version < 4 && $impalaQueries );
@@ -212,13 +222,11 @@ if ( $deployment ) {
 my $cmd_list;
 if ( $cmdId ) {
 	my $cmd;
+	$cm_url = "$cm_api/commands/$cmdId";
 	if ( $cmdAction ) {
-		$cm_url = "$cm_api/commands/$cmdId/$cmdAction";
-#		&rest_call('POST', $cm_url, 0);
+		$cm_url .= "/$cmdAction";
 		$cmd = &rest_call('POST', $cm_url, 1);
 	} else {
-		$cm_url = "$cm_api/commands/$cmdId";
-#		&rest_call('GET', $cm_url, 0);
 		$cmd = &rest_call('GET', $cm_url, 1);
 	}
 
@@ -344,45 +352,59 @@ if ( defined $hInfo ) {
 		++$host_summary->{'host_commission_state'}->{$host_commission_state} if ( $api_version > 1 && $host_commission_state ne 'COMMISSIONED' );
 		print $hInfo_output;
 
-		if ( $setRackId && $confirmed ) {
+		if ( $confirmed ) {
 			$cm_url = "$cm_api/hosts/$host_id";
-			$body_content = "{ \"rackId\" : \"$setRackId\" }";
-			&rest_call('PUT', $cm_url, 0, undef, $body_content);
-		}
-
-		if ( $addToCluster && $confirmed ) {
-			$cm_url = "$cm_api/clusters/$addToCluster/hosts";
-			$body_content = "{ \"items\" : [\"$host_id\"] }";
-			&rest_call('POST', $cm_url, 0, undef, $body_content);
-		}
-
-		if ( $hAction && $confirmed ) {
-			print "$host_name | ACTION: $hAction ";
-			if ( $hAction eq 'decommission' ) {
-				$cm_url = "$cm_api/cm/commands/hostsDecommission"
-			} elsif ( $hAction eq 'recommission' ) {
-				$cm_url = "$cm_api/cm/commands/hostsRecommission";
-			} elsif ( $hAction eq 'startRoles' ) {
-				$cm_url = "$cm_api/cm/commands/hostsStartRoles";
-			} elsif ( $hAction eq 'enterMaintenanceMode' ) {
-				$cm_url = "$cm_api/hosts/$host_id/commands/enterMaintenanceMode";
-			} elsif ( $hAction eq 'exitMaintenanceMode' ) {
-				$cm_url = "$cm_api/hosts/$host_id/commands/exitMaintenanceMode";
-			} elsif ( $hAction eq 'removeFromCluster' ) {
-				print "\n";
-				if ( defined $cluster_name && $cluster_name ne 'No cluster' ) {
-					$cm_url = "$cm_api/clusters/$cluster_name/hosts/$host_id";
-					&rest_call('DELETE', $cm_url, 0);
-				} else {
-					print "$host_name | $host_id not associated with any cluster\n";
-				}
-				next;
+			my ($host, $host_ref);
+			if ( $setRackId ) {
+				$body_content = "{ \"rackId\" : \"$setRackId\" }";
+				$host = &rest_call('PUT', $cm_url, 1, undef, $body_content);
+				print "$host_name | rackId set to '$setRackId'\n";
+			} elsif ( $deleteHost ) {
+				$host = &rest_call('DELETE', $cm_url, 1);
+				print "$host_name | Deleted from the system\n";
 			}
-			$body_content = "{ \"items\" : [\"$host_name\"] }" if $hAction =~ /decommission|recommission|startRoles/;
-			my $cmd = $body_content ? &rest_call('POST', $cm_url, 1, undef, $body_content) : &rest_call('POST', $cm_url, 1);
-			my $id = $cmd->{'id'};
-			print "| CMDID: $id\n";
-			$trackCmd ? $cmd_list->{$id} = $cmd : &cmd_id(\%{$cmd});
+
+			if ( $addToCluster ) {
+				$cm_url = "$cm_api/clusters/$addToCluster/hosts";
+				$body_content = "{ \"items\" : [\"$host_id\"] }";
+				$host_ref = &rest_call('POST', $cm_url, 1, undef, $body_content);
+				print "$host_name | Added to '$addToCluster'\n";
+			} elsif ( $removeFromCluster ) {
+				$cluster_name = $removeFromCluster;
+				$hAction = 'removeFromCluster';
+			}
+
+			if ( $hAction ) {
+				print "$host_name | ACTION: $hAction ";
+				if ( $hAction eq 'decommission' ) {
+					$cm_url = "$cm_api/cm/commands/hostsDecommission"
+				} elsif ( $hAction eq 'recommission' ) {
+					$cm_url = "$cm_api/cm/commands/hostsRecommission";
+				} elsif ( $hAction eq 'startRoles' ) {
+					$cm_url = "$cm_api/cm/commands/hostsStartRoles";
+				} elsif ( $hAction eq 'enterMaintenanceMode' ) {
+					$cm_url = "$cm_api/hosts/$host_id/commands/enterMaintenanceMode";
+				} elsif ( $hAction eq 'exitMaintenanceMode' ) {
+					$cm_url = "$cm_api/hosts/$host_id/commands/exitMaintenanceMode";
+				} elsif ( $hAction eq 'removeFromCluster' ) {
+					print "\n";
+					if ( defined $cluster_name && $cluster_name ne 'No cluster' ) {
+						$cm_url = "$cm_api/clusters/$cluster_name/hosts/$host_id";
+						$host_ref = &rest_call('DELETE', $cm_url, 1);
+						print "$host_name | ";
+						print $host_ref ? "Removed from '$cluster_name'" : "hostId '$host_id' is not associated with '$cluster_name'";
+						print "\n";
+					} else {
+						print "$host_name | hostId '$host_id' is not associated with any cluster\n";
+					}
+					next;
+				}
+				$body_content = "{ \"items\" : [\"$host_name\"] }" if $hAction =~ /decommission|recommission|startRoles/;
+				my $cmd = $body_content ? &rest_call('POST', $cm_url, 1, undef, $body_content) : &rest_call('POST', $cm_url, 1);
+				my $id = $cmd->{'id'};
+				print "| CMDID: $id\n";
+				$trackCmd ? $cmd_list->{$id} = $cmd : &cmd_id(\%{$cmd});
+			}
 		}
 
 		if ( $hChecks ) {
@@ -406,22 +428,26 @@ if ( defined $hInfo ) {
 	print "\n";
 	exit unless $num_hosts;
 
-	if ( $setRackId ) {
-		print "*** Use -confirmed to update the rack ID to $setRackId\n" if not $confirmed;
-		exit;
+	if ( not $confirmed ) {
+		if ( $setRackId ) {
+			print "*** Use -confirmed to update the rackId to '$setRackId' for the selected hosts\n";
+		} elsif ( $deleteHost ) {
+			print "*** Use -confirmed to delete the selected hosts from Cloudera Manager\n";
+		}
+		if ( $addToCluster ) {
+			print "*** Use -confirmed to add the selected hosts to '$addToCluster'\n";
+		} elsif ( $removeFromCluster ) {
+			print "*** Use -confirmed to remove the selected hosts from '$removeFromCluster'\n";
+		}
 	}
-
-	if ( $addToCluster ) {
-		print "*** Use -confirmed to add hosts to $addToCluster\n" if not $confirmed;
-		exit;
-	}
-
 	if ( $hAction ) {
-		print "*** Use -confirmed to execute the $hAction host action\n" if not $confirmed;
+		print "*** Use -confirmed or -run to execute the $hAction host action\n" if not $confirmed;
 		&track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
-		exit;
 	}
-
+	foreach ( keys %hInfo_opts ) {
+		exit if ( $_ !~ /hRoles|hChecks/ && $hInfo_opts{$_} );
+	}
+	
 	if ( $role_info_flag ) {
 		if ( @services and not $s ) {
 			# match exact word -> wrap around \b
@@ -458,7 +484,6 @@ if ( $s && $s =~ /mgmt/ ) {
 			my ($cmd, $id);
 			if ( $a eq '1' ) {
 				print "\n";
-#				&rest_call('GET', $cm_url, 0);
 				my $items = &rest_call('GET', $cm_url, 1);
 				if ( @{$items->{'items'}} ) {
 					foreach $cmd ( @{$items->{'items'}} ) {
@@ -470,14 +495,13 @@ if ( $s && $s =~ /mgmt/ ) {
 				}
 			} else {
 				$cm_url .= "/$a";
-#				&rest_call('POST', $cm_url, 0);
 				$cmd = &rest_call('POST', $cm_url, 1);
 				$id = $cmd->{'id'};
 				print "| CMDID: $id\n";
 				$trackCmd ? $cmd_list->{$id} = $cmd : &cmd_id(\%{$cmd});
 			}
 		} else {
-			print "*** Use -confirmed to execute the $mgmt_action mgmt action\n";
+			print "*** Use -confirmed or -run to execute the $mgmt_action mgmt action\n";
 		}
 	}
 	
@@ -540,7 +564,6 @@ if ( $s && $s =~ /mgmt/ ) {
 				print "$mgmt_header | $mgmt_role_name | ACTION: $a ";
 				$cm_url = "$cm_api/cm/service/roleCommands/$a";
 				$body_content = "{ \"items\" : [\"$mgmt_role_name\"] }";
-#				&rest_call('POST', $cm_url, 0, undef, $body_content);
 				my $cmd = &rest_call('POST', $cm_url, 1, undef, $body_content);
 				if ( @{$cmd->{'errors'}} ) {
 					print "\nERROR: $cmd->{'errors'}[0]\n";
@@ -551,7 +574,7 @@ if ( $s && $s =~ /mgmt/ ) {
 				$trackCmd ? $cmd_list->{$id} = $cmd->{'items'}[0] : &cmd_id($cmd->{'items'}[0]);
 			}
 		}
-		print "*** Use -confirmed to execute the $a role action\n" if $action_flag && !$confirmed;
+		print "*** Use -confirmed or -run to execute the $a role action\n" if $action_flag && !$confirmed;
 		&role_summary($mgmt_role_list, undef, undef, $mgmt_name);
 	}
 	
@@ -566,7 +589,7 @@ unless ( @clusters ) {
 	if ( $c ) {
 		push @clusters, $c;
 	} else {
-		print "Looking for clusters...\n" if $d;
+		print "Fetching clusters...\n" if $d;
 		$cm_url = "$cm_api/clusters";
 		my $cm_clusters = &rest_call('GET', $cm_url, 1);
 		for ( my $i=0; $i < @{$cm_clusters->{'items'}}; $i++ ) {
@@ -604,7 +627,6 @@ foreach my $cluster_name ( @clusters ) {
 			my ($cmd, $id);
 			if ( $a eq '1' ) {
 				print "\n";
-#				&rest_call('GET', $cm_url, 0);
 				my $items = &rest_call('GET', $cm_url, 1);
 				if ( @{$items->{'items'}} ) {
 					foreach $cmd ( @{$items->{'items'}} ) {
@@ -616,7 +638,6 @@ foreach my $cluster_name ( @clusters ) {
 				}
 			} else {
 				$cm_url .= "/$a";
-#				&rest_call('POST', $cm_url, 0);
 				$cmd = &rest_call('POST', $cm_url, 1);
 				$id = $cmd->{'id'};
 				print "| CMDID: $id\n";
@@ -628,7 +649,7 @@ foreach my $cluster_name ( @clusters ) {
 				}
 			}
 		} else {
-			print "*** Use -confirmed to execute the $cluster_action cluster action\n";
+			print "*** Use -confirmed or -run to execute the $cluster_action cluster action\n";
 			print "Set -c to specify a different cluster\n";
 		}
 		exit;
@@ -784,7 +805,6 @@ foreach my $cluster_name ( @clusters ) {
 				my ($cmd, $id);
 				if ( $a eq '1' ) {
 					print "\n";
-#					&rest_call('GET', $cm_url, 0);
 					my $items = &rest_call('GET', $cm_url, 1);
 					if ( @{$items->{'items'}} ) {
 						foreach $cmd ( @{$items->{'items'}} ) {
@@ -796,14 +816,17 @@ foreach my $cluster_name ( @clusters ) {
 					}
 				} else {
 					$cm_url .= "/$a";
-					$body_content = '{ "items" : [] }' if $a eq 'deployClientConfig';
+					if ( $a eq 'rollingRestart' ) {
+						$body_content = &rolling_restart($cluster_name, $service_name);						
+					} elsif ( $a eq 'deployClientConfig' ) {
+						$body_content = '{ "items" : [] }';
+					}
 					$cmd = $body_content ? &rest_call('POST', $cm_url, 1, undef, $body_content) : &rest_call('POST', $cm_url, 1);
 					$id = $cmd->{'id'};
 					print "| CMDID: $id\n";
 					if ( $trackCmd ) {
 						$cmd_list->{$id} = $cmd;
 					} else {
-#						&rest_call('POST', $cm_url, 0);
 						&cmd_id(\%{$cmd});
 					}
 				}
@@ -906,13 +929,19 @@ foreach my $cluster_name ( @clusters ) {
 						}
 
 						if ( $action_flag && $confirmed ) {
-							print "$service_header | $host_id | $role_name | ACTION: $a ";
-							my $service_action = 1 if $a =~ /decommission|recommission/;
-							if ( $service_action ) {
-								$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/commands/$a";
+							$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name";
+							my $service_action;
+							if ( $a eq 'rollingRestart' ) {
+								$rr_opts{'restartRoleNames'} .= "$role_name,";
+								next;
+							} elsif ( $a =~ /decommission|recommission/ ) {
+								$cm_url .= "/commands/$a";
+								$service_action = 1
 							} else {
-								$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/roleCommands/$a";
+								$cm_url .= "/roleCommands/$a";
 							}
+
+							print "$service_header | $host_id | $role_name | ACTION: $a ";
 							$body_content = "{ \"items\" : [\"$role_name\"] }";
 							my $cmd = &rest_call('POST', $cm_url, 1, undef, $body_content);
 							if ( defined $cmd->{'errors'} && @{$cmd->{'errors'}} ) {
@@ -924,18 +953,26 @@ foreach my $cluster_name ( @clusters ) {
 							if ( $trackCmd ) {
 								$cmd_list->{$id} = $service_action ? $cmd_list->{$id} = $cmd : $cmd->{'items'}[0];
 							} else { 
-#								&rest_call('POST', $cm_url, 0, undef, $body_content);
 								$service_action ? &cmd_id(\%{$cmd}) : &cmd_id($cmd->{'items'}[0]);
 							}
 						}
 					}
 				} # role instance
 			} # roles
-			print "*** Use -confirmed to execute the $a role action\n" if $action_flag && !$confirmed;
+			print "*** Use -confirmed or -run to execute the $a role action\n" if $action_flag and not $confirmed;
 			&role_summary($role_list, $cluster_name, $service_name, undef);
+			if ( $action_flag && $confirmed && $a eq 'rollingRestart' ) {
+				print "$cluster_name | $service_name | ACTION: $a ";
+				$body_content = &rolling_restart($cluster_name, $service_name);
+				my $cmd = &rest_call('POST', $cm_url, 1, undef, $body_content);
+				my $id = $cmd->{'id'};
+				print "| CMDID: $id\n";
+				$trackCmd ? $cmd_list->{$id} = $cmd : &cmd_id(\%{$cmd});
+				$rr_opts{'restartRoleNames'} = undef;
+			}
 		} # service instance
 	} # services
-	print "*** Use -confirmed to execute the $a service action\n" if $a and $a ne '1'
+	print "*** Use -confirmed or -run to execute the $a service action\n" if $action_flag
 									and $service_action_flag
 									and not defined $rInfo
 									and not $confirmed;
@@ -947,16 +984,17 @@ sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=username] [-p=password]\n";
 	print "\t[-cmVersion] [-config] [-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]\n";
 	print "\t[-users[=user_name] [-userAction=delete|(add|update -f=json_file)]]\n";
+	print "\t[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-setRackId=/...|-deleteHost] \\\n";
+	print "\t\t[(-addToCluster|-removeFromCluster)=cluster_name] [-hAction=command_name]]\n";
 	print "\t[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]\n";
 	print "\t[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=...] [-rChecks] [-rMetrics] [-log=log_type]]\n";
-	print "\t[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-setRackId=/...] [-addToCluster=cluster_name] [-hAction=action [-trackCmd]] [-c=...] [-s=...] [-r=...]]\n";
-	print "\t[-a[=action] [-confirmed] [-trackCmd]]\n";
+	print "\t[-a[=command_name]] [[-confirmed [-trackCmd]]|-run]\n";
 	print "\t[-yarnApps[=parameters]]\n";
 	print "\t[-impalaQueries[=parameters]]\n";
 	print "\t[-mgmt] (<> -s=mgmt)\n\n";
 
-	print "\t -help : Usage\n";
-	print "\t -version : Show version information\n";
+	print "\t -help : Display usage\n";
+	print "\t -version : Display version information\n";
 	print "\t -d : Enable debug mode\n";
 	print "\t -cm : CM hostname:port (default: localhost:7180)\n";
 	print "\t -https : Use https to communicate with CM (default: http)\n";
@@ -981,24 +1019,35 @@ sub usage {
 	print "\t -hFilter : Host health summary, entity status, maintenance mode, commission state (regex)\n";
 	print "\t -hRoles : Roles associated to host\n";
 	print "\t -hChecks : Host health checks\n";
-	print "\t -setRackId : Update the rack ID for the given host\n";
-	print "\t -addToCluster : Add the given host to a cluster\n";
+	print "\t -setRackId : Update the rack ID for the host\n";
+	print "\t -deleteHost : Delete the host from Cloudera Manager\n";
+	print "\t -addToCluster : Add the host to a cluster\n";
+	print "\t -removeFromCluster : Remove the host from a cluster /compatible with API v10 or lower, implies -hAction=removeFromCluster/\n";
 	print "\t -hAction : Host action\n";
-	print "\t            (decommission) Decommission the given host\n";
-	print "\t            (recommission) Recommission the given host\n";
-	print "\t            (startRoles) Start all the roles on the given host\n";
+	print "\t            (decommission|recommission) Decommission/recommission the host\n";
+	print "\t            (startRoles) Start all the roles on the host\n";
 	print "\t            (enterMaintenanceMode) Put the host into maintenance mode\n";
 	print "\t            (exitMaintenanceMode) Take the host out of maintenance mode\n";
-	print "\t            (removeFromCluster) Remove the given host from a cluster\n";
+	print "\t            (removeFromCluster) Remove the host from a cluster /compatible with API v11 or higher, gets clusterRef->clusterName from apiHost/\n";
 	print "\t -c : Cluster name\n";
 	print "\t -s : Service name (regex)\n";
 	print "\t -r : Role type/name (regex)\n";
 	print "\t -rInfo : Role information (regex UUID or set -hInfo | default: all)\n";
 	print "\t -rFilter : Role state, health summary, configuration status, commission state (regex)\n";
-	print "\t -a : Cluster/service/role action (default: -cluster/services- list active commands, -roles- no action)\n";
-	print "\t      Role decommission/recommission is supported\n";
+	print "\t -a : Cluster/service/role action (default: -cluster/service- list active commands, -role- no action)\n";
+	print "\t      (stop|start|restart|...)\n";
+	print "\t      (deployClientConfig) Deploy cluster-wide/service client configuration\n";
+	print "\t      (decommission|recommission) Decommission/recommission roles of a service\n";
+	print "\t      (rollingRestart) Rolling restart of roles in a service. Optional arguments:\n";
+ 	print "\t      -restartRoleTypes : Comma-separated list of role types to restart. If not specified, all startable roles are restarted (default: all)\n";
+ 	print "\t      -slaveBatchSize : Number of hosts with slave roles to restart at a time (default: 1)\n";
+ 	print "\t      -sleepSeconds : Number of seconds to sleep between restarts of slave host batches (default: 0)\n";
+ 	print "\t      -slaveFailCountThreshold : Number of slave host batches that are allowed to fail to restart before the entire command is considered failed (default: 0)\n";
+ 	print "\t      -staleConfigsOnly : Restart roles with stale configs only (default: false)\n";
+ 	print "\t      -unUpgradedOnly : Restart roles that haven't been upgraded yet (default: false)\n";
 	print "\t -confirmed : Proceed with the command execution\n";
 	print "\t -trackCmd : Display the result of all executed asynchronous commands before exiting\n";
+	print "\t -run : Shortcut for '-confirmed -trackCmd'\n";
 	print "\t -sChecks : Service health checks\n";
 	print "\t -sMetrics : Service metrics\n";
 	print "\t -rChecks : Role health checks\n";
@@ -1006,7 +1055,7 @@ sub usage {
 	print "\t -log : Display role log (type: full, stdout, stderr -stacks, stacksBundle for mgmt service-)\n";
 	print "\t -yarnApps : Display YARN applications (example: -yarnApps='filter='executing=true'')\n";
 	print "\t -impalaQueries : Display Impala queries (example: -impalaQueries='filter='user=<userName>'')\n";
-	print "\t -mgmt (-s=mgmt) : Show Cloudera Management Service information (default: disabled)\n\n";
+	print "\t -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)\n\n";
 	exit;
 }
 
@@ -1016,7 +1065,18 @@ sub rest_call {
 	# 0 -> print output
 	# 1 -> return output
 	# 2 -> write output to file
-	
+
+	if ( $d ) {
+		my $rest_debug_output = "<--\n";
+		$rest_debug_output .= " method = $method\n" if defined $method;
+		$rest_debug_output .= " url = $url\n" if defined $url;
+		$rest_debug_output .= " ret = $ret\n" if defined $ret;
+		$rest_debug_output .= " fn = $fn\n" if defined $fn;
+		$rest_debug_output .= " bc = $bc\n" if defined $bc;
+		$rest_debug_output .= "-->\n";
+		print $rest_debug_output;
+	}
+
 	if ( $method =~ m/GET/i ) {
 		$client->GET($url, $headers); 
 	} elsif ( $method =~ m/POST/i ) {
@@ -1037,11 +1097,11 @@ sub rest_call {
 		print $fh $content;
 		close $fh;
 	} else { 
-		print "$content\n" if ( !$ret || $http_rc ne '200' || $d );
+		print "$content\n" if ( not $ret or $http_rc !~ '2\d\d' or $d );
 		# Append a new line to the die string to prevent perl from adding the line number and file
-		die "The HTTP request was not successfull (response code: $http_rc)" if $http_rc ne '200';
+		die "The HTTP request was not successfull (response code: $http_rc)" if $http_rc !~ '2\d\d';
 		if ( $ret ) {
-			$content = from_json($content) if $url !~ /api\/version/;
+			$content = from_json($content) if ( $content && $url !~ /api\/version/ );
 #			print Dumper($content);
 			return $content;
 		}
@@ -1089,7 +1149,8 @@ sub cmd_id {
 			foreach my $key ( keys %{$cmd->{$ref}} ) {
 				if ( $ref eq 'roleRef' ) {
 					next if ( $key =~ 'clusterName|serviceName' );
-					print "$role_host_map->{$cmd->{$ref}->{'roleName'}} -> " if $hInfo and not $cmdId;
+					my $host_name = $role_host_map->{$cmd->{$ref}->{'roleName'}} if defined $role_host_map->{$cmd->{$ref}->{'roleName'}};
+					print "$host_name -> " if $hInfo and defined $host_name and not $cmdId;
 				}
 #				print "$key: $cmd->{$ref}->{$key} ";
 				print "$cmd->{$ref}->{$key} ";
@@ -1151,4 +1212,32 @@ sub track_cmd {
 			&cmd_id(\%{$cmd_list->{$id}}) unless $cmd_list->{$id}->{'success'};
 		}
 	}
+}
+
+sub rolling_restart {
+	my ($cluster_name, $service_name) = @_;
+	$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/commands/rollingRestart";
+	$body_content = "{ ";
+	my $rr_opts_cnt = 0;
+	foreach my $arg ( keys %rr_opts ) {
+		++$rr_opts_cnt if defined $rr_opts{$arg};
+	}
+	foreach my $arg ( keys %rr_opts ) {
+		if ( defined $rr_opts{$arg} ) {
+			$body_content .= "\"$arg\" : ";
+			if ( $arg =~ /restartRoleTypes|restartRoleNames/ ) {
+				$rr_opts{$arg} =~ s/\s+//g;
+				my @role_types = split /,/, uc $rr_opts{$arg}; # uppercase
+				my $role_types_json = join ' , ', map {qq("$_")} @role_types; # double quote
+				$body_content .= "[ $role_types_json ]";
+			} else {
+				$body_content .= "\"$rr_opts{$arg}\"";
+			}
+			--$rr_opts_cnt;
+			$body_content .= ", " if $rr_opts_cnt;
+		}
+	}
+	$body_content .= " }";
+	print "$body_content\n" if $d;
+	return $body_content;
 }

@@ -1,14 +1,71 @@
-**Work in progress... version 3.0 coming soon**
+###Version 3.0 is now available!
 
-(03/03/2017) Implementing support for rolling restart of services and roles
+- Rolling restart of services and roles: `-a=rollingRestart`
+- Delete hosts from Cloudera Manager: `-deleteHost`
+- Remove hosts from clusters for API v10 or lower: `-removeFromCluster`
+- Shortcut option (`-run`) for a commonly used combination of switches (namely, `-confirmed -trackCmd`)
+- Code enhancements regarding host mananagement
+- Minor changes to improve code readability
 
-(03/06/2017) Improving and expading the code regarding host management
+Note: Regarding `-removeFromCluster`, this feature was already available in version 2.0 for API v11 via `-hAction=removeFromCluster`. The difference between these two options is that the latter automatically gets the cluster name from `apiHost->clusterRef->clusterName`, whereas the former requires the cluster name to be manually set.
+
+Examples:
+
+* Delete the selected hosts from CM:
+
+`cmcli.pl -cm=cm_server -hInfo=<perl_regex> -deleteHost`
+
+* Remove the selected hosts from 'cluster2' (if using API v10 or lower):
+
+`cmcli.pl -cm=cm_server -hInfo=<perl_regex> -removeFromCluster=cluster2`
+
+If using API v11 or higher, remove hosts from ANY cluster:
+
+`cmcmli.pl -cm=cm_server -hInfo=<perl_regex> -hAction=removeFromCluster`
+
+* Roll restart ALL the roles on the selected hosts:
+
+`cmcli.pl -cm=cm_server -hInfo=<perl_regex> -a=rollingRestart`
+
+* Roll restart the HBase roles on the selected hosts:
+
+`cmcli.pl -cm=cm_server -hInfo=<perl_regex> -a=rollingRestart -s=hbase`
+
+* Roll restart the NodeManager roles of the YARN service of 'cluster2' with extra options:
+
+`cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
+
+* Roll restart the ResourceManager roles:
+
+`cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -restartRoleTypes=resourcemanager`
+
+* Roll restart YARN roles with stale configs only:
+
+`cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -staleConfigsOnly=true`
+
+*or*
+
+`cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -rFilter=stale -a=rollingRestart`
+
+* Roll restart NameNode and JournalNode roles:
+
+`cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=rollingRestart -restartRoleTypes=namenode,journalnode`
+
+*or*
+
+`cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs —r='name|journal' -a=rollingRestart`
+
+* Roll restart ALL ZooKeeper and Flume services:
+
+`cmcli.pl -cm=cm_server -c=cluster2 -s='zoo|flume' -a=rollingRestart`
+
+### ---
 
 ## Synopsis
 
 AUTHOR: Mariano Dominguez, <marianodominguez@hotmail.com>
 
-VERSION: 2.0
+VERSION: 3.0
 
 BUGS: Please report bugs to <marianodominguez@hotmail.com>
 
@@ -66,87 +123,99 @@ The only mandatory option for `cmcli.pl` is `-cm` to reference the CM server hos
 Here is the usage information for both utilities:
 
 ```
-Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=username] [-p=password]
-    [-cmVersion] [-config] [-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]
-    [-users[=user_name] [-userAction=delete|(add|update -f=json_file)]]
-    [-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]
-    [-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=...] [-rChecks] [-rMetrics] [-log=log_type]]
-    [-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-setRackId=/...] [-addToCluster=cluster_name] [-hAction=action [-trackCmd]] [-c=...] [-s=...] [-r=...]]
-    [-a[=action] [-confirmed] [-trackCmd]]
-    [-yarnApps[=parameters]]
-    [-impalaQueries[=parameters]]
-    [-mgmt] (<> -s=mgmt)
+Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=username] [-p=password]
+	[-cmVersion] [-config] [-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]
+	[-users[=user_name] [-userAction=delete|(add|update -f=json_file)]]
+	[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-setRackId=/...|-deleteHost] \
+		[(-addToCluster|-removeFromCluster)=cluster_name] [-hAction=command_name]]
+	[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]
+	[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=...] [-rChecks] [-rMetrics] [-log=log_type]]
+	[-a[=command_name]] [[-confirmed [-trackCmd]]|-run]
+	[-yarnApps[=parameters]]
+	[-impalaQueries[=parameters]]
+	[-mgmt] (<> -s=mgmt)
 
-     -help : Usage
-     -version : Show version information
-     -d : Enable debug mode
-     -cm : CM hostname:port (default: localhost:7180)
-     -https : Use https to communicate with CM (default: http)
-     -api : CM API version -> v<integer> (default: response from <cm>/api/version)
-     -u : CM username (environment variable: $CM_REST_USER | default: admin)
-     -p : CM password or path to password file (environment variable: $CM_REST_PASS | default: admin)
-          *Credendials file* $HOME/.cm_rest -> Set variables using colon-separated key/value pairs
-     -cmVersion : Display Cloudera Manager and default API versions
-     -users : Display CM users/roles (default: all)
-     -userAction: User action
-                  (add) Create user (requires -f)
-                  (update) Update user (requires -f)
-                  (delete) Delete user
-     -f: JSON file with user information
-     -config : Dump configuration to file (CM, Cloudera Management Service and, if -s is set, specific services)
-     -deployment : Retrieve full description of the entire CM deployment
-     -cmdId : Retrieve information on an asynchronous command
-     -cmdAction : Command action
-                (abort) Abort a running command
-                (retry) Try to rerun a command
-     -hInfo : Host information (regex UUID, hostname, IP, rackId, cluster) | default: all)
-     -hFilter : Host health summary, entity status, maintenance mode, commission state (regex)
-     -hRoles : Roles associated to host
-     -hChecks : Host health checks
-     -setRackId : Update the rack ID for the given host
-     -addToCluster : Add the given host to a cluster
-     -hAction : Host action
-                (decommission) Decommission the given host
-                (recommission) Recommission the given host
-                (startRoles) Start all the roles on the given host
-                (enterMaintenanceMode) Put the host into maintenance mode
-                (exitMaintenanceMode) Take the host out of maintenance mode
-                (removeFromCluster) Remove the given host from a cluster
-     -c : Cluster name
-     -s : Service name (regex)
-     -r : Role type/name (regex)
-     -rInfo : Role information (regex UUID or set -hInfo | default: all)
-     -rFilter : Role state, health summary, configuration status, commission state (regex)
-     -a : Cluster/service/role action (default: -cluster/services- list active commands, -roles- no action)
-          Role decommission/recommission is supported
-     -confirmed : Proceed with the command execution
-     -trackCmd : Display the result of all executed asynchronous commands before exiting
-     -sChecks : Service health checks
-     -sMetrics : Service metrics
-     -rChecks : Role health checks
-     -rMetrics : Role metrics
-     -log : Display role log (type: full, stdout, stderr -stacks, stacksBundle for mgmt service-)
-     -yarnApps : Display YARN applications (example: -yarnApps='filter='executing=true'')
-     -impalaQueries : Display Impala queries (example: -impalaQueries='filter='user=<userName>'')
-     -mgmt (-s=mgmt) : Show Cloudera Management Service information (default: disabled)
+	 -help : Display usage
+	 -version : Display version information
+	 -d : Enable debug mode
+	 -cm : CM hostname:port (default: localhost:7180)
+	 -https : Use https to communicate with CM (default: http)
+	 -api : CM API version -> v<integer> (default: response from <cm>/api/version)
+	 -u : CM username (environment variable: $CM_REST_USER | default: admin)
+	 -p : CM password or path to password file (environment variable: $CM_REST_PASS | default: admin)
+	      *Credendials file* $HOME/.cm_rest -> Set variables using colon-separated key/value pairs
+	 -cmVersion : Display Cloudera Manager and default API versions
+	 -users : Display CM users/roles (default: all)
+	 -userAction: User action
+	              (add) Create user (requires -f)
+	              (update) Update user (requires -f)
+	              (delete) Delete user
+	 -f: JSON file with user information
+	 -config : Dump configuration to file (CM, Cloudera Management Service and, if -s is set, specific services)
+	 -deployment : Retrieve full description of the entire CM deployment
+	 -cmdId : Retrieve information on an asynchronous command
+	 -cmdAction : Command action
+	            (abort) Abort a running command
+	            (retry) Try to rerun a command
+	 -hInfo : Host information (regex UUID, hostname, IP, rackId, cluster) | default: all)
+	 -hFilter : Host health summary, entity status, maintenance mode, commission state (regex)
+	 -hRoles : Roles associated to host
+	 -hChecks : Host health checks
+	 -setRackId : Update the rack ID for the host
+	 -deleteHost : Delete the host from Cloudera Manager
+	 -addToCluster : Add the host to a cluster
+	 -removeFromCluster : Remove the host from a cluster /compatible with API v10 or lower, implies -hAction=removeFromCluster/
+	 -hAction : Host action
+	            (decommission|recommission) Decommission/recommission the host
+	            (startRoles) Start all the roles on the host
+	            (enterMaintenanceMode) Put the host into maintenance mode
+	            (exitMaintenanceMode) Take the host out of maintenance mode
+	            (removeFromCluster) Remove the host from a cluster /compatible with API v11 or higher, gets clusterRef->clusterName from apiHost/
+	 -c : Cluster name
+	 -s : Service name (regex)
+	 -r : Role type/name (regex)
+	 -rInfo : Role information (regex UUID or set -hInfo | default: all)
+	 -rFilter : Role state, health summary, configuration status, commission state (regex)
+	 -a : Cluster/service/role action (default: -cluster/service- list active commands, -role- no action)
+	      (stop|start|restart|...)
+	      (deployClientConfig) Deploy cluster-wide/service client configuration
+	      (decommission|recommission) Decommission/recommission roles of a service
+	      (rollingRestart) Rolling restart of roles in a service. Optional arguments:
+	      -restartRoleTypes : Comma-separated list of role types to restart. If not specified, all startable roles are restarted (default: all)
+	      -slaveBatchSize : Number of hosts with slave roles to restart at a time (default: 1)
+	      -sleepSeconds : Number of seconds to sleep between restarts of slave host batches (default: 0)
+	      -slaveFailCountThreshold : Number of slave host batches that are allowed to fail to restart before the entire command is considered failed (default: 0)
+	      -staleConfigsOnly : Restart roles with stale configs only (default: false)
+	      -unUpgradedOnly : Restart roles that haven't been upgraded yet (default: false)
+	 -confirmed : Proceed with the command execution
+	 -trackCmd : Display the result of all executed asynchronous commands before exiting
+	 -run : Shortcut for '-confirmed -trackCmd'
+	 -sChecks : Service health checks
+	 -sMetrics : Service metrics
+	 -rChecks : Role health checks
+	 -rMetrics : Role metrics
+	 -log : Display role log (type: full, stdout, stderr -stacks, stacksBundle for mgmt service-)
+	 -yarnApps : Display YARN applications (example: -yarnApps='filter='executing=true'')
+	 -impalaQueries : Display Impala queries (example: -impalaQueries='filter='user=<userName>'')
+	 -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)
 ```
 ```
-Usage: cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
-    [-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] <ResourceUrl>
+Usage: ./cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
+	[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] <ResourceUrl>
 
-     -help : Display usage
-     -version : Show version information
-     -d : Enable debug mode
-     -u : CM username (environment variable: $CM_REST_USER | default: admin)
-     -p : CM password or path to password file (environment variable: $CM_REST_PASS | default: admin)
-          *Credendials file* $HOME/.cm_rest -> Set variables using colon-separated key/value pairs
-     -m : Method | GET, POST, PUT, DELETE (default: GET)
-     -bt : Body type | array, hash, json (default: hash)
-     -bc : Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)
-           To set multiple objects, use -bt=json or -f to pass a JSON file
-     -i : Add 'items' property to the body content (on by default if -bt=array)
-     -f : JSON file containing body content (implies -bt=json)
-     <ResourceUrl> : URL to REST resource (example: [http(s)://]cloudera-manager:7180/api/v10/clusters/)
+	 -help : Display usage
+	 -version : Display version information
+	 -d : Enable debug mode
+	 -u : CM username (environment variable: $CM_REST_USER | default: admin)
+	 -p : CM password or path to password file (environment variable: $CM_REST_PASS | default: admin)
+	      *Credendials file* $HOME/.cm_rest -> Set variables using colon-separated key/value pairs
+	 -m : Method | GET, POST, PUT, DELETE (default: GET)
+	 -bt : Body type | array, hash, json (default: hash)
+	 -bc : Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)
+	       To set multiple objects, use -bt=json or -f to pass a JSON file
+	 -i : Add 'items' property to the body content (on by default if -bt=array)
+	 -f : JSON file containing body content (implies -bt=json)
+	 <ResourceUrl> : URL to REST resource (example: [http(s)://]cloudera-manager:7180/api/v15/clusters/)
 ```
 
 ## Setting credentials
@@ -268,7 +337,7 @@ Here are some common use cases:
 
     `$ cmcli.pl -cm=cm_server -mgmt -rInfo`
 
-    *Or*
+    *or*
 
     `$ cmcli.pl -cm=cm_server -s=mgmt -rInfo`
 
@@ -312,7 +381,7 @@ Here are some common use cases:
 
     `$ cmcli.pl -cm=cm_server -hInfo=host_name -hAction=startRoles`
 
-    *Or*
+    *or*
 
     `$ cmcli.pl -cm=cm_server -hInfo=host_name -a=start`
 
