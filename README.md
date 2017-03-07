@@ -35,7 +35,9 @@ Examples:
 * Roll restart the NodeManager roles of the YARN service of 'cluster2' with extra options:
 
     `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
-
+    
+    `-restartRoleTypes` *is NOT case-sensitive. Check the list of role types [here](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).*
+    
 * Roll restart the ResourceManager roles:
 
     `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -restartRoleTypes=resourcemanager`
@@ -364,7 +366,7 @@ Here are some common use cases:
 
     `$ cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -r=datanode -rFilter=stopped -a=start`
 
-    *To execute the action, use* `-confirmed`. *To check the command execution status, add* `-trackCmd`. *To do both, just use the* `-run` *shortcut instead*.
+    *To execute the action, use* `-confirmed`. *To check the command execution status, add* `-trackCmd`. *To do both, just use the* `-run` *shortcut instead.*
 
 * Deploy the YARN client configuration at the service level:
 
