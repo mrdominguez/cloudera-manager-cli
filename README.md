@@ -22,7 +22,7 @@ Examples:
 
     If using API v11 or higher, remove hosts from ANY cluster:
 
-    `cmcmli.pl -cm=cm_server -hInfo=<perl_regex> -hAction=removeFromCluster`
+    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -hAction=removeFromCluster`
 
 * Roll restart ALL the roles on the selected hosts:
 
