@@ -8,7 +8,7 @@ The new release includes...
 - Code enhancements regarding host management
 - Minor changes to improve code debugging and readability
 
-Note: Regarding `-removeFromCluster`, this feature was already available in version 2.0 for API v11 via `-hAction=removeFromCluster`. The difference between these two options is that the latter automatically gets the cluster name from `apiHost->clusterRef->clusterName`, whereas the former requires the cluster name to be manually set.
+Note: Regarding `-removeFromCluster`, this feature was already available in version 2.0 for API v11 via `-hAction=removeFromCluster`. The difference between these two options is that the latter automatically gets the cluster name from `apiHost->clusterRef->clusterName`, whereas the former requires the cluster name to be manually set. Both options will be merged in the next release.
 
 Examples:
 
