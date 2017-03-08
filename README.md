@@ -117,7 +117,7 @@ make install
 
 Then, add the following line to the code:
 
-`use lib qw(<PREFIX>/share/perl5/);`
+`use lib qw(<PREFIX>/share/perl5);`
 
 ## Usage
 
