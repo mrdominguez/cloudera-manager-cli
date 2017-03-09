@@ -1,14 +1,19 @@
-###Version 3.0 is now available!
+###Version 4.0 is now available!
 
-The new release includes...
+- Improved functionality: `-removeFromCluster`
+- New options: `-maintenanceMode` and `-roleConfigGroups`
+- List active commands for roles (already supported by clusters/services): `-a`
+- New role actions (already supported by clusters/services):
+  * `-a=enterMaintenanceMode`
+  * `-a=exitMaintenanceMode`
+
+###Version 3.0
+
 - Rolling restart of services and roles: `-a=rollingRestart`
 - Delete hosts from Cloudera Manager: `-deleteHost`
-- Remove hosts from clusters for API v10 or lower: `-removeFromCluster`
 - Shortcut option (`-run`) for a commonly used combination of switches (namely, `-confirmed -trackCmd`)
 - Code enhancements regarding host management
 - Minor changes to improve code debugging and readability
-
-Note: Regarding `-removeFromCluster`, this feature was already available in version 2.0 for API v11 via `-hAction=removeFromCluster`. The difference between these two options is that the latter automatically gets the cluster name from `apiHost->clusterRef->clusterName`, whereas the former requires the cluster name to be manually set. Both options will be merged in the next release.
 
 Examples:
 
@@ -16,13 +21,13 @@ Examples:
 
     `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -deleteHost`
 
-* Remove the selected hosts from 'cluster2' (if using API v10 or lower):
+* Remove the selected hosts from ANY cluster (if using API v11 or higher):
+
+    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -removeFromCluster`
+
+    *If using API v10 or lower, remove hosts from 'cluster2':*
 
     `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -removeFromCluster=cluster2`
-
-    If using API v11 or higher, remove hosts from ANY cluster:
-
-    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -hAction=removeFromCluster`
 
 * Roll restart ALL the roles on the selected hosts:
 
@@ -68,7 +73,7 @@ Examples:
 
 AUTHOR: Mariano Dominguez, <marianodominguez@hotmail.com>
 
-VERSION: 3.0
+VERSION: 4.0
 
 BUGS: Please report bugs to <marianodominguez@hotmail.com>
 
@@ -76,7 +81,7 @@ The Cloudera Manager CLI (`cmcli.pl`) is a utility that facilitates cluster mana
 
 It is compatible with Cloudera Manager 5.x (API v6 or higher). Most of the functionality should also work (not fully tested) with Cloudera Manager 4.x (API v5 or lower), although you may see `Use of uninitialized value...` messages and/or failures.
 
-A separate REST client (`cmapi.pl`) is provided to call the endpoints not supported by the CLI.
+A separate REST client (`cmapi.pl`) is provided to call the endpoints not supported by the CLI. `cmapi.pl` can also be used to get any command's downloadable result data, provided by`resultDataUrl`.
 
 Unless overridden by the `-api` option, `cmcli.pl` will use the default API version available:
 
@@ -121,7 +126,7 @@ Then, add the following line to the code:
 
 ## Usage
 
-The only mandatory option for `cmcli.pl` is `-cm` to reference the CM server host, whereas `cmapi.pl` requires `<ResourceUrl>`.
+The only required option for `cmcli.pl` is `-cm` to reference the CM server host, whereas `cmapi.pl` requires `<ResourceUrl>`.
 
 Here is the usage information for both utilities:
 
@@ -130,9 +135,10 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	[-cmVersion] [-config] [-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]
 	[-users[=user_name] [-userAction=delete|(add|update -f=json_file)]]
 	[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-setRackId=/...|-deleteHost] \
-		[(-addToCluster|-removeFromCluster)=cluster_name] [-hAction=command_name]]
+		[-addToCluster=cluster_name|-removeFromCluster] [-hAction=command_name]]
 	[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]
 	[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=...] [-rChecks] [-rMetrics] [-log=log_type]]
+	[-maintenanceMode[=YES|NO]] [-roleConfigGroups[=config_group_name]]
 	[-a[=command_name]] [[-confirmed [-trackCmd]]|-run]
 	[-yarnApps[=parameters]]
 	[-impalaQueries[=parameters]]
@@ -161,28 +167,29 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	            (abort) Abort a running command
 	            (retry) Try to rerun a command
 	 -hInfo : Host information (regex UUID, hostname, IP, rackId, cluster) | default: all)
-	 -hFilter : Host health summary, entity status, maintenance mode, commission state (regex)
+	 -hFilter : Host health summary, entity status, commission state (regex)
 	 -hRoles : Roles associated to host
 	 -hChecks : Host health checks
 	 -setRackId : Update the rack ID for the host
 	 -deleteHost : Delete the host from Cloudera Manager
 	 -addToCluster : Add the host to a cluster
-	 -removeFromCluster : Remove the host from a cluster /compatible with API v10 or lower, implies -hAction=removeFromCluster/
+	 -removeFromCluster : Remove the host from a cluster (set to cluster_name if using API v10 or lower)
 	 -hAction : Host action
 	            (decommission|recommission) Decommission/recommission the host
 	            (startRoles) Start all the roles on the host
-	            (enterMaintenanceMode) Put the host into maintenance mode
-	            (exitMaintenanceMode) Take the host out of maintenance mode
-	            (removeFromCluster) Remove the host from a cluster /compatible with API v11 or higher, gets clusterRef->clusterName from apiHost/
+	            (enterMaintenanceMode|exitMaintenanceMode) Put/take the host into/out of maintenance mode
 	 -c : Cluster name
 	 -s : Service name (regex)
 	 -r : Role type/name (regex)
 	 -rInfo : Role information (regex UUID or set -hInfo | default: all)
 	 -rFilter : Role state, health summary, configuration status, commission state (regex)
-	 -a : Cluster/service/role action (default: -cluster/service- list active commands, -role- no action)
+	 -maintenanceMode : Display maintenance mode. Select hosts/roles based on status (default: all -YES/NO-)
+	 -roleConfigGroups : Display role configuration group. Select roles based on group names (default: all -regex-)
+	 -a : Cluster/service/role action (default: list active commands)
 	      (stop|start|restart|...)
 	      (deployClientConfig) Deploy cluster-wide/service client configuration
 	      (decommission|recommission) Decommission/recommission roles of a service
+	      (enterMaintenanceMode|exitMaintenanceMode) Put/take the cluster/service/role into/out of maintenance mode
 	      (rollingRestart) Rolling restart of roles in a service. Optional arguments:
 	      -restartRoleTypes : Comma-separated list of role types to restart. If not specified, all startable roles are restarted (default: all)
 	      -slaveBatchSize : Number of hosts with slave roles to restart at a time (default: 1)
@@ -274,21 +281,21 @@ Cluster actions:
 
 <https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiCluster.html>
 
-`name >>> displayName (CDH fullVersion) --- entityStatus`
+`name | maintenanceMode >>> displayName (CDH fullVersion) --- entityStatus`
 
 <https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiService.html>
 
-`... | name | displayName --- serviceState healthSummary configStalenessStatus clientConfigStalenessStatus`
+`... | name | maintenanceMode | displayName --- serviceState healthSummary configStalenessStatus clientConfigStalenessStatus`
 
 <https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiRole.html>
 
-`... | ... | hostId (hostname) | type | commissionState | name --- roleState healthSummary configStalenessStatus` 
+`... | ... | hostId (hostname) | type | roleConfigGroupRef->roleConfigGroupName | maintenanceMode | commissionState | name --- roleState healthSummary configStalenessStatus` 
 
 ## Host output
 
 https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiHost.html
 
-`hostname | hostId | ipAddress | rackId | maintenanceMode | commissionState | clusterRef --- healthSummary entityStatus`
+`hostname | hostId | ipAddress | rackId | maintenanceMode | commissionState | clusterRef->clusterName --- healthSummary entityStatus`
 
 ## Command output
 
@@ -366,7 +373,7 @@ Here are some common use cases:
 
     `$ cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -r=datanode -rFilter=stopped -a=start`
 
-    *To execute the action, use* `-confirmed`. *To check the command execution status, add* `-trackCmd`. *To do both, just use the* `-run` *shortcut instead.*
+    *To execute the action, use* `-confirmed`*. To check the command execution status, add* `-trackCmd`*. To do both, just use the* `-run` *shortcut instead.*
 
 * Deploy the YARN client configuration at the service level:
 
