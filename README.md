@@ -1,3 +1,5 @@
+**Update: Woking on implementing role and configuration management capabilities for version 5.0**
+
 ###Version 4.0 is now available!
 
 - Improved functionality: `-removeFromCluster`
