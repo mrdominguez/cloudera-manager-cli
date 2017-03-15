@@ -43,7 +43,7 @@ if ( $version ) {
 
 &usage if $help;
 die "-cm is not set. Use -help for options\n" unless $cm;
-die "Set -maintenanceMode to YES/NO. Use -help for options\n" if ( $maintenanceMode && $maintenanceMode !~ /1|YES|NO/ );
+die "Set -maintenanceMode to YES/NO\n" if ( $maintenanceMode && $maintenanceMode !~ /1|YES|NO/ );
 
 my %opts = ('cmdId'=>$cmdId, 'cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'userAction'=>$userAction,
 		'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction);
@@ -296,10 +296,12 @@ if ( defined $hInfo ) {
 
 		my $cluster_flag = 1;
 		if ( $role_info_flag and not $c and not $hRoles ) {
-			push @clusters, $cluster_name unless ( not defined $cluster_name
-							or grep { $_ eq $cluster_name } @clusters
-						 	or $cluster_name eq 'No cluster' );
-			$cluster_flag = 0;
+			unless ( not defined $cluster_name
+					or grep { $_ eq $cluster_name } @clusters
+				 	or $cluster_name eq 'No cluster' ) {
+				push @clusters, $cluster_name;
+				$cluster_flag = 0;
+			}
 		}
 
 		$hInfo_output = "$host_name | $host_id | $ip | $rack_id";
@@ -338,9 +340,10 @@ if ( defined $hInfo ) {
 						push @services, $service_name unless grep { $_ eq $service_name } @services;
 					}
 					if ( $role_info_flag and not $c and $cluster_flag ) {
-						push @clusters, $cluster_name unless ( not defined $cluster_name
-										or grep { $_ eq $cluster_name } @clusters );
-						$cluster_flag = 0;
+						unless ( not defined $cluster_name or grep { $_ eq $cluster_name } @clusters ) {
+							push @clusters, $cluster_name;
+							$cluster_flag = 0;
+						}
 					}
 				}
 			} else {
