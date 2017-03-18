@@ -275,7 +275,7 @@ Usage: ./cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
 
 CM credentials can be passed by using the `-u` (username) and `-p` (password) options. The `-p` option can be set to the password string itself (**not recommended**) or to a file containing the password:
 
-`$ cmcli.pl -u=username -p=/path/to/password_file -cm=...`
+`$ cmcli.pl -u=username -p=/path/to/password_file -cm=<cm_server_host>`
 
 Credentials can also be passed by using the `$CM_REST_USER` and `$CM_REST_PASS` environment variables. Just like the `-p` option, the `$CM_REST PASS` environment variable can be set to a file containing the password:
 
