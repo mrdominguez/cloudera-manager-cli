@@ -12,9 +12,9 @@ New features:
 
 Examples:
 
-* Multi-action command: Add hosts to cluster 'cluster1', create HIVESERVER2 and GATEWAY roles (service 'hive1') and set the hosts in maintenance mode:
+* Multi-action command: Add hosts to cluster 'cluster1', set rack Id, create HIVESERVER2 and GATEWAY roles (service 'hive1') and set the hosts in maintenance mode:
 
-    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -addToCluster=cluster1 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
+    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster1 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
 
     *`-addRole` is NOT case-sensitive. Check the list of role types [here](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).*
 
