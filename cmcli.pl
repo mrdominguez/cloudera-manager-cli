@@ -385,7 +385,7 @@ if ( defined $hInfo ) {
 				print "$host_name | Deleted from the system\n";
 				next;
 			}
-			
+
 			if ( $addToCluster ) {
 				$cm_url = "$cm_api/clusters/$addToCluster/hosts";
 				$body_content = "{ \"items\" : [\"$host_id\"] }";
