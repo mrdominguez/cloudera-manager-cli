@@ -472,7 +472,7 @@ if ( defined $hInfo ) {
 		if ( $setRackId ) {
 			print "# Use -confirmed to update the rackId to $setRackId for the selected hosts\n";
 		} elsif ( $deleteHost ) {
-			print "*** Use -confirmed to delete the selected hosts from Cloudera Manager\n";
+			print "# Use -confirmed to delete the selected hosts from Cloudera Manager\n";
 			last;
 		}
 		if ( $addToCluster ) {
