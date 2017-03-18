@@ -21,6 +21,10 @@ Examples:
 * Delete all the roles from a host:
 
 	`cmcli.pl -cm=cm_server -hInfo=host_name -a=deleteRole`
+	
+	*(Follow-up multi-action command) Set rack Id to default, remove host from the cluster and disable maintenance mode:*
+	
+	`cmcli.pl -cm=cm_server -hInfo=host_name -setRackId=/default -removeFromCluster -hAction=exitMaintenanceMode`
 
 * Delete the Hive GATEWAY role from a host:
 
