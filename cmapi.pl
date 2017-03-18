@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Cloudera Manager REST API client
-# Version: 4.0
+# Version: 5.0
 # Use -help for options
 
 use strict;
@@ -29,8 +29,8 @@ use vars qw($help $version $u $p $m $d $f $i $bt $bc);
 if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 4.0\n";
-	print "Release date: 03/09/2017\n";
+	print "Version: 5.0\n";
+	print "Release date: 03/17/2017\n";
 	exit;
 }
 

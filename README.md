@@ -1,6 +1,87 @@
-**Update: Woking on implementing role and configuration management capabilities for version 5.0**
+### Version 5.0 is now available!
 
-###Version 4.0 is now available!
+New features:
+- Create roles: `-hInfo=<...> -addRole=<role_types> -serviceName=<service_name>`
+- Delete roles: `-a=deleteRole`
+- Display configuration for services, role groups and roles (including Management service): `-a=getConfig`
+- Download service client configuration: `-s=<service_name> -a=getConfig -clientConfig`
+- Update configuration: `-a=updateConfig`
+- Move role to config group: `-a=moveToRoleGroup -roleConfigGroups=<config_group_name>`
+- Move role to base (default) group: `-a=moveToBaseGroup`
+- Minor improvements
+
+Check the list of role types [here](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).
+
+Examples:
+
+* Multi-action command: Add hosts to cluster 'cluster1', create HIVESERVER2 and GATEWAY roles (service 'hive1') and set the hosts in maintenance mode:
+
+    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -addToCluster=cluster1 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
+
+* Delete all the roles from a host:
+
+	`cmcli.pl -cm=cm_server -hInfo=host_name -a=deleteRole`
+
+* Delete the Hive GATEWAY role from a host:
+
+	`cmcli.pl -cm=cm_server -hInfo=host_name -s=hive -r=gateway -a=deleteRole`
+
+* Display the configuration of the 'flume1' service:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -a=getConfig`
+
+* Download the Hive client configuration:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hive1 -a=getConfig -clientConfig`
+
+* Display the role config groups of the HDFS service:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs1 -a=getConfig -roleConfigGroups`
+
+* Display the full-view configuration of the default role config group:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs1 -a=getConfig -roleConfigGroups=hdfs1-DATANODE-BASE -full`
+
+* Update the 'dfs_data_dir_list' property:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs1 -a=updateConfig -roleConfigGroups=hdfs1-DATANODE-BASE -propertyName=dfs_data_dir_list -propertyValue=new_value`
+
+* Override the 'dfs_data_dir_list' property on a given host:
+
+    `cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=updateConfig -propertyName=dfs_data_dir_list -propertyValue=new_value`
+
+* Reset the 'dfs_data_dir_list' property on a given host to the config group value:
+
+    `cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=updateConfig -propertyName=dfs_data_dir_list`
+
+* Move the DataNode role on a given host to a different config group:
+
+   	`cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=moveToRoleGroup -roleConfigGroups=hdfs1-DATANODE-1`
+
+* Move the DataNode role on a given host to the default config group:
+
+	`cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=moveToBaseGroup`
+
+* Update the Flume Agent configuration file of the default config group:
+
+	`cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -a=updateConfig -roleConfigGroups=flume-AGENT-BASE -propertyName=agent_config_file -propertyValue="$(<flume1.conf)"`
+
+	*NOTE: The `flume1.conf` text file must have newline characters escaped to avoid an error like the following:*
+
+	```
+	"message" : "Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in string value
+	at [Source: org.apache.cxf.transport.http.AbstractHTTPDestination$1@1874a9cf; line: 1, column: 98]"
+	```
+
+	*Here is an easy way to escape newline characters using a Perl one-liner:*
+
+	`perl -npe "s/\n/\\\n/g" flume.conf > flume1.conf`
+
+* Refresh the Flume Agents of the default config group to apply the new configuration file:*
+
+	`cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -roleConfigGroups=agent-base -rFilter=refreshable -a=refresh`
+
+### Version 4.0
 
 - Improved functionality: `-removeFromCluster`
 - New options: `-maintenanceMode` and `-roleConfigGroups`
@@ -9,7 +90,7 @@
   * `-a=enterMaintenanceMode`
   * `-a=exitMaintenanceMode`
 
-###Version 3.0
+### Version 3.0
 
 - Rolling restart of services and roles: `-a=rollingRestart`
 - Delete hosts from Cloudera Manager: `-deleteHost`
@@ -17,67 +98,15 @@
 - Code enhancements regarding host management
 - Minor changes to improve code debugging and readability
 
-Examples:
-
-* Delete the selected hosts from CM:
-
-    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -deleteHost`
-
-* Remove the selected hosts from ANY cluster (if using API v11 or higher):
-
-    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -removeFromCluster`
-
-    *If using API v10 or lower, remove hosts from 'cluster2':*
-
-    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -removeFromCluster=cluster2`
-
-* Roll restart ALL the roles on the selected hosts:
-
-    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -a=rollingRestart`
-
-* Roll restart the HBase roles on the selected hosts:
-
-    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -a=rollingRestart -s=hbase`
-
-* Roll restart the NodeManager roles of the YARN service of 'cluster2' with extra options:
-
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
-    
-    `-restartRoleTypes` *is NOT case-sensitive. Check the list of role types [here](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).*
-    
-* Roll restart the ResourceManager roles:
-
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -restartRoleTypes=resourcemanager`
-
-* Roll restart YARN roles with stale configs only:
-
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -staleConfigsOnly=true`
-
-    *or*
-
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -rFilter=stale -a=rollingRestart`
-
-* Roll restart NameNode and JournalNode roles:
-
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=rollingRestart -restartRoleTypes=namenode,journalnode`
-
-    *or*
-
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs —r='name|journal' -a=rollingRestart`
-
-* Roll restart ALL ZooKeeper and Flume services:
-
-    `cmcli.pl -cm=cm_server -c=cluster2 -s='zoo|flume' -a=rollingRestart`
-
 ### ---
 
 ## Synopsis
 
 AUTHOR: Mariano Dominguez, <marianodominguez@hotmail.com>
 
-VERSION: 4.0
+VERSION: 5.0
 
-BUGS: Please report bugs to <marianodominguez@hotmail.com>
+FEEDBACK/BUGS: Please contact me by email.
 
 The Cloudera Manager CLI (`cmcli.pl`) is a utility that facilitates cluster management and automation from the command-line through the Cloudera Manager REST API.
 
@@ -122,7 +151,7 @@ make
 make install
 ```
 
-Then, add the following line to the code:
+Then, add the following line to the Perl code at the beginning of the `use` block:
 
 `use lib qw(<PREFIX>/share/perl5);`
 
@@ -134,10 +163,10 @@ Here is the usage information for both utilities:
 
 ```
 Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=username] [-p=password]
-	[-cmVersion] [-config] [-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]
+	[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]
 	[-users[=user_name] [-userAction=delete|(add|update -f=json_file)]]
 	[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-setRackId=/...|-deleteHost] \
-		[-addToCluster=cluster_name|-removeFromCluster] [-hAction=command_name]]
+	  [-addToCluster=cluster_name|-removeFromCluster] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]
 	[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]
 	[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=...] [-rChecks] [-rMetrics] [-log=log_type]]
 	[-maintenanceMode[=YES|NO]] [-roleConfigGroups[=config_group_name]]
@@ -162,20 +191,21 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	              (update) Update user (requires -f)
 	              (delete) Delete user
 	 -f: JSON file with user information
-	 -config : Dump configuration to file (CM, Cloudera Management Service and, if -s is set, specific services)
+	 -cmConfig : Save CM configuration to file
 	 -deployment : Retrieve full description of the entire CM deployment
 	 -cmdId : Retrieve information on an asynchronous command
 	 -cmdAction : Command action
 	            (abort) Abort a running command
 	            (retry) Try to rerun a command
-	 -hInfo : Host information (regex UUID, hostname, IP, rackId, cluster) | default: all)
+	 -hInfo : Host information (regex UUID, hostname, IP, rackId | default: all)
 	 -hFilter : Host health summary, entity status, commission state (regex)
 	 -hRoles : Roles associated to host
 	 -hChecks : Host health checks
 	 -setRackId : Update the rack ID for the host
 	 -deleteHost : Delete the host from Cloudera Manager
 	 -addToCluster : Add the host to a cluster
-	 -removeFromCluster : Remove the host from a cluster (set to cluster_name if using API v10 or lower)
+	 -removeFromCluster : Remove the host from a cluster (set to cluster_name for API v10 or lower)
+	 -addRole : Create new roles in the service specified by -serviceName. Comma-separated list of role types (requires also -clusterName for API v10 or lower)
 	 -hAction : Host action
 	            (decommission|recommission) Decommission/recommission the host
 	            (startRoles) Start all the roles on the host
@@ -185,20 +215,31 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	 -r : Role type/name (regex)
 	 -rInfo : Role information (regex UUID or set -hInfo | default: all)
 	 -rFilter : Role state, health summary, configuration status, commission state (regex)
-	 -maintenanceMode : Display maintenance mode. Select hosts/roles based on status (default: all -YES/NO-)
-	 -roleConfigGroups : Display role configuration group. Select roles based on group names (default: all -regex-)
+	 -maintenanceMode : Display maintenance mode. Select hosts/roles based on status (YES/NO | default: all)
+	 -roleConfigGroups : Display role config group in the role information. Select roles based on config group name (regex | default: all)
 	 -a : Cluster/service/role action (default: list active commands)
 	      (stop|start|restart|...)
 	      (deployClientConfig) Deploy cluster-wide/service client configuration
 	      (decommission|recommission) Decommission/recommission roles of a service
 	      (enterMaintenanceMode|exitMaintenanceMode) Put/take the cluster/service/role into/out of maintenance mode
+	      (deleteRole) Delete a role from a given service
 	      (rollingRestart) Rolling restart of roles in a service. Optional arguments:
-	      -restartRoleTypes : Comma-separated list of role types to restart. If not specified, all startable roles are restarted (default: all)
-	      -slaveBatchSize : Number of hosts with slave roles to restart at a time (default: 1)
-	      -sleepSeconds : Number of seconds to sleep between restarts of slave host batches (default: 0)
-	      -slaveFailCountThreshold : Number of slave host batches that are allowed to fail to restart before the entire command is considered failed (default: 0)
-	      -staleConfigsOnly : Restart roles with stale configs only (default: false)
-	      -unUpgradedOnly : Restart roles that haven't been upgraded yet (default: false)
+	        -restartRoleTypes : Comma-separated list of role types to restart. If not set, all startable roles are restarted (default: all)
+	        -slaveBatchSize : Number of hosts with slave roles to restart at a time (default: 1)
+	        -sleepSeconds : Number of seconds to sleep between restarts of slave host batches (default: 0)
+	        -slaveFailCountThreshold : Number of slave host batches that are allowed to fail to restart before the entire command is considered failed (default: 0)
+	        -staleConfigsOnly : Restart roles with stale configs only (default: false)
+	        -unUpgradedOnly : Restart roles that haven't been upgraded yet (default: false)
+	      (getConfig|updateConfig) : Display/update the configuration of services or roles
+	        Syntax: -a=getConfig [-clientConfig] | [-roleConfigGroups[=config_group_name]] [-propertyName[=property_name]]
+	                -a=updateConfig [-roleConfigGroups=config_group_name] -propertyName=property_name [-propertyValue=property_value]
+	        -clientConfig : Save service client configuration to file (default: disabled)
+	        -roleConfigGroups : Role config group name. If empty, list role config groups for a given service (default: disabled)
+	        -propertyName : Configuration parameter canonical name. Required for -updateConfig. Use as a filter for -getConfig (default: all)
+	        -propertyValue : User-defined value. When absent, the default value (if any) will be used
+	        -full : Full view (default view: summary)
+	      (moveToRoleGroup) Move roles to the config group specified by -roleConfigGroups
+	      (moveToBaseGroup) Move roles to the base role config group
 	 -confirmed : Proceed with the command execution
 	 -trackCmd : Display the result of all executed asynchronous commands before exiting
 	 -run : Shortcut for '-confirmed -trackCmd'
@@ -407,7 +448,7 @@ Here are some common use cases:
 
 * Restart the DataNode instance on a given host:
 
-    `$ cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=restart`
+	`$ cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=restart`
 	
 * Restart the agent of the 'flume2' service on a given host:
 
@@ -491,3 +532,53 @@ user1 : ROLE_ADMIN
 user2 : ROLE_USER
 user3 : ROLE_CONFIGURATOR
 ```
+
+* Delete the selected hosts from CM:
+
+	`cmcli.pl -cm=cm_server -hInfo=<perl_regex> -deleteHost`
+
+* Remove the selected hosts from ANY cluster (if using API v11 or higher):
+
+	`cmcli.pl -cm=cm_server -hInfo=<perl_regex> -removeFromCluster`
+
+	*If using API v10 or lower, remove hosts from 'cluster2':*
+
+	`cmcli.pl -cm=cm_server -hInfo=<perl_regex> -removeFromCluster=cluster2`
+
+* Roll restart ALL the roles on the selected hosts:
+
+    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -a=rollingRestart`
+
+* Roll restart the HBase roles on the selected hosts:
+
+    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -a=rollingRestart -s=hbase`
+
+* Roll restart the NodeManager roles of the YARN service of 'cluster2' with extra options:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
+    
+    `-restartRoleTypes` *is NOT case-sensitive. Check the list of role types [here](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).*
+    
+* Roll restart the ResourceManager roles:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -restartRoleTypes=resourcemanager`
+
+* Roll restart YARN roles with stale configs only:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -staleConfigsOnly=true`
+
+    *or*
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -rFilter=stale -a=rollingRestart`
+
+* Roll restart NameNode and JournalNode roles:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=rollingRestart -restartRoleTypes=namenode,journalnode`
+
+    *or*
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs —r='name|journal' -a=rollingRestart`
+
+* Roll restart ALL ZooKeeper and Flume services:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s='zoo|flume' -a=rollingRestart`
