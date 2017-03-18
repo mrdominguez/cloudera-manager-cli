@@ -38,7 +38,7 @@ if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 5.0\n";
-	print "Release date: 03/17/2017\n";
+	print "Release date: 03/18/2017\n";
 	exit;
 }
 
@@ -855,8 +855,6 @@ foreach my $cluster_name ( @clusters ) {
 				$cm_url = "$cm_api/timeseries?query=select * where serviceName=$service_name";
 				my $service_metrics = &rest_call('GET', $cm_url, 1);
 #				print Dumper($service_metrics);
-#				for ( my $i=0; $i < @{$service_metrics->{'items'}}; $i++ ) {
-#				for ( my $j=0; $j < @{$service_metrics->{'items'}[$i]->{'timeSeries'}}; $j++ ) {
 				my $i=0;
 				for ( my $j=0; $j < @{$service_metrics->{'items'}[$i]->{'timeSeries'}}; $j++ ) {
 					my $metric_name = $service_metrics->{'items'}[$i]->{'timeSeries'}[$j]->{'metadata'}->{'metricName'};
@@ -871,7 +869,7 @@ foreach my $cluster_name ( @clusters ) {
 					print "$unit_numerators" if defined $unit_numerators;
 					print "/$unit_denominators" if defined $unit_denominators;;
 					print "\n";
-				} # }
+				}
 			} }
 
 			if ( $a && !defined $rInfo && ( $list_active_commands || $confirmed ) ) {
