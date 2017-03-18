@@ -79,7 +79,7 @@ Examples:
 
 	`perl -npe "s/\n/\\\n/g" flume.conf > flume1.conf`
 
-* Refresh the Flume Agents of the default config group to apply the new configuration file:*
+* Refresh the Flume Agents of the default config group to apply the new configuration file:
 
 	`cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -roleConfigGroups=agent-base -rFilter=refreshable -a=refresh`
 
