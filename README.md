@@ -10,13 +10,13 @@ New features:
 - Move role to base (default) group: `-a=moveToBaseGroup`
 - Minor improvements
 
-Check the list of role types [here](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).
-
 Examples:
 
 * Multi-action command: Add hosts to cluster 'cluster1', create HIVESERVER2 and GATEWAY roles (service 'hive1') and set the hosts in maintenance mode:
 
     `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -addToCluster=cluster1 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
+
+    *`-addRole` is NOT case-sensitive. Check the list of role types [here](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).*
 
 * Delete all the roles from a host:
 
@@ -41,6 +41,8 @@ Examples:
 * Display the full-view configuration of the default role config group:
 
     `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs1 -a=getConfig -roleConfigGroups=hdfs1-DATANODE-BASE -full`
+    
+    *In addition to `name` and `value`, the full view output includes the `validateState`, `validateMessage` and `displayName` properties (see [apiConfig](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiConfig.html))*
 
 * Update the 'dfs_data_dir_list' property:
 
@@ -402,7 +404,7 @@ Here are some common use cases:
 
     `$ cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -rInfo`
 
-    *To replace the host id (UUID) in the output with the host name, simply add* `-hInfo`.
+    *To replace the host id (UUID) in the output with the host name, simply add `-hInfo`.*
 
 * Show the DataNode instances:
 
@@ -416,7 +418,7 @@ Here are some common use cases:
 
     `$ cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -r=datanode -rFilter=stopped -a=start`
 
-    *To execute the action, use* `-confirmed`*. To check the command execution status, add* `-trackCmd`*. To do both, just use the* `-run` *shortcut instead.*
+    *To execute the action, use `-confirmed`. To check the command execution status, add `-trackCmd`. To do both, just use the `-run` shortcut instead.*
 
 * Deploy the YARN client configuration at the service level:
 
@@ -557,7 +559,7 @@ user3 : ROLE_CONFIGURATOR
 
     `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
     
-    `-restartRoleTypes` *is NOT case-sensitive. Check the list of role types [here](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).*
+    *`-restartRoleTypes` is NOT case-sensitive. Check the list of role types [here](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).*
     
 * Roll restart the ResourceManager roles:
 
