@@ -3,7 +3,7 @@
 New features:
 - Create roles: `-hInfo=<...> -addRole=<role_types> -serviceName=<service_name>`
 - Delete roles: `-a=deleteRole`
-- Display configuration for services, role groups and roles (including Management service): `-a=getConfig`
+- Display configuration for services (including Cloudera Management), role groups and roles: `-a=getConfig`
 - Download service client configuration: `-s=<service_name> -a=getConfig -clientConfig`
 - Update configuration: `-a=updateConfig`
 - Move role to config group: `-a=moveToRoleGroup -roleConfigGroups=<config_group_name>`
