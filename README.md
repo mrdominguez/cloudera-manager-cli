@@ -360,7 +360,7 @@ Here are some common use cases:
 
     `$ cmcli.pl -cm=cm_server -hInfo`
 
-* Show hosts not associated to any cluster:
+* Show hosts not associated with any cluster:
 
     `$ cmcli.pl -cm=cm_server -hInfo -c='No cluster'`
 
@@ -384,7 +384,7 @@ Here are some common use cases:
 
     `$ cmcli.pl -cm=cm_server -hInfo=host_name -hRoles`
 
-* Show all the hosts associated to a given cluster:
+* Show all the hosts associated with a given cluster:
 
     `$ cmcli.pl -cm=cm_server -hInfo -c=cluster_name`
 
