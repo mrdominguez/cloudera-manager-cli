@@ -6,8 +6,8 @@ New features:
 - Display configuration for services (including Cloudera Management), role groups and roles: `-a=getConfig`
 - Download service client configuration: `-s=<service_name> -a=getConfig -clientConfig`
 - Update configuration: `-a=updateConfig`
-- Move role to config group: `-a=moveToRoleGroup -roleConfigGroups=<config_group_name>`
-- Move role to base (default) group: `-a=moveToBaseGroup`
+- Move roles to config group: `-a=moveToRoleGroup -roleConfigGroups=<config_group_name>`
+- Move roles to base (default) config group: `-a=moveToBaseGroup`
 - Minor improvements
 
 Examples:
@@ -205,9 +205,9 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	            (retry) Try to rerun a command
 	 -hInfo : Host information (regex UUID, hostname, IP, rackId | default: all)
 	 -hFilter : Host health summary, entity status, commission state (regex)
-	 -hRoles : Roles associated to host
+	 -hRoles : Display roles associated with host
 	 -hChecks : Host health checks
-	 -setRackId : Update the rack ID for the host
+	 -setRackId : Update the rack ID of the host
 	 -deleteHost : Delete the host from Cloudera Manager
 	 -addToCluster : Add the host to a cluster
 	 -removeFromCluster : Remove the host from a cluster (set to cluster_name for API v10 or lower)

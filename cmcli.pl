@@ -1183,9 +1183,9 @@ sub usage {
 	print "\t            (retry) Try to rerun a command\n";
 	print "\t -hInfo : Host information (regex UUID, hostname, IP, rackId | default: all)\n";
 	print "\t -hFilter : Host health summary, entity status, commission state (regex)\n";
-	print "\t -hRoles : Roles associated to host\n";
+	print "\t -hRoles : Display roles associated with host\n";
 	print "\t -hChecks : Host health checks\n";
-	print "\t -setRackId : Update the rack ID for the host\n";
+	print "\t -setRackId : Update the rack ID of the host\n";
 	print "\t -deleteHost : Delete the host from Cloudera Manager\n";
 	print "\t -addToCluster : Add the host to a cluster\n";
 	print "\t -removeFromCluster : Remove the host from a cluster (set to cluster_name for API v10 or lower)\n";
