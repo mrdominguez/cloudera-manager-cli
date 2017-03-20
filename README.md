@@ -309,7 +309,9 @@ The preference is as follows (highest first):
 
 ## Suported cluster/service/role actions
 
-For a complete list, go to https://cloudera.github.io/cm_api/ and click on **Full API Docs**.
+To execute an action, set `-a={commandName}` in the appropriate context.
+
+For a complete list of commands, go to https://cloudera.github.io/cm_api/ and click on **Full API Docs > REST**.
 
 Role actions:
 - `/clusters/{clusterName}/services/{serviceName}/roleCommands/{commandName}`
