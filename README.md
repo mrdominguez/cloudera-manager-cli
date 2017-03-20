@@ -311,11 +311,11 @@ The preference is as follows (highest first):
 
 To execute an action, set `-a={commandName}` in the appropriate context. These are the supported actions:
 
-=Role actions=
+Role actions
 - `/clusters/{clusterName}/services/{serviceName}/roleCommands/{commandName}`
 - MGMT: `/cm/service/roleCommands/{commandName}`
 
-=Service actions=
+Service actions
 - All `/clusters/{clusterName}/services/{serviceName}/commands/{commandName}` endpoints that don't require *Request Body*, except the following supported commands:
   * `deployClientConfig`
   * `decommission`
@@ -323,7 +323,7 @@ To execute an action, set `-a={commandName}` in the appropriate context. These a
   * `rollingRestart`
 - MGMT: `/cm/service/commands/{commandName}`
 
-=Cluster actions=
+Cluster actions
 - All `/clusters/{clusterName}/commands/{commandName}` endpoints that don't require *Request Body*.
 
 For a complete list of commands, go to https://cloudera.github.io/cm_api/ and click on **Full API Docs > REST**.
