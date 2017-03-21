@@ -38,7 +38,7 @@ if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 5.0\n";
-	print "Release date: 03/18/2017\n";
+	print "Release date: 03/20/2017\n";
 	exit;
 }
 
@@ -375,15 +375,30 @@ if ( defined $hInfo ) {
 
 		if ( $confirmed ) {
 			my ($host, $host_ref, $role_list);
+			if ( $removeFromCluster ) {
+                                $cluster_name = $removeFromCluster if $api_version < 11;
+                                if ( $cluster_name ne 'No cluster' ) {
+                                        $cm_url = "$cm_api/clusters/$cluster_name/hosts/$host_id";
+                                        $host_ref = &rest_call('DELETE', $cm_url, 1);
+                                        print "$host_name | ";
+                                        print $host_ref ? "Removed from cluster '$cluster_name'" : "hostId $host_id is not associated with cluster '$cluster_name'";
+                                        print "\n";
+                                } else {
+                                        print "$host_name | hostId $host_id is not associated with any cluster\n";
+                                } 
+			}
+
 			$cm_url = "$cm_api/hosts/$host_id";
+			if ( $deleteHost ) {
+                                $host = &rest_call('DELETE', $cm_url, 1);
+                                print "$host_name | Deleted from the system\n";
+                                next;
+                        }
+
 			if ( $setRackId ) {
 				$body_content = "{ \"rackId\" : \"$setRackId\" }";
 				$host = &rest_call('PUT', $cm_url, 1, undef, $body_content);
 				print "$host_name | rackId set to $setRackId\n";
-			} elsif ( $deleteHost ) {
-				$host = &rest_call('DELETE', $cm_url, 1);
-				print "$host_name | Deleted from the system\n";
-				next;
 			}
 
 			if ( $addToCluster ) {
@@ -391,17 +406,6 @@ if ( defined $hInfo ) {
 				$body_content = "{ \"items\" : [\"$host_id\"] }";
 				$host_ref = &rest_call('POST', $cm_url, 1, undef, $body_content);
 				print "$host_name | Added to cluster '$addToCluster'\n";
-			} elsif ( $removeFromCluster ) {
-				$cluster_name = $removeFromCluster if $api_version < 11;
-				if ( $cluster_name ne 'No cluster' ) {
-					$cm_url = "$cm_api/clusters/$cluster_name/hosts/$host_id";
-					$host_ref = &rest_call('DELETE', $cm_url, 1);
-					print "$host_name | ";
-					print $host_ref ? "Removed from cluster '$cluster_name'" : "hostId $host_id is not associated with cluster '$cluster_name'";
-					print "\n";
-				} else {
-					print "$host_name | hostId $host_id is not associated with any cluster\n";
-				}
 			}
 
 			if ( $addRole ) {
@@ -469,16 +473,18 @@ if ( defined $hInfo ) {
 	exit unless $num_hosts;
 
 	while ( not $confirmed ) {
-		if ( $setRackId ) {
-			print "# Use -confirmed to update the rackId to $setRackId for the selected hosts\n";
-		} elsif ( $deleteHost ) {
+		if ( $removeFromCluster ) {
+			print "# Use -confirmed to remove the selected hosts from the cluster\n";
+		}
+		if ( $deleteHost ) {
 			print "# Use -confirmed to delete the selected hosts from Cloudera Manager\n";
 			last;
 		}
+		if ( $setRackId ) {
+			print "# Use -confirmed to update the rackId to $setRackId for the selected hosts\n";
+		}
 		if ( $addToCluster ) {
 			print "# Use -confirmed to add the selected hosts to cluster '$addToCluster'\n";
-		} elsif ( $removeFromCluster ) {
-			print "# Use -confirmed to remove the selected hosts from the cluster\n";
 		}
 		if ( $addRole ) {
 			print "# Use -confirmed to add roles(s) $addRole, service '$serviceName' to the selected hosts\n";
@@ -1128,6 +1134,7 @@ foreach my $cluster_name ( @clusters ) {
 			&display_role_summary($role_summary, $cluster_name, $service_name, undef);
 			if ( $a && $confirmed && $a eq 'rollingRestart' ) {
 				print "$cluster_name | $service_name | ACTION: $a ";
+				$cm_url .= "/commands/$a";
 				$body_content = &rolling_restart($cluster_name, $service_name);
 				my $cmd = &rest_call('POST', $cm_url, 1, undef, $body_content);
 				my $id = $cmd->{'id'};
@@ -1149,8 +1156,8 @@ sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=username] [-p=password]\n";
 	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]\n";
 	print "\t[-users[=user_name] [-userAction=delete|(add|update -f=json_file)]]\n";
-	print "\t[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-setRackId=/...|-deleteHost] \\\n";
-	print "\t  [-addToCluster=cluster_name|-removeFromCluster] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]\n";
+	print "\t[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
+	print "\t  [-setRackId=/...] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]\n";
 	print "\t[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]\n";
 	print "\t[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=...] [-rChecks] [-rMetrics] [-log=log_type]]\n";
 	print "\t[-maintenanceMode[=YES|NO]] [-roleConfigGroups[=config_group_name]]\n";
@@ -1185,10 +1192,10 @@ sub usage {
 	print "\t -hFilter : Host health summary, entity status, commission state (regex)\n";
 	print "\t -hRoles : Display roles associated with host\n";
 	print "\t -hChecks : Host health checks\n";
-	print "\t -setRackId : Update the rack ID of the host\n";
-	print "\t -deleteHost : Delete the host from Cloudera Manager\n";
-	print "\t -addToCluster : Add the host to a cluster\n";
 	print "\t -removeFromCluster : Remove the host from a cluster (set to cluster_name for API v10 or lower)\n";
+	print "\t -deleteHost : Delete the host from Cloudera Manager\n";
+	print "\t -setRackId : Update the rack ID of the host\n";
+	print "\t -addToCluster : Add the host to a cluster\n";
 	print "\t -addRole : Create new roles in the service specified by -serviceName. Comma-separated list of role types (requires also -clusterName for API v10 or lower)\n";
 	print "\t -hAction : Host action\n";
 	print "\t            (decommission|recommission) Decommission/recommission the host\n";
@@ -1353,8 +1360,8 @@ sub track_cmd {
 		foreach my $id ( sort keys %{$cmd_list} ) {
 			next if $cmd_list->{$id}->{'done'};
 			unless ( $first_iteration ) {
-				$cm_url = "$cm_api/commands/$id";
-				my $cmd = &rest_call('GET', $cm_url, 1);
+				my $url = "$cm_api/commands/$id";
+				my $cmd = &rest_call('GET', $url, 1);
 				$cmd_list->{$id} = $cmd;
 			}
 			print "CMDID: $id --- ";
@@ -1396,7 +1403,6 @@ sub track_cmd {
 
 sub rolling_restart {
 	my ($cluster_name, $service_name) = @_;
-	$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/commands/rollingRestart";
 	$body_content = "{ ";
 	my $rr_opts_cnt = 0;
 	foreach my $arg ( keys %rr_opts ) {

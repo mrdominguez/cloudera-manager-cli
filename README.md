@@ -22,9 +22,9 @@ Examples:
 
 	`cmcli.pl -cm=cm_server -hInfo=host_name -a=deleteRole`
 	
-	*(Follow-up multi-action command) Set rack Id to default, remove host from the cluster and disable maintenance mode:*
+	*(Follow-up multi-action command) Remove host from the cluster and from CM:*
 	
-	`cmcli.pl -cm=cm_server -hInfo=host_name -setRackId=/default -removeFromCluster -hAction=exitMaintenanceMode`
+	`cmcli.pl -cm=cm_server -hInfo=host_name -removeFromCluster -deleteHost`
 
 * Delete the Hive GATEWAY role from a host:
 
@@ -171,8 +171,8 @@ Here is the usage information for both utilities:
 Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=username] [-p=password]
 	[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]
 	[-users[=user_name] [-userAction=delete|(add|update -f=json_file)]]
-	[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-setRackId=/...|-deleteHost] \
-	  [-addToCluster=cluster_name|-removeFromCluster] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]
+	[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
+	  [-setRackId=/...] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]
 	[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]
 	[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=...] [-rChecks] [-rMetrics] [-log=log_type]]
 	[-maintenanceMode[=YES|NO]] [-roleConfigGroups[=config_group_name]]
@@ -207,10 +207,10 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	 -hFilter : Host health summary, entity status, commission state (regex)
 	 -hRoles : Display roles associated with host
 	 -hChecks : Host health checks
-	 -setRackId : Update the rack ID of the host
-	 -deleteHost : Delete the host from Cloudera Manager
-	 -addToCluster : Add the host to a cluster
 	 -removeFromCluster : Remove the host from a cluster (set to cluster_name for API v10 or lower)
+	 -deleteHost : Delete the host from Cloudera Manager
+	 -setRackId : Update the rack ID of the host
+	 -addToCluster : Add the host to a cluster
 	 -addRole : Create new roles in the service specified by -serviceName. Comma-separated list of role types (requires also -clusterName for API v10 or lower)
 	 -hAction : Host action
 	            (decommission|recommission) Decommission/recommission the host
