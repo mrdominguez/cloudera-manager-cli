@@ -376,24 +376,24 @@ if ( defined $hInfo ) {
 		if ( $confirmed ) {
 			my ($host, $host_ref, $role_list);
 			if ( $removeFromCluster ) {
-                                $cluster_name = $removeFromCluster if $api_version < 11;
-                                if ( $cluster_name ne 'No cluster' ) {
-                                        $cm_url = "$cm_api/clusters/$cluster_name/hosts/$host_id";
-                                        $host_ref = &rest_call('DELETE', $cm_url, 1);
-                                        print "$host_name | ";
-                                        print $host_ref ? "Removed from cluster '$cluster_name'" : "hostId $host_id is not associated with cluster '$cluster_name'";
-                                        print "\n";
-                                } else {
-                                        print "$host_name | hostId $host_id is not associated with any cluster\n";
-                                } 
+				$cluster_name = $removeFromCluster if $api_version < 11;
+				if ( $cluster_name ne 'No cluster' ) {
+					$cm_url = "$cm_api/clusters/$cluster_name/hosts/$host_id";
+					$host_ref = &rest_call('DELETE', $cm_url, 1);
+					print "$host_name | ";
+					print $host_ref ? "Removed from cluster '$cluster_name'" : "hostId $host_id is not associated with cluster '$cluster_name'";
+					print "\n";
+				} else {
+					print "$host_name | hostId $host_id is not associated with any cluster\n";
+				} 
 			}
 
 			$cm_url = "$cm_api/hosts/$host_id";
 			if ( $deleteHost ) {
-                                $host = &rest_call('DELETE', $cm_url, 1);
-                                print "$host_name | Deleted from the system\n";
-                                next;
-                        }
+				$host = &rest_call('DELETE', $cm_url, 1);
+				print "$host_name | Deleted from the system\n";
+				next;
+			}
 
 			if ( $setRackId ) {
 				$body_content = "{ \"rackId\" : \"$setRackId\" }";
