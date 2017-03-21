@@ -1,3 +1,5 @@
+**(Version 6.0 update) Working on implementing support to create/delete clusters and services**
+
 ### Version 5.0 is now available!
 
 New features:
