@@ -38,7 +38,7 @@ if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 5.0\n";
-	print "Release date: 03/20/2017\n";
+	print "Release date: 03/22/2017\n";
 	exit;
 }
 
@@ -56,11 +56,15 @@ my %rr_opts = ('slaveBatchSize'=>$slaveBatchSize, 'sleepSeconds'=>$sleepSeconds,
 foreach ( keys %opts ) {
 	die "-$_ is not set\n" if ( defined $opts{$_} && ( $opts{$_} eq '1' || $opts{$_} =~ /^\s*$/ ) );
 }
-foreach ( keys %hInfo_opts ) {
-	die "-$_ requires -hInfo to be set\n" if ( defined $hInfo_opts{$_} and not $hInfo );
+unless ( $hInfo) {
+	foreach ( keys %hInfo_opts ) {
+		die "-$_ requires -hInfo to be set\n" if defined $hInfo_opts{$_};
+	}
 }
-foreach ( keys %rr_opts ) {
-	die "-$_ requires -s to be set\n" if ( defined $rr_opts{$_} and not $s );
+unless ( $s ) {
+	foreach ( keys %rr_opts ) {
+		die "-$_ requires -s to be set\n" if defined $rr_opts{$_};
+	}
 }
 
 if ( $cmdAction ) {
