@@ -14,9 +14,9 @@ New features:
 
 Examples:
 
-* Multi-action command: Add hosts to cluster 'cluster1', set rack Id, create HIVESERVER2 and GATEWAY roles (service 'hive1') and set the hosts in maintenance mode:
+* Multi-action command: Add hosts to cluster 'cluster2', set rack Id, create HIVESERVER2 and GATEWAY roles (service 'hive1') and set the hosts in maintenance mode:
 
-    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster1 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
+    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster2 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
 
     *`-addRole` is NOT case-sensitive. Check the list of role types [here](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).*
 
@@ -36,23 +36,23 @@ Examples:
 
     `cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -a=getConfig`
 
-* Download the Hive client configuration:
+* Download the client configuration of all the Hive services:
 
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hive1 -a=getConfig -clientConfig`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hive -a=getConfig -clientConfig`
 
 * Display the role config groups of the HDFS service:
 
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs1 -a=getConfig -roleConfigGroups`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroups`
 
 * Display the full-view configuration of the default role config group:
 
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs1 -a=getConfig -roleConfigGroups=hdfs1-DATANODE-BASE -full`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroups=hdfs1-DATANODE-BASE -full`
     
     *In addition to `name` and `value`, the full view output includes the `validateState`, `validateMessage` and `displayName` properties (see [apiConfig](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiConfig.html))*
 
 * Update the 'dfs_data_dir_list' property:
 
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs1 -a=updateConfig -roleConfigGroups=hdfs1-DATANODE-BASE -propertyName=dfs_data_dir_list -propertyValue=new_value`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=updateConfig -roleConfigGroups=hdfs1-DATANODE-BASE -propertyName=dfs_data_dir_list -propertyValue=new_value`
 
 * Override the 'dfs_data_dir_list' property on a given host:
 
