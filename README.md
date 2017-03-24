@@ -1,8 +1,21 @@
-**(Version 6.0 update) Working on implementing support to create/update/delete clusters and services**
 
-### Version 5.0 is now available!
+### Version 6.0 is now available!
 
-New features:
+New options:
+
+- List the supported service types for a cluster: `-c=<...> -a=serviceTypes`
+- List the supported role types for a service: `-s=<...> -a=roleTypes`
+- Create cluster: `-a=createCluster`
+- Update cluster: `-c=<...> -a=updateCluster`
+- Delete cluster: `-c=<...> -a=deleteCluster`
+- Create service: `-c=<...> -a=addService`
+- Update service: `-s=<...> -a=updateService`
+- Delete service: `-s=<...> -a=deleteService`
+
+Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services.html) and [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).
+
+### Version 5.0
+
 - Create roles: `-hInfo=<...> -addRole=<role_types> -serviceName=<service_name>`
 - Delete roles: `-a=deleteRole`
 - Display configuration for services (including Cloudera Management), role groups and roles: `-a=getConfig`
@@ -11,83 +24,6 @@ New features:
 - Move roles to config group: `-a=moveToRoleGroup -roleConfigGroups=<config_group_name>`
 - Move roles to base (default) config group: `-a=moveToBaseGroup`
 - Minor improvements
-
-Examples:
-
-* Multi-action command: Add hosts to cluster 'cluster2', set rack Id, create HIVESERVER2 and GATEWAY roles (service 'hive1') and set the hosts in maintenance mode:
-
-    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster2 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
-
-    *`-addRole` is NOT case-sensitive. Check the list of role types [here](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).*
-
-* Delete all the roles from a host:
-
-	`cmcli.pl -cm=cm_server -hInfo=host_name -a=deleteRole`
-	
-	*(Follow-up multi-action command) Remove host from the cluster and from CM:*
-	
-	`cmcli.pl -cm=cm_server -hInfo=host_name -removeFromCluster -deleteHost`
-
-* Delete the Hive GATEWAY role from a host:
-
-	`cmcli.pl -cm=cm_server -hInfo=host_name -s=hive -r=gateway -a=deleteRole`
-
-* Display the configuration of the 'flume1' service:
-
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -a=getConfig`
-
-* Download the client configuration of all the Hive services:
-
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hive -a=getConfig -clientConfig`
-
-* Display the role config groups of the HDFS service:
-
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroups`
-
-* Display the full-view configuration of the default role config group:
-
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroups=hdfs1-DATANODE-BASE -full`
-    
-    *In addition to `name` and `value`, the full view output includes the `validateState`, `validateMessage` and `displayName` properties (see [apiConfig](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiConfig.html))*
-
-* Update the 'dfs_data_dir_list' property:
-
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=updateConfig -roleConfigGroups=hdfs1-DATANODE-BASE -propertyName=dfs_data_dir_list -propertyValue=new_value`
-
-* Override the 'dfs_data_dir_list' property on a given host:
-
-    `cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=updateConfig -propertyName=dfs_data_dir_list -propertyValue=new_value`
-
-* Reset the 'dfs_data_dir_list' property on a given host to the config group value:
-
-    `cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=updateConfig -propertyName=dfs_data_dir_list`
-
-* Move the DataNode role on a given host to a different config group:
-
-   	`cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=moveToRoleGroup -roleConfigGroups=hdfs1-DATANODE-1`
-
-* Move the DataNode role on a given host to the default config group:
-
-	`cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=moveToBaseGroup`
-
-* Update the Flume Agent configuration file of the default config group:
-
-	`cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -a=updateConfig -roleConfigGroups=flume-AGENT-BASE -propertyName=agent_config_file -propertyValue="$(<flume1.conf)"`
-
-	*NOTE: The `flume1.conf` text file must have newline characters escaped to avoid an error like the following:*
-
-	```
-	"message" : "Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in string value
-	at [Source: org.apache.cxf.transport.http.AbstractHTTPDestination$1@1874a9cf; line: 1, column: 98]"
-	```
-
-	*Here is an easy way to escape newline characters using a Perl one-liner:*
-
-	`perl -npe "s/\n/\\\n/g" flume.conf > flume1.conf`
-
-* Refresh the Flume Agents of the default config group to apply the new configuration file:
-
-	`cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -roleConfigGroups=agent-base -rFilter=refreshable -a=refresh`
 
 ### Version 4.0
 
@@ -112,7 +48,7 @@ Examples:
 
 AUTHOR: Mariano Dominguez, <marianodominguez@hotmail.com>
 
-VERSION: 5.0
+VERSION: 6.0
 
 FEEDBACK/BUGS: Please contact me by email.
 
@@ -213,7 +149,7 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	 -deleteHost : Delete the host from Cloudera Manager
 	 -setRackId : Update the rack ID of the host
 	 -addToCluster : Add the host to a cluster
-	 -addRole : Create new roles in the service specified by -serviceName. Comma-separated list of role types (requires also -clusterName for API v10 or lower)
+	 -addRole : Create new roles. Comma-separated list of role types. Argument: -serviceName (requires also -clusterName for API v10 or lower)
 	 -hAction : Host action
 	            (decommission|recommission) Decommission/recommission the host
 	            (startRoles) Start all the roles on the host
@@ -248,6 +184,14 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	        -full : Full view (default view: summary)
 	      (moveToRoleGroup) Move roles to the config group specified by -roleConfigGroups
 	      (moveToBaseGroup) Move roles to the base role config group
+	      (addCluster) Create cluster. Arguments: -clusterName, -displayName, -fullVersion
+	      (updateCluster) Update cluster information. Arguments: -displayName and/or -fullVersion
+	      (deleteCluster) Delete cluster
+	      (serviceTypes) List the supported service types for a cluster
+	      (addService) Create service. Arguments: -serviceName, -serviceType, -displayName
+	      (updateService) Update service information. Argument: -displayName
+	      (deleteService) Delete service
+	      (roleTypes) List the supported role types for a service
 	 -confirmed : Proceed with the command execution
 	 -trackCmd : Display the result of all executed asynchronous commands before exiting
 	 -run : Shortcut for '-confirmed -trackCmd'
@@ -567,7 +511,7 @@ user3 : ROLE_CONFIGURATOR
 
     `cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
     
-    *`-restartRoleTypes` is NOT case-sensitive. Check the list of role types [here](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).*
+    *`-restartRoleTypes` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=<...> -a=roleTypes`.*
     
 * Roll restart the ResourceManager roles:
 
@@ -592,3 +536,78 @@ user3 : ROLE_CONFIGURATOR
 * Roll restart ALL ZooKeeper and Flume services:
 
     `cmcli.pl -cm=cm_server -c=cluster2 -s='zoo|flume' -a=rollingRestart`
+
+* Multi-action command: Add hosts to cluster 'cluster2', set rack Id, create HIVESERVER2 and GATEWAY roles (service 'hive1') and set the hosts in maintenance mode:
+
+    `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster2 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
+
+    *`-addRole` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=<...> -a=roleTypes`.*
+
+* Delete all the roles from a host:
+
+	`cmcli.pl -cm=cm_server -hInfo=host_name -a=deleteRole`
+	
+	*(Follow-up multi-action command) Remove host from the cluster and from CM:*
+	
+	`cmcli.pl -cm=cm_server -hInfo=host_name -removeFromCluster -deleteHost`
+
+* Delete the Hive GATEWAY role from a host:
+
+	`cmcli.pl -cm=cm_server -hInfo=host_name -s=hive -r=gateway -a=deleteRole`
+
+* Display the configuration of the 'flume1' service:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -a=getConfig`
+
+* Download the client configuration of all the Hive services:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hive -a=getConfig -clientConfig`
+
+* Display the role config groups of the HDFS service:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroups`
+
+* Display the full-view configuration of the default role config group:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroups=hdfs1-DATANODE-BASE -full`
+    
+    *In addition to `name` and `value`, the full view output includes the `validateState`, `validateMessage` and `displayName` properties (see [apiConfig](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiConfig.html))*
+
+* Update the 'dfs_data_dir_list' property:
+
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=updateConfig -roleConfigGroups=hdfs1-DATANODE-BASE -propertyName=dfs_data_dir_list -propertyValue=new_value`
+
+* Override the 'dfs_data_dir_list' property on a given host:
+
+    `cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=updateConfig -propertyName=dfs_data_dir_list -propertyValue=new_value`
+
+* Reset the 'dfs_data_dir_list' property on a given host to the config group value:
+
+    `cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=updateConfig -propertyName=dfs_data_dir_list`
+
+* Move the DataNode role on a given host to a different config group:
+
+   	`cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=moveToRoleGroup -roleConfigGroups=hdfs1-DATANODE-1`
+
+* Move the DataNode role on a given host to the default config group:
+
+	`cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=moveToBaseGroup`
+
+* Update the Flume Agent configuration file of the default config group:
+
+	`cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -a=updateConfig -roleConfigGroups=flume-AGENT-BASE -propertyName=agent_config_file -propertyValue="$(<flume1.conf)"`
+
+	*NOTE: The `flume1.conf` text file must have newline characters escaped to avoid an error like the following:*
+
+	```
+	"message" : "Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in string value
+	at [Source: org.apache.cxf.transport.http.AbstractHTTPDestination$1@1874a9cf; line: 1, column: 98]"
+	```
+
+	*Here is an easy way to escape newline characters using a Perl one-liner:*
+
+	`perl -npe "s/\n/\\\n/g" flume.conf > flume1.conf`
+
+* Refresh the Flume Agents of the default config group to apply the new configuration file:
+
+	`cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -roleConfigGroups=agent-base -rFilter=refreshable -a=refresh`

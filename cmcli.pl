@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Cloudera Manager Command-Line Interface
-# Version: 5.0
+# Version: 6.0
 # Use -help for options
 
 use strict;
@@ -31,14 +31,14 @@ BEGIN { $| = 1 }
 use vars qw($help $version $d $cmVersion $users $userAction $f $https $api $sChecks $sMetrics $rChecks $rMetrics $cmConfig $u $p $cm
 	$c $s $r $rInfo $rFilter $yarnApps $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles $hChecks $deployment
 	$mgmt $impalaQueries $trackCmd $setRackId $deleteHost $addToCluster $removeFromCluster $addRole $serviceName $clusterName
-	$hAction $run $maintenanceMode $roleConfigGroups $propertyName $propertyValue $clientConfig $full
+	$hAction $run $maintenanceMode $roleConfigGroups $propertyName $propertyValue $clientConfig $full $displayName $fullVersion $serviceType
 	$slaveBatchSize $sleepSeconds $slaveFailCountThreshold $staleConfigsOnly $unUpgradedOnly $restartRoleTypes);
 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 5.0\n";
-	print "Release date: 03/22/2017\n";
+	print "Version: 6.0\n";
+	print "Release date: 03/24/2017\n";
 	exit;
 }
 
@@ -47,25 +47,23 @@ die "-cm is not set. Use -help for options\n" unless $cm;
 
 my %opts = ('cmdId'=>$cmdId, 'cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'userAction'=>$userAction,
 		'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction,
-		'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName);
+		'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName,
+		'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType);
 my %hInfo_opts = ('hRoles'=>$hRoles, 'hChecks'=>$hChecks, 'setRackId'=>$setRackId, 'deleteHost'=>$deleteHost,
 		'addToCluster'=>$addToCluster, 'removeFromCluster'=>$removeFromCluster, 'hAction'=>$hAction, 'addRole'=>$addRole);
 my %rr_opts = ('slaveBatchSize'=>$slaveBatchSize, 'sleepSeconds'=>$sleepSeconds, 'slaveFailCountThreshold'=>$slaveFailCountThreshold,
 		'staleConfigsOnly'=>$staleConfigsOnly, 'unUpgradedOnly'=>$unUpgradedOnly, 'restartRoleTypes'=>$restartRoleTypes, 'restartRoleNames'=>undef);
+my %cluster_opts = ('c'=>$c, 'clusterName'=>$clusterName, 'displayName'=>$displayName, 'fullVersion'=>$fullVersion);
+my %service_opts = ('c'=>$c, 's'=>$s, 'serviceName'=>$serviceName, 'displayName'=>$displayName, 'serviceType'=>$serviceType);
 
 foreach ( keys %opts ) {
-	die "-$_ is not set\n" if ( defined $opts{$_} && ( $opts{$_} eq '1' || $opts{$_} =~ /^\s*$/ ) );
-}
-unless ( $hInfo) {
+	die "-$_ is not set\n" if ( defined $opts{$_} && ( $opts{$_} eq '1' || $opts{$_} =~ /^\s*$/ ) ) }
+unless ( $hInfo ) {
 	foreach ( keys %hInfo_opts ) {
-		die "-$_ requires -hInfo to be set\n" if defined $hInfo_opts{$_};
-	}
-}
+		die "-$_ requires -hInfo to be set\n" if defined $hInfo_opts{$_} } }
 unless ( $s ) {
 	foreach ( keys %rr_opts ) {
-		die "-$_ requires -s to be set\n" if defined $rr_opts{$_};
-	}
-}
+		die "-$_ requires -s to be set\n" if defined $rr_opts{$_} } }
 
 if ( $cmdAction ) {
 	die "-cmdAction requires -cmdId to be set\n" if not $cmdId;
@@ -76,15 +74,37 @@ if ( $userAction ) {
 	die "User action '$userAction' not supported. Use -help for options\n" if $userAction !~ /add|update|delete/;
 }
 
-die "Host action '$hAction' not supported. Use -help for options\n"
-		if ( $hAction && $hAction !~ /decommission|recommission|startRoles|enterMaintenanceMode|exitMaintenanceMode/ );
-die "-trackCmd requires -a, -cmdId or -hAction to be set\n"
-		if ( $trackCmd and not $a and not $cmdId and not $hAction );
+if ( $hAction && $hAction !~ /decommission|recommission|startRoles|enterMaintenanceMode|exitMaintenanceMode/ ) {
+	die "Host action '$hAction' not supported. Use -help for options\n" }
+if ( $trackCmd and not $a and not $cmdId and not $hAction ) {
+	die "-trackCmd requires -a, -cmdId or -hAction to be set\n" }
 die "-sChecks and -sMetrics require -s to be set\n" if ( ( $sChecks or $sMetrics ) and not $s );
 die "Set -maintenanceMode to YES/NO\n" if ( $maintenanceMode and $maintenanceMode !~ /1|YES|NO/ );
-die "Set -roleConfigGroups to an existent config group\n" if ( $a and $a eq 'moveToRoleGroup' and not $roleConfigGroups );
-die "Set -roleConfigGroups to an existent config group\n" if ( $a and $a eq 'updateConfig' and $roleConfigGroups and $roleConfigGroups eq '1' );
-die "Set -propertyName to a valid property name. If -propertyValue is absent, the default value (if any) will be used\n" if ( $a and $a eq 'updateConfig' and not $propertyName );
+if ( $a ) {
+	die "Set -roleConfigGroups to an existent config group\n" if ( $a eq 'moveToRoleGroup' and not $roleConfigGroups );
+	die "Set -roleConfigGroups to an existent config group\n" if ( $a eq 'updateConfig'
+									and $roleConfigGroups
+									and $roleConfigGroups eq '1' );
+	if ( $a eq 'updateConfig' and not $propertyName ) {
+		die "Set -propertyName to a valid property name. If -propertyValue is absent, the default value (if any) will be used\n" }
+	if ( $a =~ /addCluster|updateCluster|deleteCluster/ ) {
+		foreach ( sort keys %cluster_opts ) {
+			next if ( $_ eq 'displayName' and ( ( $a eq 'deleteCluster' ) || ( $a eq 'updateCluster' and $fullVersion ) ) );
+			next if ( $_ eq 'fullVersion' and ( ( $a eq 'deleteCluster' ) || ( $a eq 'updateCluster' and $displayName ) ) );
+			next if ( $_ eq 'clusterName' and $a ne 'addCluster' );
+			next if ( $_ eq 'c' and $a eq 'addCluster' );
+			die "Set -$_\n" unless $opts{$_};
+		}
+	}
+	if ( $a =~ /addService|updateService|deleteService/ ) {
+		foreach ( sort keys %service_opts ) {
+			next if ( $_ =~ /serviceName|serviceType/ and $a eq 'updateService' );
+			next if ( $_ !~ /^(c|s)$/ and $a eq 'deleteService' );
+			next if ( $_ eq 's' and $a eq 'addService' );
+			die "Set -$_\n" unless $opts{$_};
+		}
+	}
+}
 
 ($confirmed, $trackCmd) = (1, 1) if $run;
 $s = 'mgmt' if $mgmt;
@@ -161,9 +181,7 @@ if ( $addRole ) {
 	die "Set -clusterName for API v10 or lower, or set -addToCluster if the host is not associated with any cluster yet\n" if ( $api_version < 11 and not $clusterName and not $addToCluster );
 	$addRole =~ s/\s+//g;
 	$addRole = uc $addRole;
-} else {
-	die "-serviceName and -clusterName require -addRole to be set\n" if ( $serviceName || $clusterName );
-}
+} 
 
 my $cm_api = "$cm_host:$cm_port/api/v$api_version";
 if ( $cmVersion ) {
@@ -425,14 +443,17 @@ if ( defined $hInfo ) {
 				}
 				$cm_url = "$cm_api/clusters/$clusterName/services/$serviceName/roles";
 				$body_content = "{ \"items\" : [ ";
-				my @roles_array;
-				foreach my $role ( split /,/, $addRole ) {
-					push @roles_array, "{ \"hostRef\" : \"$host_id\", \"type\" : \"$role\" }";
+				my @role_types = split /,/, $addRole; 
+				my @role_types_json;
+				foreach my $role ( @role_types ) {
+					push @role_types_json, "{ \"hostRef\" : \"$host_id\", \"type\" : \"$role\" }";
 				}
-				$body_content .= join ', ', @roles_array;
+				$body_content .= join ', ', @role_types_json;
 				$body_content .= " ] }";
 				$role_list = &rest_call('POST', $cm_url, 1, undef, $body_content);
-				print "$host_name | Added role(s) $addRole, service '$serviceName'\n"; 
+				print "$host_name | Added role";
+				print "s" if @role_types > 1;
+				print " @role_types to service '$serviceName'\n"; 
 			}
 
 			if ( $hAction ) {
@@ -496,7 +517,7 @@ if ( defined $hInfo ) {
 		last;
 	}
 	if ( $hAction and not $deleteHost ) {
-		print "# Use -confirmed or -run to execute the $hAction host action\n" if not $confirmed;
+		print "# Use -confirmed or -run to execute the '$hAction' host action\n" if not $confirmed;
 		&track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 	}
 	foreach ( keys %hInfo_opts ) {
@@ -561,6 +582,11 @@ if ( $s && $s =~ /mgmt/ ) {
 				&get_config($cm_url);
 			} elsif ( $a eq 'updateConfig' ) {
 				&update_config($cm_url, $propertyName, $propertyValue);
+			} elsif ( $a eq 'roleTypes' ) {
+				print "\n";
+				$cm_url .= "/$a";
+				my $role_types = &rest_call('GET', $cm_url, 1);
+				print map { "$_\n" } sort @{$role_types->{'items'}};
 			} else {
 				$cm_url .= "/commands/$a";
 				$cmd = &rest_call('POST', $cm_url, 1);
@@ -569,7 +595,7 @@ if ( $s && $s =~ /mgmt/ ) {
 				$trackCmd ? $cmd_list->{$id} = $cmd : &cmd_id(\%{$cmd});
 			}
 		} else {
-			print "# Use -confirmed or -run to execute the $mgmt_action mgmt action\n";
+			print "# Use -confirmed or -run to execute the '$mgmt_action' mgmt action\n";
 		}
 	}
 
@@ -647,6 +673,9 @@ if ( $s && $s =~ /mgmt/ ) {
 					} else {
 						print "|__ No active mgmt role commands found\n";
 					}
+				} elsif ( $a eq 'deleteRole' ) {
+					my $role = &rest_call('DELETE', $cm_url, 1);
+					print "| Role deleted\n";
 				} elsif ( $a eq 'getConfig' ) {
 					&get_config($cm_url);
 				} elsif ( $a eq 'updateConfig' ) {
@@ -665,7 +694,7 @@ if ( $s && $s =~ /mgmt/ ) {
 				}
 			}
 		}
-		print "# Use -confirmed or -run to execute the $a mgmt role action\n" if ( $a and not $confirmed and not $list_active_commands );
+		print "# Use -confirmed or -run to execute the '$a' mgmt role action\n" if ( $a and not $confirmed and not $list_active_commands );
 		&display_role_summary($mgmt_role_summary, undef, undef, $mgmt_name);
 	}
 
@@ -675,6 +704,23 @@ if ( $s && $s =~ /mgmt/ ) {
 	}
 }
 #print "After the mgmt block...\n";
+
+if ( $a and $a eq 'addCluster' ) {
+	if ( $confirmed ) {
+		$cm_url = "$cm_api/clusters";
+		$body_content = "{ \"items\" : [ { \"name\" : \"$clusterName\", \"displayName\" : \"$displayName\", \"fullVersion\" : \"$fullVersion\" } ] }";
+		my $cluster = &rest_call('POST', $cm_url, 1, undef, $body_content);
+		my $cluster_display_name = $cluster->{'items'}[0]->{'displayName'};
+		my $cluster_full_version = $cluster->{'items'}[0]->{'fullVersion'};
+		print "Cluster '$clusterName' ";
+		print "-> '$cluster_display_name' " if $cluster_display_name;
+		print "(CDH $cluster_full_version) " if $cluster_full_version;
+		print "created\n";
+	} else {
+		print "# Use -confirmed to execute the '$a' action\n";
+	}
+	exit;
+}
 
 unless ( @clusters ) {
 	if ( $c ) {
@@ -716,10 +762,11 @@ foreach my $cluster_name ( @clusters ) {
 		my $cluster_action = $list_active_commands ? 'list active cluster commands' : $a;
 		if ( $list_active_commands || $confirmed ) {
 			print "$cluster_name | ACTION: $cluster_action ";
-			$cm_url = "$cm_api/clusters/$cluster_name/commands";
-			my ($cmd, $id);
+			$cm_url = "$cm_api/clusters/$cluster_name";
+			my ($cmd, $id, $cluster, $service);
 			if ( $list_active_commands ) {
 				print "\n";
+				$cm_url .= "/commands";
 				my $items = &rest_call('GET', $cm_url, 1);
 				if ( @{$items->{'items'}} ) {
 					foreach $cmd ( sort { $a->{'id'} <=> $b->{'id'} } @{$items->{'items'}} ) {
@@ -732,8 +779,35 @@ foreach my $cluster_name ( @clusters ) {
 				} else {
 					print "|_ No active cluster commands found\n";
 				}
-			} else {
+			} elsif ( $a eq 'updateCluster' ) {
+				$body_content = "{ ";
+				$body_content .= "\"displayName\" : \"$displayName\"" if $displayName;
+				$body_content .= ", " if ( $displayName and $fullVersion );
+				$body_content .= "\"fullVersion\" : \"$fullVersion\"" if $fullVersion; 
+				$body_content .= " }";
+				$cluster = &rest_call('PUT', $cm_url, 1, undef, $body_content);
+				print "| Cluster updated\n";
+			} elsif ( $a eq 'deleteCluster' ) {
+				$cluster = &rest_call('DELETE', $cm_url, 1);
+				print "| Cluster deleted\n";
+			} elsif ( $a eq 'addService' ) {
+				$serviceType = uc $serviceType;
+				$cm_url .= "/services";
+				$body_content = "{ \"items\" : [ { \"name\" : \"$serviceName\", \"displayName\" : \"$displayName\", \"type\" : \"$serviceType\" } ] }";
+				$service = &rest_call('POST', $cm_url, 1, undef, $body_content);
+				my $service_display_name = $service->{'items'}[0]->{'displayName'};
+				my $service_type = $service->{'items'}[0]->{'type'};
+				print "| Service '$serviceName' ";
+				print "-> '$service_display_name' " if $service_display_name;
+				print "($service_type) " if $service_type;
+				print "created\n";
+			} elsif ( $a eq 'serviceTypes' ) {
 				$cm_url .= "/$a";
+				my $service_types = &rest_call('GET', $cm_url, 1);
+				print "\n";
+				print map { "$_\n" } sort @{$service_types->{'items'}};
+			} else {
+				$cm_url .= "/commands/$a";
 				$cmd = &rest_call('POST', $cm_url, 1);
 				$id = $cmd->{'id'};
 				print "| CMDID: $id\n";
@@ -745,8 +819,8 @@ foreach my $cluster_name ( @clusters ) {
 			}
 			&track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 		} else {
-			print "# Use -confirmed or -run to execute the $cluster_action cluster action\n";
-			print "Set -c to specify a different cluster\n";
+			print "# Use -confirmed or -run to execute the '$cluster_action' cluster action\n";
+			print "Set -c to specify a different cluster\n" unless $a =~ /(Cluster|Service)$/;
 		}
 		exit;
 	}
@@ -886,7 +960,7 @@ foreach my $cluster_name ( @clusters ) {
 				my $service_action = $list_active_commands ? 'list active service commands' : $a;
 				print "|_ $service_header | ACTION: $service_action ";
 				$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name";
-				my ($cmd, $id);
+				my ($cmd, $id, $service);
 				if ( $list_active_commands ) {
 					print "\n";
 					$cm_url .= "/commands";
@@ -934,6 +1008,18 @@ foreach my $cluster_name ( @clusters ) {
 				} elsif ( $a eq 'updateConfig' ) {
 					$cm_url .= "/roleConfigGroups/$roleConfigGroups" if $roleConfigGroups;
 					&update_config($cm_url, $propertyName, $propertyValue);
+				} elsif ( $a eq 'updateService' ) {
+					$body_content = "{ \"displayName\" : \"$displayName\" }";
+					$service = &rest_call('PUT', $cm_url, 1, undef, $body_content);
+					print "| Service '$service_name' updated\n";
+				} elsif ( $a eq 'deleteService' ) {
+					$service = &rest_call('DELETE', $cm_url, 1);
+					print "| Service '$service_name' deleted\n";
+				} elsif ( $a eq 'roleTypes' ) {
+					print "\n";
+					$cm_url .= "/$a";
+					my $role_types = &rest_call('GET', $cm_url, 1);
+					print map { "$_\n" } sort @{$role_types->{'items'}};
 				} else {
 					$cm_url .= "/commands/$a";
 					if ( $a eq 'rollingRestart' ) {
@@ -1134,7 +1220,7 @@ foreach my $cluster_name ( @clusters ) {
 					}
 				} # role instance
 			} # roles
-			print "# Use -confirmed or -run to execute the $a role action\n" if ( $a and not $confirmed and not $list_active_commands );
+			print "# Use -confirmed or -run to execute the '$a' role action\n" if ( $a and not $confirmed and not $list_active_commands );
 			&display_role_summary($role_summary, $cluster_name, $service_name, undef);
 			if ( $a && $confirmed && $a eq 'rollingRestart' ) {
 				print "$cluster_name | $service_name | ACTION: $a ";
@@ -1148,7 +1234,7 @@ foreach my $cluster_name ( @clusters ) {
 			}
 		} # service instance
 	} # services
-	print "# Use -confirmed or -run to execute the $a service action\n" if $a and $service_action_flag
+	print "# Use -confirmed or -run to execute the '$a' service action\n" if $a and $service_action_flag
 									and not defined $rInfo
 									and not $confirmed
 									and not $list_active_commands;
@@ -1200,7 +1286,7 @@ sub usage {
 	print "\t -deleteHost : Delete the host from Cloudera Manager\n";
 	print "\t -setRackId : Update the rack ID of the host\n";
 	print "\t -addToCluster : Add the host to a cluster\n";
-	print "\t -addRole : Create new roles in the service specified by -serviceName. Comma-separated list of role types (requires also -clusterName for API v10 or lower)\n";
+	print "\t -addRole : Create new roles. Comma-separated list of role types. Argument: -serviceName (requires also -clusterName for API v10 or lower)\n";
 	print "\t -hAction : Host action\n";
 	print "\t            (decommission|recommission) Decommission/recommission the host\n";
 	print "\t            (startRoles) Start all the roles on the host\n";
@@ -1235,6 +1321,14 @@ sub usage {
 	print "\t        -full : Full view (default view: summary)\n";
 	print "\t      (moveToRoleGroup) Move roles to the config group specified by -roleConfigGroups\n";
 	print "\t      (moveToBaseGroup) Move roles to the base role config group\n";
+	print "\t      (addCluster) Create cluster. Arguments: -clusterName, -displayName, -fullVersion\n"; 
+	print "\t      (updateCluster) Update cluster information. Arguments: -displayName and/or -fullVersion\n";	# cluster context
+	print "\t      (deleteCluster) Delete cluster\n";								# cluster context
+	print "\t      (serviceTypes) List the supported service types for a cluster\n";				# cluster context
+	print "\t      (addService) Create service. Arguments: -serviceName, -serviceType, -displayName\n";		# cluster context
+	print "\t      (updateService) Update service information. Argument: -displayName\n";				# service context
+	print "\t      (deleteService) Delete service\n";								# service context
+	print "\t      (roleTypes) List the supported role types for a service\n";					# service context
 	print "\t -confirmed : Proceed with the command execution\n";
 	print "\t -trackCmd : Display the result of all executed asynchronous commands before exiting\n";
 	print "\t -run : Shortcut for '-confirmed -trackCmd'\n";
