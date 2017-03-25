@@ -1299,7 +1299,7 @@ sub usage {
 	print "\t -maintenanceMode : Display maintenance mode. Select hosts/roles based on status (YES/NO | default: all)\n";
 	print "\t -roleConfigGroups : Display role config group in the role information. Select roles based on config group name (regex | default: all)\n";
 	print "\t -a : Cluster/service/role action (default: list active commands)\n";
-	print "\t      (stop|start|restart|...)\n";
+	print "\t      (stop|start|restart|refresh|...)\n";
 	print "\t      (deployClientConfig) Deploy cluster-wide/service client configuration\n";
 	print "\t      (decommission|recommission) Decommission/recommission roles of a service\n";
 	print "\t      (enterMaintenanceMode|exitMaintenanceMode) Put/take the cluster/service/role into/out of maintenance mode\n";

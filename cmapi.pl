@@ -177,7 +177,7 @@ sub usage {
 	print "\t -bc : Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)\n";
 	# The above makes it possible to set comma-delimited values for properties such as 'dfs_data_dir_list'
 	print "\t       To set multiple objects, use -bt=json or -f to pass a JSON file\n";
-	print "\t -i : Add 'items' property to the body content (on by default if -bt=array)\n";
+	print "\t -i : Add the 'items' property to the body content (on by default if -bt=array)\n";
 	print "\t -f : JSON file containing body content (implies -bt=json)\n";
 	print "\t <ResourceUrl> : URL to REST resource (example: [http(s)://]cloudera-manager:7180/api/v15/clusters/)\n\n";
 	exit;

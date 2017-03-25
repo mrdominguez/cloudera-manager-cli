@@ -162,7 +162,7 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	 -maintenanceMode : Display maintenance mode. Select hosts/roles based on status (YES/NO | default: all)
 	 -roleConfigGroups : Display role config group in the role information. Select roles based on config group name (regex | default: all)
 	 -a : Cluster/service/role action (default: list active commands)
-	      (stop|start|restart|...)
+	      (stop|start|restart|refresh|...)
 	      (deployClientConfig) Deploy cluster-wide/service client configuration
 	      (decommission|recommission) Decommission/recommission roles of a service
 	      (enterMaintenanceMode|exitMaintenanceMode) Put/take the cluster/service/role into/out of maintenance mode
