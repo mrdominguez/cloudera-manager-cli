@@ -27,8 +27,8 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v15/
 - Display configuration for services (including Cloudera Management), role groups and roles: `-a=getConfig`
 - Download service client configuration: `-s=<service_name> -a=getConfig -clientConfig`
 - Update configuration: `-a=updateConfig`
-- Move roles to config group: `-a=moveToRoleGroup -roleConfigGroup=<config_group_name>`
-- Move roles to base (default) config group: `-a=moveToBaseGroup`
+- Move roles to a config group: `-a=moveToRoleGroup -roleConfigGroup=<config_group_name>`
+- Move roles to the base (default) config group: `-a=moveToBaseGroup`
 - Minor improvements
 
 ### Version 4.0
