@@ -7,6 +7,8 @@ New service actions:
 - Update role config group: -a=updateRoleGroup
 - Delete role config group: -a=deleteRoleGroup
 
+Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services.html) and [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).
+
 ### Version 6.0
 
 - List the supported service types for a cluster: `-c=<...> -a=serviceTypes`
@@ -17,8 +19,6 @@ New service actions:
 - Create service: `-c=<...> -a=addService`
 - Update service: `-s=<...> -a=updateService`
 - Delete service: `-s=<...> -a=deleteService`
-
-Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services.html) and [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).
 
 ### Version 5.0
 
