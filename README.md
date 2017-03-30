@@ -3,9 +3,9 @@
 
 New service actions:
 
-- Create role config group: -a=createRoleGroup
-- Update role config group: -a=updateRoleGroup
-- Delete role config group: -a=deleteRoleGroup
+- Create role config group: `-a=createRoleGroup`
+- Update role config group: `-a=updateRoleGroup`
+- Delete role config group: `-a=deleteRoleGroup`
 
 Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services.html) and [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).
 
