@@ -1,7 +1,13 @@
 
-### Version 6.0 is now available!
+### Version 7.0 is now available!
 
-New options:
+New service actions:
+
+- Create role config group: -a=createRoleGroup
+- Update role config group: -a=updateRoleGroup
+- Delete role config group: -a=deleteRoleGroup
+
+### Version 6.0
 
 - List the supported service types for a cluster: `-c=<...> -a=serviceTypes`
 - List the supported role types for a service: `-s=<...> -a=roleTypes`
@@ -21,14 +27,14 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v15/
 - Display configuration for services (including Cloudera Management), role groups and roles: `-a=getConfig`
 - Download service client configuration: `-s=<service_name> -a=getConfig -clientConfig`
 - Update configuration: `-a=updateConfig`
-- Move roles to config group: `-a=moveToRoleGroup -roleConfigGroups=<config_group_name>`
+- Move roles to config group: `-a=moveToRoleGroup -roleConfigGroup=<config_group_name>`
 - Move roles to base (default) config group: `-a=moveToBaseGroup`
 - Minor improvements
 
 ### Version 4.0
 
 - Improved functionality: `-removeFromCluster`
-- New options: `-maintenanceMode` and `-roleConfigGroups`
+- New options: `-maintenanceMode` and `-roleConfigGroup`
 - List active commands for roles (already supported by clusters/services): `-a`
 - New role actions (already supported by clusters/services):
   * `-a=enterMaintenanceMode`
@@ -48,7 +54,7 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v15/
 
 AUTHOR: Mariano Dominguez, <marianodominguez@hotmail.com>
 
-VERSION: 6.0
+VERSION: 7.0
 
 FEEDBACK/BUGS: Please contact me by email.
 
@@ -113,7 +119,7 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	  [-setRackId=/...] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]
 	[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]
 	[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=...] [-rChecks] [-rMetrics] [-log=log_type]]
-	[-maintenanceMode[=YES|NO]] [-roleConfigGroups[=config_group_name]]
+	[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]
 	[-a[=command_name]] [[-confirmed [-trackCmd]]|-run]
 	[-yarnApps[=parameters]]
 	[-impalaQueries[=parameters]]
@@ -160,7 +166,7 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	 -rInfo : Role information (regex UUID or set -hInfo | default: all)
 	 -rFilter : Role state, health summary, configuration status, commission state (regex)
 	 -maintenanceMode : Display maintenance mode. Select hosts/roles based on status (YES/NO | default: all)
-	 -roleConfigGroups : Display role config group in the role information. Select roles based on config group name (regex | default: all)
+	 -roleConfigGroup : Display role config group in the role information. Select roles based on config group name (regex | default: all)
 	 -a : Cluster/service/role action (default: list active commands)
 	      (stop|start|restart|refresh|...)
 	      (deployClientConfig) Deploy cluster-wide/service client configuration
@@ -174,15 +180,18 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	        -slaveFailCountThreshold : Number of slave host batches that are allowed to fail to restart before the entire command is considered failed (default: 0)
 	        -staleConfigsOnly : Restart roles with stale configs only (default: false)
 	        -unUpgradedOnly : Restart roles that haven't been upgraded yet (default: false)
-	      (getConfig|updateConfig) : Display/update the configuration of services or roles
-	        Syntax: -a=getConfig [-clientConfig] | [-roleConfigGroups[=config_group_name]] [-propertyName[=property_name]]
-	                -a=updateConfig [-roleConfigGroups=config_group_name] -propertyName=property_name [-propertyValue=property_value]
+	      (getConfig|updateConfig) : Display/update the configuration of services/role config groups/roles
+	        Syntax: -a=getConfig [-clientConfig] | [-roleConfigGroup[=config_group_name]] [-propertyName[=property_name]]
+	                -a=updateConfig [-roleConfigGroup=config_group_name] -propertyName=property_name [-propertyValue=property_value]
 	        -clientConfig : Save service client configuration to file (default: disabled)
-	        -roleConfigGroups : Role config group name. If empty, list role config groups for a given service (default: disabled)
-	        -propertyName : Configuration parameter canonical name. Required for -updateConfig. Use as a filter for -getConfig (default: all)
+	        -roleConfigGroup : Role config group name. If empty, list role config groups for a given service (default: disabled)
+	        -propertyName : Configuration parameter canonical name. Required for -updateConfig. Regex filter for -getConfig (default: all)
 	        -propertyValue : User-defined value. When absent, the default value (if any) will be used
 	        -full : Full view (default view: summary)
-	      (moveToRoleGroup) Move roles to the config group specified by -roleConfigGroups
+	      (createRoleGroup) Create role config group. Arguments: -displayName, -roleType, (optional) -copyFromRoleGroup
+	      (updateRoleGroup) Update role config group. Arguments: -displayName and/or -copyFromRoleGroup
+	      (deleteRoleGroup) Delete role config group.
+	      (moveToRoleGroup) Move roles to a config group. Argument: -roleConfigGroup
 	      (moveToBaseGroup) Move roles to the base role config group
 	      (addCluster) Create cluster. Arguments: -clusterName, -displayName, -fullVersion
 	      (updateCluster) Update cluster information. Arguments: -displayName and/or -fullVersion
@@ -253,9 +262,9 @@ The preference is as follows (highest first):
 3. Environment variables (using the `export` command)
 4. Default credentials (*admin*/*admin*)
 
-## Suported cluster/service/role actions
+## Suported cluster/service/role commands
 
-To execute an action, set `-a={commandName}` in the appropriate context. These are the supported actions:
+In addition to the actions listed in the usage section, to execute a command endpoint, set `-a={commandName}` in the appropriate context. These are the supported commands:
 
 Role actions
 - `/clusters/{clusterName}/services/{serviceName}/roleCommands/{commandName}`
@@ -565,17 +574,17 @@ user3 : ROLE_CONFIGURATOR
 
 * Display the role config groups of the HDFS service:
 
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroups`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroup`
 
 * Display the full-view configuration of the default role config group:
 
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroups=hdfs1-DATANODE-BASE -full`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroup=hdfs1-DATANODE-BASE -full`
     
     *In addition to `name` and `value`, the full view output includes the `validateState`, `validateMessage` and `displayName` properties (see [apiConfig](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiConfig.html))*
 
 * Update the 'dfs_data_dir_list' property:
 
-    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=updateConfig -roleConfigGroups=hdfs1-DATANODE-BASE -propertyName=dfs_data_dir_list -propertyValue=new_value`
+    `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs -a=updateConfig -roleConfigGroup=hdfs1-DATANODE-BASE -propertyName=dfs_data_dir_list -propertyValue=new_value`
 
 * Override the 'dfs_data_dir_list' property on a given host:
 
@@ -587,7 +596,7 @@ user3 : ROLE_CONFIGURATOR
 
 * Move the DataNode role on a given host to a different config group:
 
-   	`cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=moveToRoleGroup -roleConfigGroups=hdfs1-DATANODE-1`
+   	`cmcli.pl -cm=cm_server -hInfo=host_name -r=datanode -a=moveToRoleGroup -roleConfigGroup=hdfs1-DATANODE-1`
 
 * Move the DataNode role on a given host to the default config group:
 
@@ -595,7 +604,7 @@ user3 : ROLE_CONFIGURATOR
 
 * Update the Flume Agent configuration file of the default config group:
 
-	`cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -a=updateConfig -roleConfigGroups=flume-AGENT-BASE -propertyName=agent_config_file -propertyValue="$(<flume1.conf)"`
+	`cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -a=updateConfig -roleConfigGroup=flume-AGENT-BASE -propertyName=agent_config_file -propertyValue="$(<flume1.conf)"`
 
 	*NOTE: The `flume1.conf` text file must have newline characters escaped to avoid an error like the following:*
 
@@ -610,4 +619,4 @@ user3 : ROLE_CONFIGURATOR
 
 * Refresh the Flume Agents of the default config group to apply the new configuration file:
 
-	`cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -roleConfigGroups=agent-base -rFilter=refreshable -a=refresh`
+	`cmcli.pl -cm=cm_server -c=cluster2 -s=flume1 -roleConfigGroup=agent-base -rFilter=refreshable -a=refresh`

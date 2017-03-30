@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Cloudera Manager Command-Line Interface
-# Version: 6.0
+# Version: 7.0
 # Use -help for options
 
 use strict;
@@ -31,14 +31,14 @@ BEGIN { $| = 1 }
 use vars qw($help $version $d $cmVersion $users $userAction $f $https $api $sChecks $sMetrics $rChecks $rMetrics $cmConfig $u $p $cm
 	$c $s $r $rInfo $rFilter $yarnApps $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles $hChecks $deployment
 	$mgmt $impalaQueries $trackCmd $setRackId $deleteHost $addToCluster $removeFromCluster $addRole $serviceName $clusterName
-	$hAction $run $maintenanceMode $roleConfigGroups $propertyName $propertyValue $clientConfig $full $displayName $fullVersion $serviceType
-	$slaveBatchSize $sleepSeconds $slaveFailCountThreshold $staleConfigsOnly $unUpgradedOnly $restartRoleTypes);
+	$hAction $run $maintenanceMode $roleConfigGroup $propertyName $propertyValue $clientConfig $full $displayName $fullVersion $serviceType $roleType
+	$slaveBatchSize $sleepSeconds $slaveFailCountThreshold $staleConfigsOnly $unUpgradedOnly $restartRoleTypes $copyFromRoleGroup);
 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 6.0\n";
-	print "Release date: 03/24/2017\n";
+	print "Version: 7.0\n";
+	print "Release date: 03/30/2017\n";
 	exit;
 }
 
@@ -48,13 +48,14 @@ die "-cm is not set. Use -help for options\n" unless $cm;
 my %opts = ('cmdId'=>$cmdId, 'cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'userAction'=>$userAction,
 		'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction,
 		'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName,
-		'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType);
+		'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType, 'roleType'=>$roleType, 'copyFromRoleGroup'=>$copyFromRoleGroup);
 my %hInfo_opts = ('hRoles'=>$hRoles, 'hChecks'=>$hChecks, 'setRackId'=>$setRackId, 'deleteHost'=>$deleteHost,
 		'addToCluster'=>$addToCluster, 'removeFromCluster'=>$removeFromCluster, 'hAction'=>$hAction, 'addRole'=>$addRole);
 my %rr_opts = ('slaveBatchSize'=>$slaveBatchSize, 'sleepSeconds'=>$sleepSeconds, 'slaveFailCountThreshold'=>$slaveFailCountThreshold,
 		'staleConfigsOnly'=>$staleConfigsOnly, 'unUpgradedOnly'=>$unUpgradedOnly, 'restartRoleTypes'=>$restartRoleTypes, 'restartRoleNames'=>undef);
 my %cluster_opts = ('c'=>$c, 'clusterName'=>$clusterName, 'displayName'=>$displayName, 'fullVersion'=>$fullVersion);
 my %service_opts = ('c'=>$c, 's'=>$s, 'serviceName'=>$serviceName, 'displayName'=>$displayName, 'serviceType'=>$serviceType);
+my %role_group_opts = ('c'=>$c, 's'=>$s, 'displayName'=>$displayName, 'roleType'=>$roleType, 'roleConfigGroup'=>$roleConfigGroup, 'copyFromRoleGroup'=>$copyFromRoleGroup);
 
 foreach ( keys %opts ) {
 	die "-$_ is not set\n" if ( defined $opts{$_} && ( $opts{$_} eq '1' || $opts{$_} =~ /^\s*$/ ) ) }
@@ -81,27 +82,43 @@ if ( $trackCmd and not $a and not $cmdId and not $hAction ) {
 die "-sChecks and -sMetrics require -s to be set\n" if ( ( $sChecks or $sMetrics ) and not $s );
 die "Set -maintenanceMode to YES/NO\n" if ( $maintenanceMode and $maintenanceMode !~ /1|YES|NO/ );
 if ( $a ) {
-	die "Set -roleConfigGroups to an existent config group\n" if ( $a eq 'moveToRoleGroup' and not $roleConfigGroups );
-	die "Set -roleConfigGroups to an existent config group\n" if ( $a eq 'updateConfig'
-									and $roleConfigGroups
-									and $roleConfigGroups eq '1' );
+	if ( $a =~ /createRoleGroup|updateRoleGroup|deleteRoleGroup/ ) {
+		foreach ( sort keys %role_group_opts ) {
+			next if ( $a eq 'createRoleGroup' and $_ =~ /roleConfigGroup|copyFromRoleGroup/ );
+			if ( $a eq 'updateRoleGroup' ) {
+				die "Set -displayName and/or -copyFromRoleGroup\n" unless ( $displayName or $copyFromRoleGroup );
+				next if $_ eq 'displayName' and $copyFromRoleGroup;
+				next if $_ eq 'copyFromRoleGroup' and $displayName;
+				next if $_ eq 'roleType';
+			}
+			next if ( $a eq 'deleteRoleGroup' and $_ !~ /^(c|s|roleConfigGroup)$/ );
+			die "Set -$_\n" unless $role_group_opts{$_};
+		}
+	}
+	die "Set -roleConfigGroup to an existent config group\n" if ( $a eq 'moveToRoleGroup' and not $roleConfigGroup );
+	die "Set -roleConfigGroup to an existent config group\n" if ( $a eq 'updateConfig'
+									and $roleConfigGroup
+									and $roleConfigGroup eq '1' );
 	if ( $a eq 'updateConfig' and not $propertyName ) {
 		die "Set -propertyName to a valid property name. If -propertyValue is absent, the default value (if any) will be used\n" }
 	if ( $a =~ /addCluster|updateCluster|deleteCluster/ ) {
 		foreach ( sort keys %cluster_opts ) {
-			next if ( $_ eq 'displayName' and ( ( $a eq 'deleteCluster' ) || ( $a eq 'updateCluster' and $fullVersion ) ) );
-			next if ( $_ eq 'fullVersion' and ( ( $a eq 'deleteCluster' ) || ( $a eq 'updateCluster' and $displayName ) ) );
-			next if ( $_ eq 'clusterName' and $a ne 'addCluster' );
-			next if ( $_ eq 'c' and $a eq 'addCluster' );
-			die "Set -$_\n" unless $opts{$_};
+			next if ( ( ( $a eq 'deleteCluster' ) || ( $a eq 'updateCluster' and $fullVersion ) ) and $_ eq 'displayName' );
+			next if ( ( ( $a eq 'deleteCluster' ) || ( $a eq 'updateCluster' and $displayName ) ) and $_ eq 'fullVersion' );
+			if ( $a eq 'addCluster' ) {
+				next if $_ eq 'c';
+			} else {
+				next if $_ eq 'clusterName';
+			}
+			die "Set -$_\n" unless $cluster_opts{$_};
 		}
 	}
 	if ( $a =~ /addService|updateService|deleteService/ ) {
 		foreach ( sort keys %service_opts ) {
-			next if ( $_ =~ /serviceName|serviceType/ and $a eq 'updateService' );
-			next if ( $_ !~ /^(c|s)$/ and $a eq 'deleteService' );
-			next if ( $_ eq 's' and $a eq 'addService' );
-			die "Set -$_\n" unless $opts{$_};
+			next if ( $a eq 'updateService' and $_ =~ /serviceName|serviceType/ );
+			next if ( $a eq 'deleteService' and $_ !~ /^(c|s)$/ );
+			next if ( $a eq 'addService' and $_ eq 's' );
+			die "Set -$_\n" unless $service_opts{$_};
 		}
 	}
 }
@@ -276,7 +293,7 @@ if ( $cmdId ) {
 }
 
 $hInfo = '.' if ( ( defined $hInfo && $hInfo eq '1' ) || ( !defined $hInfo && $hFilter ) );
-$roleConfigGroups = '.' if ( defined $roleConfigGroups && $roleConfigGroups eq '1' );
+$roleConfigGroup = '.' if ( defined $roleConfigGroup && $roleConfigGroup eq '1' );
 $propertyName = '.' if ( defined $propertyName && $propertyName eq '1' );
 my $list_active_commands = 1 if ( $a and $a eq '1' );
 my @clusters;
@@ -579,7 +596,7 @@ if ( $s && $s =~ /mgmt/ ) {
 					print "|_ No active mgmt commands found\n";
 				}
 			} elsif ( $a eq 'getConfig' ) {
-				&get_config($cm_url);
+				&get_config($cm_url, $propertyName);
 			} elsif ( $a eq 'updateConfig' ) {
 				&update_config($cm_url, $propertyName, $propertyValue);
 			} elsif ( $a eq 'roleTypes' ) {
@@ -677,7 +694,7 @@ if ( $s && $s =~ /mgmt/ ) {
 					my $role = &rest_call('DELETE', $cm_url, 1);
 					print "| Role deleted\n";
 				} elsif ( $a eq 'getConfig' ) {
-					&get_config($cm_url);
+					&get_config($cm_url, $propertyName);
 				} elsif ( $a eq 'updateConfig' ) {
 					&update_config($cm_url, $propertyName, $propertyValue);
 				} else {
@@ -960,7 +977,7 @@ foreach my $cluster_name ( @clusters ) {
 				my $service_action = $list_active_commands ? 'list active service commands' : $a;
 				print "|_ $service_header | ACTION: $service_action ";
 				$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name";
-				my ($cmd, $id, $service);
+				my ($cmd, $id, $service, $role_config_group);
 				if ( $list_active_commands ) {
 					print "\n";
 					$cm_url .= "/commands";
@@ -976,10 +993,43 @@ foreach my $cluster_name ( @clusters ) {
 					} else {
 						print "|__ No active service commands found\n";
 					}
+				} elsif ( $a eq 'createRoleGroup' ) {
+					$roleType = uc $roleType;
+					my $roleGroupDisplayName = $displayName;
+					$displayName =~ s/\s+//g;
+					my $roleGroupName = "$service_name-$roleType-$displayName";
+					$cm_url .= "/roleConfigGroups";
+					$body_content = "{ \"items\" : [ { \"name\" : \"$roleGroupName\", \"displayName\" : \"$roleGroupDisplayName\", \"roleType\" : \"$roleType\"";
+					if ( $copyFromRoleGroup ) {
+						my $url = $cm_url . "/$copyFromRoleGroup";
+						$body_content .= &copy_from($url);
+					}
+					$body_content .= " } ] }";
+					$role_config_group = &rest_call('POST', $cm_url, 1, undef, $body_content);
+					print "| Role config group '$role_config_group->{'items'}[0]->{'name'}' created";
+					print " (copy from group '$copyFromRoleGroup')" if $copyFromRoleGroup;
+					print "\n";
+				} elsif ( $a eq 'updateRoleGroup' ) {
+					$cm_url .= "/roleConfigGroups/$roleConfigGroup";
+					$body_content = "{ \"name\" : \"$roleConfigGroup\"";
+					$body_content .= ", \"displayName\" : \"$displayName\"" if $displayName;
+					if ( $copyFromRoleGroup ) {
+						( my $url = $cm_url ) =~ s/$roleConfigGroup/$copyFromRoleGroup/;
+						$body_content .= &copy_from($url);
+					}
+					$body_content .= " } ] }";
+					$role_config_group = &rest_call('PUT', $cm_url, 1, undef, $body_content);
+					print "| Role config group '$roleConfigGroup' updated";
+					print " (copy from group '$copyFromRoleGroup')" if $copyFromRoleGroup;
+					print "\n";
+				} elsif ( $a eq 'deleteRoleGroup' ) {
+					$cm_url .= "/roleConfigGroups/$roleConfigGroup";
+					$role_config_group = &rest_call('DELETE', $cm_url, 1);
+					print "| Role config group '$roleConfigGroup' deleted\n";
 				} elsif ( $a eq 'getConfig' ) {
-					if ( $roleConfigGroups ) {
+					if ( $roleConfigGroup ) {
 						$cm_url .= "/roleConfigGroups";
-						if ( $roleConfigGroups eq '.' ) {
+						if ( $roleConfigGroup eq '.' ) {
 							print "\n";
 							my $role_config_groups = &rest_call('GET', $cm_url, 1);
 							foreach my $groups ( sort { $a->{'name'} cmp $b->{'name'} } @{$role_config_groups->{'items'}} ) {
@@ -993,8 +1043,9 @@ foreach my $cluster_name ( @clusters ) {
 								} }
 							}
 						} else {
-							$cm_url .= "/$roleConfigGroups";
-							&get_config($cm_url);
+							$cm_url .= "/$roleConfigGroup";
+							print "| Role config group: $roleConfigGroup";
+							&get_config($cm_url, $propertyName);
 						}
 						print "#\n";
 					} elsif ( $clientConfig ) {
@@ -1003,10 +1054,13 @@ foreach my $cluster_name ( @clusters ) {
 						&rest_call('GET', $cm_url, 2, $filename);
 						print "| Saved to $filename\n";
 					} else {
-						&get_config($cm_url);
+						&get_config($cm_url, $propertyName);
 					}
 				} elsif ( $a eq 'updateConfig' ) {
-					$cm_url .= "/roleConfigGroups/$roleConfigGroups" if $roleConfigGroups;
+					if ( $roleConfigGroup ) {
+						$cm_url .= "/roleConfigGroups/$roleConfigGroup";
+						print "| Role config group: $roleConfigGroup ";
+					}
 					&update_config($cm_url, $propertyName, $propertyValue);
 				} elsif ( $a eq 'updateService' ) {
 					$body_content = "{ \"displayName\" : \"$displayName\" }";
@@ -1069,9 +1123,9 @@ foreach my $cluster_name ( @clusters ) {
 								&& $maintenanceMode ne '1'
 								&& $role_maintenance_mode ne $maintenanceMode );
 						unless ( $a and $a eq 'moveToRoleGroup' ) {
-							next if ( defined $roleConfigGroups
-											&& defined $role_config_group
-											&& $role_config_group !~ /$roleConfigGroups/i );
+							next if ( defined $roleConfigGroup
+									&& defined $role_config_group
+									&& $role_config_group !~ /$roleConfigGroup/i );
 						}
 
 						if ( defined $hInfo ) {
@@ -1088,7 +1142,7 @@ foreach my $cluster_name ( @clusters ) {
 
 						my $role_header = "|__ $service_header | $host_id | $role_type";
 						print "$role_header | ";
-						print "$role_config_group | " if ( $roleConfigGroups && $api_version > 2 );
+						print "$role_config_group | " if ( $roleConfigGroup && $api_version > 2 );
 						if ( $api_version > 1 ) {
 							print "$role_maintenance_mode | " if $maintenanceMode;
 							print "$role_commission_state | ";
@@ -1186,12 +1240,12 @@ foreach my $cluster_name ( @clusters ) {
 								print "| Role deleted\n";
 								next;
 							} elsif ( $a eq 'moveToRoleGroup' ) {
-								$cm_url .= "/roleConfigGroups/$roleConfigGroups/roles";
+								$cm_url .= "/roleConfigGroups/$roleConfigGroup/roles";
 							} elsif ( $a eq 'moveToBaseGroup' ) {
 								$cm_url .= "/roleConfigGroups/roles";
 							} elsif ( $a =~ /getConfig|updateConfig/ ) {
 								$cm_url .= "/roles/$role_name";
-								$a eq 'getConfig' ? &get_config($cm_url) : &update_config($cm_url, $propertyName, $propertyValue);
+								$a eq 'getConfig' ? &get_config($cm_url, $propertyName) : &update_config($cm_url, $propertyName, $propertyValue);
 								next;
 							} else {
 								$cm_url .= "/roleCommands/$a";
@@ -1201,7 +1255,7 @@ foreach my $cluster_name ( @clusters ) {
 							$body_content = "{ \"items\" : [\"$role_name\"] }" if $a !~ /enterMaintenanceMode|exitMaintenanceMode/;
 							if ( $a =~ /moveToRoleGroup|moveToBaseGroup/ ) {
 								my $role_list = &rest_call('PUT', $cm_url, 1, undef, $body_content);
-								print "| Role configuration group updated\n";
+								print "| Role config group updated\n";
 								next;
 							}
 							$cmd = $body_content ? &rest_call('POST', $cm_url, 1, undef, $body_content) : &rest_call('POST', $cm_url, 1);
@@ -1250,7 +1304,7 @@ sub usage {
 	print "\t  [-setRackId=/...] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]\n";
 	print "\t[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]\n";
 	print "\t[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=...] [-rChecks] [-rMetrics] [-log=log_type]]\n";
-	print "\t[-maintenanceMode[=YES|NO]] [-roleConfigGroups[=config_group_name]]\n";
+	print "\t[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]\n";
 	print "\t[-a[=command_name]] [[-confirmed [-trackCmd]]|-run]\n";
 	print "\t[-yarnApps[=parameters]]\n";
 	print "\t[-impalaQueries[=parameters]]\n";
@@ -1297,7 +1351,7 @@ sub usage {
 	print "\t -rInfo : Role information (regex UUID or set -hInfo | default: all)\n";
 	print "\t -rFilter : Role state, health summary, configuration status, commission state (regex)\n";
 	print "\t -maintenanceMode : Display maintenance mode. Select hosts/roles based on status (YES/NO | default: all)\n";
-	print "\t -roleConfigGroups : Display role config group in the role information. Select roles based on config group name (regex | default: all)\n";
+	print "\t -roleConfigGroup : Display role config group in the role information. Select roles based on config group name (regex | default: all)\n";
 	print "\t -a : Cluster/service/role action (default: list active commands)\n";
 	print "\t      (stop|start|restart|refresh|...)\n";
 	print "\t      (deployClientConfig) Deploy cluster-wide/service client configuration\n";
@@ -1311,16 +1365,19 @@ sub usage {
  	print "\t        -slaveFailCountThreshold : Number of slave host batches that are allowed to fail to restart before the entire command is considered failed (default: 0)\n";
  	print "\t        -staleConfigsOnly : Restart roles with stale configs only (default: false)\n";
  	print "\t        -unUpgradedOnly : Restart roles that haven't been upgraded yet (default: false)\n";
-	print "\t      (getConfig|updateConfig) : Display/update the configuration of services or roles\n";
-	print "\t        Syntax: -a=getConfig [-clientConfig] | [-roleConfigGroups[=config_group_name]] [-propertyName[=property_name]]\n";
-	print "\t                -a=updateConfig [-roleConfigGroups=config_group_name] -propertyName=property_name [-propertyValue=property_value]\n";
+	print "\t      (getConfig|updateConfig) : Display/update the configuration of services/role config groups/roles\n";
+	print "\t        Syntax: -a=getConfig [-clientConfig] | [-roleConfigGroup[=config_group_name]] [-propertyName[=property_name]]\n";
+	print "\t                -a=updateConfig [-roleConfigGroup=config_group_name] -propertyName=property_name [-propertyValue=property_value]\n";
 	print "\t        -clientConfig : Save service client configuration to file (default: disabled)\n";
-	print "\t        -roleConfigGroups : Role config group name. If empty, list role config groups for a given service (default: disabled)\n";
-	print "\t        -propertyName : Configuration parameter canonical name. Required for -updateConfig. Use as a filter for -getConfig (default: all)\n";
+	print "\t        -roleConfigGroup : Role config group name. If empty, list role config groups for a given service (default: disabled)\n";
+	print "\t        -propertyName : Configuration parameter canonical name. Required for -updateConfig. Regex filter for -getConfig (default: all)\n";
 	print "\t        -propertyValue : User-defined value. When absent, the default value (if any) will be used\n";
 	print "\t        -full : Full view (default view: summary)\n";
-	print "\t      (moveToRoleGroup) Move roles to the config group specified by -roleConfigGroups\n";
-	print "\t      (moveToBaseGroup) Move roles to the base role config group\n";
+	print "\t      (createRoleGroup) Create role config group. Arguments: -displayName, -roleType, (optional) -copyFromRoleGroup\n";	# service context
+	print "\t      (updateRoleGroup) Update role config group. Arguments: -displayName and/or -copyFromRoleGroup\n";			# service context
+	print "\t      (deleteRoleGroup) Delete role config group.\n";							# service context
+	print "\t      (moveToRoleGroup) Move roles to a config group. Argument: -roleConfigGroup\n";			# role context
+	print "\t      (moveToBaseGroup) Move roles to the base role config group\n";					# role context
 	print "\t      (addCluster) Create cluster. Arguments: -clusterName, -displayName, -fullVersion\n"; 
 	print "\t      (updateCluster) Update cluster information. Arguments: -displayName and/or -fullVersion\n";	# cluster context
 	print "\t      (deleteCluster) Delete cluster\n";								# cluster context
@@ -1526,13 +1583,14 @@ sub rolling_restart {
 }
 
 sub get_config {
-	my $url = shift;
+	my ($url, $name, $ret) = @_;
 	$url .= "/config";
 	$url .= "?view=full" if $full;
 	my $config_list = &rest_call('GET', $url, 1);
+	return $config_list if $ret;
 	print "\n";
 	foreach my $config_property ( sort { $a->{'name'} cmp $b->{'name'} } @{$config_list->{'items'}} ) {
-		next if ( $propertyName and $config_property->{'name'} !~ qr/$propertyName/i );
+		next if ( $name and $config_property->{'name'} !~ qr/$name/i );
 		print "$config_property->{'name'} = ";
 		if ( $config_property->{'value'} ) {
 			print $config_property->{'value'}
@@ -1556,4 +1614,11 @@ sub update_config {
 	print "| Property '$name' ";
 	print $value ? "set to '$value'" : "reset";
 	print "\n";
+}
+
+sub copy_from {
+	my $url = shift;
+	my $config = &rest_call('GET', $url, 1);
+	$config = to_json($config->{'config'});
+	return ", \"config\" : $config";
 }
