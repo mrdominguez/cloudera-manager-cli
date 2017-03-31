@@ -38,7 +38,7 @@ if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 7.0\n";
-	print "Release date: 03/30/2017\n";
+	print "Release date: 03/31/2017\n";
 	exit;
 }
 
@@ -1314,11 +1314,11 @@ sub usage {
 	print "\t -version : Display version information\n";
 	print "\t -d : Enable debug mode\n";
 	print "\t -cm : CM hostname:port (default: localhost:7180)\n";
-	print "\t -https : Use https to communicate with CM (default: http)\n";
-	print "\t -api : CM API version -> v<integer> (default: response from <cm>/api/version)\n";
+	print "\t -https : Use HTTPS to communicate with CM (default: HTTP)\n";
+	print "\t -api : CM API version (v<integer> | default: response from <cm>/api/version)\n";
 	print "\t -u : CM username (environment variable: \$CM_REST_USER | default: admin)\n";
 	print "\t -p : CM password or path to password file (environment variable: \$CM_REST_PASS | default: admin)\n";
-	print "\t      *Credendials file* \$HOME/.cm_rest -> Set variables using colon-separated key/value pairs\n";
+	print "\t      Credentials file: \$HOME/.cm_rest (set env variables using colon-separated key/value pairs)\n";
 	print "\t -cmVersion : Display Cloudera Manager and default API versions\n";
 	print "\t -users : Display CM users/roles (default: all)\n";
 	print "\t -userAction: User action\n";

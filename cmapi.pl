@@ -30,7 +30,7 @@ if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 7.0\n";
-	print "Release date: 03/30/2017\n";
+	print "Release date: 03/31/2017\n";
 	exit;
 }
 
@@ -171,7 +171,7 @@ sub usage {
 	print "\t -d : Enable debug mode\n";
 	print "\t -u : CM username (environment variable: \$CM_REST_USER | default: admin)\n";
 	print "\t -p : CM password or path to password file (environment variable: \$CM_REST_PASS | default: admin)\n";
-	print "\t      *Credendials file* \$HOME/.cm_rest -> Set variables using colon-separated key/value pairs\n";
+	print "\t      Credentials file: \$HOME/.cm_rest (set env variables using colon-separated key/value pairs)\n";
 	print "\t -m : Method | GET, POST, PUT, DELETE (default: GET)\n";
 	print "\t -bt : Body type | array, hash, json (default: hash)\n";
 	print "\t -bc : Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)\n";

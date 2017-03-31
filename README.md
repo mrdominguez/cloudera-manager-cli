@@ -129,11 +129,11 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	 -version : Display version information
 	 -d : Enable debug mode
 	 -cm : CM hostname:port (default: localhost:7180)
-	 -https : Use https to communicate with CM (default: http)
-	 -api : CM API version -> v<integer> (default: response from <cm>/api/version)
+	 -https : Use HTTPS to communicate with CM (default: HTTP)
+	 -api : CM API version (v<integer> | default: response from <cm>/api/version)
 	 -u : CM username (environment variable: $CM_REST_USER | default: admin)
 	 -p : CM password or path to password file (environment variable: $CM_REST_PASS | default: admin)
-	      *Credendials file* $HOME/.cm_rest -> Set variables using colon-separated key/value pairs
+	      Credentials file: $HOME/.cm_rest (set env variables using colon-separated key/value pairs)
 	 -cmVersion : Display Cloudera Manager and default API versions
 	 -users : Display CM users/roles (default: all)
 	 -userAction: User action
@@ -222,7 +222,7 @@ Usage: ./cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
 	 -d : Enable debug mode
 	 -u : CM username (environment variable: $CM_REST_USER | default: admin)
 	 -p : CM password or path to password file (environment variable: $CM_REST_PASS | default: admin)
-	      *Credendials file* $HOME/.cm_rest -> Set variables using colon-separated key/value pairs
+	      Credentials file: $HOME/.cm_rest (set env variables using colon-separated key/value pairs)
 	 -m : Method | GET, POST, PUT, DELETE (default: GET)
 	 -bt : Body type | array, hash, json (default: hash)
 	 -bc : Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)
