@@ -38,7 +38,7 @@ if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 7.0\n";
-	print "Release date: 03/31/2017\n";
+	print "Release date: 04/07/2017\n";
 	exit;
 }
 
@@ -1322,10 +1322,9 @@ sub usage {
 	print "\t -cmVersion : Display Cloudera Manager and default API versions\n";
 	print "\t -users : Display CM users/roles (default: all)\n";
 	print "\t -userAction: User action\n";
-	print "\t              (add) Create user (requires -f)\n";
-	print "\t              (update) Update user (requires -f)\n";
+	print "\t              (add|update) Create/update user\n";
+	print "\t                -f: JSON file with user information\n";
 	print "\t              (delete) Delete user\n";
-	print "\t -f: JSON file with user information\n";
 	print "\t -cmConfig : Save CM configuration to file\n";
 	print "\t -deployment : Retrieve full description of the entire CM deployment\n";
 	print "\t -cmdId : Retrieve information on an asynchronous command\n";

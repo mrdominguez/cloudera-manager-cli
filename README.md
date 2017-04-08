@@ -1,4 +1,3 @@
-
 ### Version 7.0 is now available!
 
 New service actions:
@@ -112,7 +111,7 @@ The only required option for `cmcli.pl` is `-cm` to reference the CM server host
 Here is the usage information for both utilities:
 
 ```
-Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=username] [-p=password]
+Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=username] [-p=password]
 	[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]
 	[-users[=user_name] [-userAction=delete|(add|update -f=json_file)]]
 	[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
@@ -137,10 +136,9 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	 -cmVersion : Display Cloudera Manager and default API versions
 	 -users : Display CM users/roles (default: all)
 	 -userAction: User action
-	              (add) Create user (requires -f)
-	              (update) Update user (requires -f)
+	              (add|update) Create/update user
+	                -f: JSON file with user information
 	              (delete) Delete user
-	 -f: JSON file with user information
 	 -cmConfig : Save CM configuration to file
 	 -deployment : Retrieve full description of the entire CM deployment
 	 -cmdId : Retrieve information on an asynchronous command
@@ -214,7 +212,7 @@ Usage: ./cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v
 	 -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)
 ```
 ```
-Usage: ./cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
+Usage: cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
 	[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] <ResourceUrl>
 
 	 -help : Display usage
