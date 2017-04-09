@@ -160,7 +160,7 @@ if ( $method =~ m/GET/i ) {
 my $http_rc = $client->responseCode();
 my $content = $client->responseContent();
 print "$content\n";
-print "HTTP request not successful (response code: $http_rc)\n" if $http_rc !~ /2\d\d/;
+print "HTTP status code: $http_rc\n" if $http_rc !~ /2\d\d/;
 
 sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] [-u=username] [-p=password]\n";

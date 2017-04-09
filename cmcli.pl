@@ -1438,7 +1438,7 @@ sub rest_call {
 		close $fh;
 	} else { 
 		print "$content\n" if ( not $ret or $http_rc !~ /2\d\d/ or $d );
-		die "HTTP request not successful (response code: $http_rc)\n" if $http_rc !~ /2\d\d/;
+		die "HTTP status code: $http_rc\n" if $http_rc !~ /2\d\d/;
 		if ( $ret ) {
 			$content = from_json($content) if ( $content && $url !~ /api\/version/ );
 #			print Dumper($content);
