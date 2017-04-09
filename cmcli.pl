@@ -38,7 +38,7 @@ if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 7.0\n";
-	print "Release date: 04/07/2017\n";
+	print "Release date: 04/08/2017\n";
 	exit;
 }
 
@@ -216,7 +216,7 @@ if ( $users ) {
 			$body_content = do {
 				local $/ = undef;
 				open my $fh, "<", $f
-				or die "Could not open file $f: $!\n";
+					or die "Could not open file $f: $!\n";
 				<$fh>;
 			};
 		}
@@ -1426,7 +1426,7 @@ sub rest_call {
 	} elsif ( $method =~ m/DELETE/i ) {
 		$client->DELETE($url, $headers); 
 	} else {
-		die "Invalid http method: $method";
+		die "Invalid HTTP method: $method";
 	}
 
 	my $http_rc = $client->responseCode();
@@ -1437,9 +1437,8 @@ sub rest_call {
 		print $fh $content;
 		close $fh;
 	} else { 
-		print "$content\n" if ( not $ret or $http_rc !~ '2\d\d' or $d );
-		# Append a new line to the die string to prevent perl from adding the line number and file
-		die "The HTTP request was not successfull (response code: $http_rc)" if $http_rc !~ '2\d\d';
+		print "$content\n" if ( not $ret or $http_rc !~ /2\d\d/ or $d );
+		die "HTTP request not successful (response code: $http_rc)\n" if $http_rc !~ /2\d\d/;
 		if ( $ret ) {
 			$content = from_json($content) if ( $content && $url !~ /api\/version/ );
 #			print Dumper($content);

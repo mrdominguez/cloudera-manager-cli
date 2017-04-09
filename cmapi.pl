@@ -30,7 +30,7 @@ if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 7.0\n";
-	print "Release date: 04/07/2017\n";
+	print "Release date: 04/08/2017\n";
 	exit;
 }
 
@@ -68,12 +68,12 @@ if ( -e $password ) {
 }
 
 my $headers = { 'Content-Type' => 'application/json', 'Authorization' => 'Basic ' . encode_base64($username . ':' . $password) };
-my $method = $m || 'get';
+my $method = $m || 'GET';
 my $body_type = $bt || 'hash';
 my $body_content = $bc || undef;
 
 my $url = $ARGV[0];
-my $https = 1 if $url =~ /^https/;
+my $https = 1 if $url =~ /^https/i;
 
 if ( $d ) {
 	print "method = $method\n";
@@ -145,22 +145,22 @@ if ( $https ) {
 	#$client->getUseragent()->ssl_opts( SSL_verify_mode => SSL_VERIFY_NONE ); # Bareword "SSL_VERIFY_NONE" not allowed while "strict subs" in use
 }
 
-if ( $method =~ m/get/i ) {
+if ( $method =~ m/GET/i ) {
 	$client->GET($url, $headers); 
-} elsif ( $method =~ m/post/i ) {
+} elsif ( $method =~ m/POST/i ) {
 	$client->POST($url, $body_content, $headers); 
-} elsif ( $method =~ m/put/i ) {
+} elsif ( $method =~ m/PUT/i ) {
 	$client->PUT($url, $body_content, $headers); 
-} elsif ( $method =~ m/delete/i ) {
+} elsif ( $method =~ m/DELETE/i ) {
 	$client->DELETE($url, $headers); 
 } else {
-	die "Invalid http method: $method";
+	die "Invalid HTTP method: $method";
 }
 
 my $http_rc = $client->responseCode();
 my $content = $client->responseContent();
 print "$content\n";
-die "The HTTP request was not successfull (response code: $http_rc)" if $http_rc ne '200';
+print "HTTP request not successful (response code: $http_rc)\n" if $http_rc !~ /2\d\d/;
 
 sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] [-u=username] [-p=password]\n";
