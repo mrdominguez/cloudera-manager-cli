@@ -470,7 +470,7 @@ if ( defined $hInfo ) {
 				$role_list = &rest_call('POST', $cm_url, 1, undef, $body_content);
 				print "$host_name | Added role";
 				print "s" if @role_types > 1;
-				print " @role_types to service '$serviceName'\n"; 
+				print " @role_types (service '$serviceName')\n"; 
 			}
 
 			if ( $hAction ) {
@@ -529,7 +529,7 @@ if ( defined $hInfo ) {
 			print "# Use -confirmed to add the selected hosts to cluster '$addToCluster'\n";
 		}
 		if ( $addRole ) {
-			print "# Use -confirmed to add roles(s) $addRole, service '$serviceName' to the selected hosts\n";
+			print "# Use -confirmed to add role $addRole (service '$serviceName') to the selected hosts\n";
 		}
 		last;
 	}
