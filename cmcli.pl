@@ -62,9 +62,9 @@ foreach ( keys %opts ) {
 unless ( $hInfo ) {
 	foreach ( keys %hInfo_opts ) {
 		die "-$_ requires -hInfo to be set\n" if defined $hInfo_opts{$_} } }
-unless ( $s ) {
+unless ( $s or $hInfo ) {
 	foreach ( keys %rr_opts ) {
-		die "-$_ requires -s to be set\n" if defined $rr_opts{$_} } }
+		die "-$_ requires -s or -hInfo to be set\n" if defined $rr_opts{$_} } }
 
 if ( $cmdAction ) {
 	die "-cmdAction requires -cmdId to be set\n" if not $cmdId;
