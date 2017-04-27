@@ -1,4 +1,21 @@
-### Version 7.0 is now available!
+### Version 8.0 is now available!
+
+- Rewrote the user management section to make it consistent with the rest of the code:
+```
+ -userAction: User action
+	  (add|update) Create/update user
+		-userName : User name
+		-userPassword : User password (default: 'changeme' /for new users/)
+		-userRole : User role (default: ROLE_USER)
+		-f : JSON file to add users in bulk (instead of -userName)
+	  (delete) Delete user (args: -userName)
+	  (show) Display users (args: [-userName] | default: all)
+```
+- Minor changes
+
+Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiUser.html).
+
+### Version 7.0
 
 New service actions:
 
@@ -111,9 +128,9 @@ The only required option for `cmcli.pl` is `-cm` to reference the CM server host
 Here is the usage information for both utilities:
 
 ```
-Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=username] [-p=password]
+Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=cm_user] [-p=cm_password]
 	[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]
-	[-users[=user_name] [-userAction=delete|(add|update -f=json_file)]]
+	[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]
 	[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
 	  [-setRackId=/...] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]
 	[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]
@@ -130,15 +147,18 @@ Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<i
 	 -cm : CM hostname:port (default: localhost:7180)
 	 -https : Use HTTPS to communicate with CM (default: HTTP)
 	 -api : CM API version (v<integer> | default: response from <cm>/api/version)
-	 -u : CM username (environment variable: $CM_REST_USER | default: admin)
+	 -u : CM user name (environment variable: $CM_REST_USER | default: admin)
 	 -p : CM password or path to password file (environment variable: $CM_REST_PASS | default: admin)
 	      Credentials file: $HOME/.cm_rest (set env variables using colon-separated key/value pairs)
 	 -cmVersion : Display Cloudera Manager and default API versions
-	 -users : Display CM users/roles (default: all)
 	 -userAction: User action
 	              (add|update) Create/update user
-	                -f: JSON file with user information
-	              (delete) Delete user
+	                -userName : User name
+	                -userPassword : User password (default: 'changeme' /for new users/)
+	                -userRole : User role (default: ROLE_USER)
+	                -f : JSON file to add users in bulk (instead of -userName)
+	              (delete) Delete user (args: -userName)
+	              (show) Display users (args: [-userName] | default: all)
 	 -cmConfig : Save CM configuration to file
 	 -deployment : Retrieve full description of the entire CM deployment
 	 -cmdId : Retrieve information on an asynchronous command
@@ -153,7 +173,7 @@ Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<i
 	 -deleteHost : Delete the host from Cloudera Manager
 	 -setRackId : Update the rack ID of the host
 	 -addToCluster : Add the host to a cluster
-	 -addRole : Create new roles. Comma-separated list of role types. Argument: -serviceName (requires also -clusterName for API v10 or lower)
+	 -addRole : Create new roles. Comma-separated list of role types (args: -serviceName, [-clusterName] /for API v10 or lower/)
 	 -hAction : Host action
 	            (decommission|recommission) Decommission/recommission the host
 	            (startRoles) Start all the roles on the host
@@ -186,17 +206,17 @@ Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<i
 	        -propertyName : Configuration parameter canonical name. Required for -updateConfig. Regex filter for -getConfig (default: all)
 	        -propertyValue : User-defined value. When absent, the default value (if any) will be used
 	        -full : Full view (default view: summary)
-	      (createRoleGroup) Create role config group. Arguments: -displayName, -roleType, (optional) -copyFromRoleGroup
-	      (updateRoleGroup) Update role config group. Arguments: -displayName and/or -copyFromRoleGroup
-	      (deleteRoleGroup) Delete role config group.
-	      (moveToRoleGroup) Move roles to a config group. Argument: -roleConfigGroup
+	      (createRoleGroup) Create role config group (args: -displayName, -roleType, [-copyFromRoleGroup])
+	      (updateRoleGroup) Update role config group (args: -displayName, -copyFromRoleGroup)
+	      (deleteRoleGroup) Delete role config group
+	      (moveToRoleGroup) Move roles to a config group (args: -roleConfigGroup)
 	      (moveToBaseGroup) Move roles to the base role config group
-	      (addCluster) Create cluster. Arguments: -clusterName, -displayName, -fullVersion
-	      (updateCluster) Update cluster information. Arguments: -displayName and/or -fullVersion
+	      (addCluster) Create cluster (args: -clusterName, -displayName, -fullVersion)
+	      (updateCluster) Update cluster information (args: -displayName, -fullVersion)
 	      (deleteCluster) Delete cluster
 	      (serviceTypes) List the supported service types for a cluster
-	      (addService) Create service. Arguments: -serviceName, -serviceType, -displayName
-	      (updateService) Update service information. Argument: -displayName
+	      (addService) Create service (args: -serviceName, -serviceType, -displayName)
+	      (updateService) Update service information (args: -displayName)
 	      (deleteService) Delete service
 	      (roleTypes) List the supported role types for a service
 	 -confirmed : Proceed with the command execution
@@ -206,7 +226,7 @@ Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<i
 	 -sMetrics : Service metrics
 	 -rChecks : Role health checks
 	 -rMetrics : Role metrics
-	 -log : Display role log (type: full, stdout, stderr -stacks, stacksBundle for mgmt service-)
+	 -log : Display role log (type: full, stdout, stderr /plus stacks, stacksBundle for mgmt service/)
 	 -yarnApps : Display YARN applications (example: -yarnApps='filter='executing=true'')
 	 -impalaQueries : Display Impala queries (example: -impalaQueries='filter='user=<userName>'')
 	 -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)
@@ -437,8 +457,8 @@ $ cat users.json
     "roles" : [ "ROLE_OPERATOR" ]
   } ]
 }
-$ cmcli.pl -cm=cm_server -users -userAction=add -f=users.json
-Adding users from file users.json...
+$ cmcli.pl -cm=cm_server -userAction=add -f=users.json
+Loading file users.json...
 {
   "items" : [ {
     "name" : "user1",
@@ -454,7 +474,7 @@ Adding users from file users.json...
     "roles" : [ "ROLE_OPERATOR" ]
   } ]
 }
-$ cmcli.pl -cm=cm_server -users
+$ cmcli.pl -cm=cm_server -userAction=show
 admin : ROLE_ADMIN
 user1 : ROLE_USER
 user2 : ROLE_USER
@@ -462,36 +482,46 @@ user3 : ROLE_CONFIGURATOR
 user4 : ROLE_OPERATOR
 ```
 
-* Change password and role for user1:
+* Create a single user (default password: 'changeme') without a JSON file:
 
 ```
-$ cat user1.json 
+$ cmcli.pl -cm=cm_server -userAction=add -userName=user5 -userRole=role_operator
+Adding user 'user5'...
 {
-    "password" : "mypassword",
-    "roles" : [ "ROLE_ADMIN" ]
+  "items" : [ {
+    "name" : "user5",
+    "roles" : [ "ROLE_OPERATOR" ]
+  } ]
 }
-$ cmcli.pl -cm=cm_server -users=user1 -userAction=update -f=user1.json 
-Updating user user1...
+```
+*`-userRole` is NOT case-sensitive. Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiUser.html).*
+
+* Change password and role for 'user1':
+
+```
+$ cmcli.pl -cm=cm_server -userAction=update -userName=user1 -userPassword=new_password -userRole=role_admin 
+Updating user 'user1'...
 {
   "name" : "user1",
   "roles" : [ "ROLE_ADMIN" ]
 }
 ```
 
-* Delete user4:
+* Delete 'user4':
 
 ```
-$ cmcli.pl -cm=cm_server -users=user4 -userAction=delete
-Deleting user user4...
+$ cmcli.pl -cm=cm_server -userAction=delete -userName=user4
+Deleting user 'user4'...
 {
   "name" : "user4",
   "roles" : [ "ROLE_OPERATOR" ]
 }
-$ cmcli.pl -cm=cm_server -users 
+$ cmcli.pl -cm=cm_server -userAction=show
 admin : ROLE_ADMIN
 user1 : ROLE_ADMIN
 user2 : ROLE_USER
 user3 : ROLE_CONFIGURATOR
+user5 : ROLE_OPERATOR
 ```
 
 * Delete the selected hosts from CM:

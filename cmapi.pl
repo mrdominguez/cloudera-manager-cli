@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Cloudera Manager REST API client
-# Version: 7.0
+# Version: 8.0
 # Use -help for options
 
 use strict;
@@ -29,8 +29,8 @@ use vars qw($help $version $u $p $m $d $f $i $bt $bc);
 if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 7.0\n";
-	print "Release date: 04/08/2017\n";
+	print "Version: 8.0\n";
+	print "Release date: 04/27/2017\n";
 	exit;
 }
 
@@ -55,19 +55,19 @@ if ( -e $cm_cred_file ) {
 	print "Credentials file $cm_cred_file not found\n" if $d;
 }
 
-my $username = $u || $ENV{'CM_REST_USER'} || 'admin';
-print "username = $username\n" if $d;
+my $cm_user = $u || $ENV{'CM_REST_USER'} || 'admin';
+print "username = $cm_user\n" if $d;
 
-my $password = $p || $ENV{'CM_REST_PASS'} || 'admin';
-if ( -e $password ) {
-	print "Password file $password found\n" if $d;
-	$password = qx/cat $password/ or die;
-	chomp($password);
+my $cm_password = $p || $ENV{'CM_REST_PASS'} || 'admin';
+if ( -e $cm_password ) {
+	print "Password file $cm_password found\n" if $d;
+	$cm_password = qx/cat $cm_password/ or die;
+	chomp($cm_password);
 } else {
 	print "Password file not found\n" if $d;
 }
 
-my $headers = { 'Content-Type' => 'application/json', 'Authorization' => 'Basic ' . encode_base64($username . ':' . $password) };
+my $headers = { 'Content-Type' => 'application/json', 'Authorization' => 'Basic ' . encode_base64($cm_user . ':' . $cm_password) };
 my $method = $m || 'GET';
 my $body_type = $bt || 'hash';
 my $body_content = $bc || undef;

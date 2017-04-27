@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Cloudera Manager Command-Line Interface
-# Version: 7.0
+# Version: 8.0
 # Use -help for options
 
 use strict;
@@ -28,7 +28,7 @@ use Data::Dumper;
 
 BEGIN { $| = 1 }
 
-use vars qw($help $version $d $cmVersion $users $userAction $f $https $api $sChecks $sMetrics $rChecks $rMetrics $cmConfig $u $p $cm
+use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword $userRole $https $api $sChecks $sMetrics $rChecks $rMetrics $cmConfig $u $p $cm
 	$c $s $r $rInfo $rFilter $yarnApps $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles $hChecks $deployment
 	$mgmt $impalaQueries $trackCmd $setRackId $deleteHost $addToCluster $removeFromCluster $addRole $serviceName $clusterName
 	$hAction $run $maintenanceMode $roleConfigGroup $propertyName $propertyValue $clientConfig $full $displayName $fullVersion $serviceType $roleType
@@ -37,8 +37,8 @@ use vars qw($help $version $d $cmVersion $users $userAction $f $https $api $sChe
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 7.0\n";
-	print "Release date: 04/08/2017\n";
+	print "Version: 8.0\n";
+	print "Release date: 04/27/2017\n";
 	exit;
 }
 
@@ -48,7 +48,8 @@ die "-cm is not set. Use -help for options\n" unless $cm;
 my %opts = ('cmdId'=>$cmdId, 'cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'userAction'=>$userAction,
 		'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction,
 		'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName,
-		'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType, 'roleType'=>$roleType, 'copyFromRoleGroup'=>$copyFromRoleGroup);
+		'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType, 'roleType'=>$roleType, 'copyFromRoleGroup'=>$copyFromRoleGroup,
+		'f'=>$f, 'userName'=>$userName, 'userPassword'=>$userPassword, 'userRole'=>$userRole);
 my %hInfo_opts = ('hRoles'=>$hRoles, 'hChecks'=>$hChecks, 'setRackId'=>$setRackId, 'deleteHost'=>$deleteHost,
 		'addToCluster'=>$addToCluster, 'removeFromCluster'=>$removeFromCluster, 'hAction'=>$hAction, 'addRole'=>$addRole);
 my %rr_opts = ('slaveBatchSize'=>$slaveBatchSize, 'sleepSeconds'=>$sleepSeconds, 'slaveFailCountThreshold'=>$slaveFailCountThreshold,
@@ -56,6 +57,7 @@ my %rr_opts = ('slaveBatchSize'=>$slaveBatchSize, 'sleepSeconds'=>$sleepSeconds,
 my %cluster_opts = ('c'=>$c, 'clusterName'=>$clusterName, 'displayName'=>$displayName, 'fullVersion'=>$fullVersion);
 my %service_opts = ('c'=>$c, 's'=>$s, 'serviceName'=>$serviceName, 'displayName'=>$displayName, 'serviceType'=>$serviceType);
 my %role_group_opts = ('c'=>$c, 's'=>$s, 'displayName'=>$displayName, 'roleType'=>$roleType, 'roleConfigGroup'=>$roleConfigGroup, 'copyFromRoleGroup'=>$copyFromRoleGroup);
+my %user_opts = ('f'=>$f, 'userName'=>$userName, 'userPassword'=>$userPassword, 'userRole'=>$userRole);
 
 foreach ( keys %opts ) {
 	die "-$_ is not set\n" if ( defined $opts{$_} && ( $opts{$_} eq '1' || $opts{$_} =~ /^\s*$/ ) ) }
@@ -66,13 +68,19 @@ unless ( $s or $hInfo ) {
 	foreach ( keys %rr_opts ) {
 		die "-$_ requires -s or -hInfo to be set\n" if defined $rr_opts{$_} } }
 
+if ( $userAction ) {
+	die "User action '$userAction' not supported. Use -help for options\n" if $userAction !~ /show|add|update|delete/;
+	die "Set -f or -userName with -userAction=$userAction\n" if ( $userAction eq 'add' and not $f and not $userName );
+	die "Set -userName\n" if ( $userAction !~ /show|add/ and not $userName );
+	die "Set -userPassword and/or -userRole\n" if ( $userAction eq 'update' and not $userPassword and not $userRole );
+} else {
+	foreach ( keys %user_opts ) {
+		die "-$_ requires -userAction to be set\n" if defined $user_opts{$_} }
+}
+
 if ( $cmdAction ) {
 	die "-cmdAction requires -cmdId to be set\n" if not $cmdId;
 	die "Command action '$cmdAction' not supported. Use -help for options\n" if $cmdAction !~ /abort|retry/;
-}
-if ( $userAction ) {
-	die "-userAction requires -users to be set\n" if not $users;
-	die "User action '$userAction' not supported. Use -help for options\n" if $userAction !~ /add|update|delete/;
 }
 
 if ( $hAction && $hAction !~ /decommission|recommission|startRoles|enterMaintenanceMode|exitMaintenanceMode/ ) {
@@ -146,19 +154,19 @@ if ( -e $cm_cred_file ) {
 	print "Credentials file $cm_cred_file not found\n" if $d;
 }
 
-my $username = $u || $ENV{'CM_REST_USER'} || 'admin';
-print "username = $username\n" if $d;
+my $cm_user = $u || $ENV{'CM_REST_USER'} || 'admin';
+print "username = $cm_user\n" if $d;
 
-my $password = $p || $ENV{'CM_REST_PASS'} || 'admin';
-if ( -e $password ) {
-	print "Password file $password found\n" if $d;
-	$password = qx/cat $password/ or die;
-	chomp($password);
+my $cm_password = $p || $ENV{'CM_REST_PASS'} || 'admin';
+if ( -e $cm_password ) {
+	print "Password file $cm_password found\n" if $d;
+	$cm_password = qx/cat $cm_password/ or die;
+	chomp($cm_password);
 } else {
 	print "Password file not found\n" if $d;
 }
 
-my $headers = { 'Content-Type' => 'application/json', 'Authorization' => 'Basic ' . encode_base64($username . ':' . $password) };
+my $headers = { 'Content-Type' => 'application/json', 'Authorization' => 'Basic ' . encode_base64($cm_user . ':' . $cm_password) };
 my $body_content;
 
 my $cm_protocol = $https ? 'https://' : 'http://';
@@ -208,53 +216,63 @@ if ( $cmVersion ) {
 	exit;
 }
 
-if ( $users ) {
+if ( $userAction ) {
+	my $method;
 	$cm_url = "$cm_api/users";
-	if ( $userAction ) {
-		if ( $userAction =~ /add|update/ ) {
-			die "No JSON file provided: Set -f\n" unless $f;
-			$body_content = do {
-				local $/ = undef;
-				open my $fh, "<", $f
-					or die "Could not open file $f: $!\n";
-				<$fh>;
-			};
-		}
-		my $method;
-		if ( $userAction eq 'add' ) {
-			print "Adding users from file $f...\n";
+	if ( $confirmed ) {
+		my $user_info = {};
+		$user_info->{'name'} = $userName if $userName;
+		$user_info->{'password'} = $userPassword if $userPassword;
+		$user_info->{'password'} = 'changeme' if ( $userAction eq 'add' and not $userPassword );
+		push @{$user_info->{'roles'}}, uc $userRole if $userRole;
+		$body_content = to_json($user_info);
+		$cm_url .= "/$userName" unless $userAction eq 'add' or ( $userAction eq 'show' and not $userName );
+		if ( $userAction eq 'add') {
+			if ( $f ) {
+				print "Loading file $f...\n";
+				$body_content = do {
+					local $/ = undef;
+					open my $fh, "<", $f
+						or die "Could not open file $f: $!\n";
+					<$fh>;
+				};
+			} elsif ( $userName ) {
+				print "Adding user '$userName'...\n";
+				$body_content = "{ \"items\" : [ $body_content ] }"
+			}
 			$method = 'POST';
 		} elsif ( $userAction eq 'update' ) {
+			print "Updating user '$userName'...\n";
 			$method = 'PUT';
-			die "-update requires -users to be set to a user_name\n" if $users eq '1'; # assuming that '1' is not a valid username
-			print "Updating user $users from file $f...\n";
-			$cm_url .= "/$users";
 		} elsif ( $userAction eq 'delete' ) {
+			print "Deleting user '$userName'...\n";
 			$method = 'DELETE';
-			die "-delete requires -users to be set to a user_name\n" if $users eq '1';
-			die "# Use -confirmed to delete user '$users'\n" if not $confirmed;
-			print "Deleting user $users...\n";
-			$cm_url .= "/$users";
-		}
-		$userAction eq 'delete' ? &rest_call($method, $cm_url, 0) : &rest_call($method, $cm_url, 0, undef, $body_content);
-		exit
-	}
-	
-	$cm_url .= "/$users" if $users ne '1';
-	my $user_list = &rest_call('GET', $cm_url, 1);
-	if ( $users eq '1' ) {
-		for ( my $i=0; $i < @{$user_list->{'items'}}; $i++ ) {
-			my $user_name = $user_list->{'items'}[$i]->{'name'};
-			my $user_roles = $user_list->{'items'}[$i]->{'roles'};
-			print "$user_name : @$user_roles\n";
+		} elsif ( $userAction eq 'show' ) {
+			$method = 'GET';
+			my $user_list = &rest_call($method, $cm_url, 1);
+			if ( not $userName ) {
+				for ( my $i=0; $i < @{$user_list->{'items'}}; $i++ ) {
+					my $user_name = $user_list->{'items'}[$i]->{'name'};
+					my $user_roles = $user_list->{'items'}[$i]->{'roles'};
+					print "$user_name : @$user_roles\n";
+				}
+			} else {
+				my $user_name = $user_list->{'name'};
+				my $user_roles = $user_list->{'roles'};
+				print "$user_name : @$user_roles\n";
+			}
+			exit;
 		}
 	} else {
-		my $user_name = $user_list->{'name'};
-		my $user_roles = $user_list->{'roles'};
-		print "$user_name : @$user_roles\n";
+		print "# Use -confirmed to execute the '$userAction' user action";
+		print " for user '$userName'" if $userName;
+		print "\n";
+		exit;
 	}
+	$userAction eq 'delete' ? &rest_call($method, $cm_url, 0) : &rest_call($method, $cm_url, 0, undef, $body_content);
 	exit;
 }
+	
 
 if ( $cmConfig || $deployment ) {
 	my $filename;
@@ -1197,7 +1215,7 @@ foreach my $cluster_name ( @clusters ) {
 #								my $cluster_name_w_spaces = $cluster_name;
 #								$cluster_name_w_spaces =~ s/ /%20/g;
 								# curl call (if https, add -k to allow connections to SSL sites without certs)
-#								$cm_url = "http://$username:\'$password\'\@$cm_api/clusters/$cluster_name_w_spaces/services/$service_name/roles/$role_name/logs/$log";
+#								$cm_url = "http://$cm_user:\'$cm_password\'\@$cm_api/clusters/$cluster_name_w_spaces/services/$service_name/roles/$role_name/logs/$log";
 								$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/roles/$role_name/logs/$log";
 								&rest_call('GET', $cm_url, 0);
 							} else { 
@@ -1297,9 +1315,9 @@ foreach my $cluster_name ( @clusters ) {
 &track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 
 sub usage {
-	print "\nUsage: $0 [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=username] [-p=password]\n";
+	print "\nUsage: $0 [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=cm_user] [-p=cm_password]\n";
 	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]\n";
-	print "\t[-users[=user_name] [-userAction=delete|(add|update -f=json_file)]]\n";
+	print "\t[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]\n";
 	print "\t[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
 	print "\t  [-setRackId=/...] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]\n";
 	print "\t[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]\n";
@@ -1316,15 +1334,18 @@ sub usage {
 	print "\t -cm : CM hostname:port (default: localhost:7180)\n";
 	print "\t -https : Use HTTPS to communicate with CM (default: HTTP)\n";
 	print "\t -api : CM API version (v<integer> | default: response from <cm>/api/version)\n";
-	print "\t -u : CM username (environment variable: \$CM_REST_USER | default: admin)\n";
+	print "\t -u : CM user name (environment variable: \$CM_REST_USER | default: admin)\n";
 	print "\t -p : CM password or path to password file (environment variable: \$CM_REST_PASS | default: admin)\n";
 	print "\t      Credentials file: \$HOME/.cm_rest (set env variables using colon-separated key/value pairs)\n";
 	print "\t -cmVersion : Display Cloudera Manager and default API versions\n";
-	print "\t -users : Display CM users/roles (default: all)\n";
 	print "\t -userAction: User action\n";
 	print "\t              (add|update) Create/update user\n";
-	print "\t                -f: JSON file with user information\n";
-	print "\t              (delete) Delete user\n";
+	print "\t                -userName : User name\n";
+	print "\t                -userPassword : User password (default: 'changeme' /for new users/)\n";
+	print "\t                -userRole : User role (default: ROLE_USER)\n"; # List of roles -> https://cloudera.github.io/cm_api/apidocs/v16/ns0_apiUser.html
+	print "\t                -f : JSON file to add users in bulk (instead of -userName)\n";
+	print "\t              (delete) Delete user (args: -userName)\n";
+	print "\t              (show) Display users (args: [-userName] | default: all)\n";
 	print "\t -cmConfig : Save CM configuration to file\n";
 	print "\t -deployment : Retrieve full description of the entire CM deployment\n";
 	print "\t -cmdId : Retrieve information on an asynchronous command\n";
@@ -1339,7 +1360,7 @@ sub usage {
 	print "\t -deleteHost : Delete the host from Cloudera Manager\n";
 	print "\t -setRackId : Update the rack ID of the host\n";
 	print "\t -addToCluster : Add the host to a cluster\n";
-	print "\t -addRole : Create new roles. Comma-separated list of role types. Argument: -serviceName (requires also -clusterName for API v10 or lower)\n";
+	print "\t -addRole : Create new roles. Comma-separated list of role types (args: -serviceName, [-clusterName] /for API v10 or lower/)\n";
 	print "\t -hAction : Host action\n";
 	print "\t            (decommission|recommission) Decommission/recommission the host\n";
 	print "\t            (startRoles) Start all the roles on the host\n";
@@ -1372,19 +1393,19 @@ sub usage {
 	print "\t        -propertyName : Configuration parameter canonical name. Required for -updateConfig. Regex filter for -getConfig (default: all)\n";
 	print "\t        -propertyValue : User-defined value. When absent, the default value (if any) will be used\n";
 	print "\t        -full : Full view (default view: summary)\n";
-	print "\t      (createRoleGroup) Create role config group. Arguments: -displayName, -roleType, (optional) -copyFromRoleGroup\n";	# service context
-	print "\t      (updateRoleGroup) Update role config group. Arguments: -displayName and/or -copyFromRoleGroup\n";			# service context
-	print "\t      (deleteRoleGroup) Delete role config group.\n";							# service context
-	print "\t      (moveToRoleGroup) Move roles to a config group. Argument: -roleConfigGroup\n";			# role context
-	print "\t      (moveToBaseGroup) Move roles to the base role config group\n";					# role context
-	print "\t      (addCluster) Create cluster. Arguments: -clusterName, -displayName, -fullVersion\n"; 
-	print "\t      (updateCluster) Update cluster information. Arguments: -displayName and/or -fullVersion\n";	# cluster context
-	print "\t      (deleteCluster) Delete cluster\n";								# cluster context
-	print "\t      (serviceTypes) List the supported service types for a cluster\n";				# cluster context
-	print "\t      (addService) Create service. Arguments: -serviceName, -serviceType, -displayName\n";		# cluster context
-	print "\t      (updateService) Update service information. Argument: -displayName\n";				# service context
-	print "\t      (deleteService) Delete service\n";								# service context
-	print "\t      (roleTypes) List the supported role types for a service\n";					# service context
+	print "\t      (createRoleGroup) Create role config group (args: -displayName, -roleType, [-copyFromRoleGroup])\n";	# service context
+	print "\t      (updateRoleGroup) Update role config group (args: -displayName, -copyFromRoleGroup)\n";		# service context
+	print "\t      (deleteRoleGroup) Delete role config group\n";						# service context
+	print "\t      (moveToRoleGroup) Move roles to a config group (args: -roleConfigGroup)\n";		# role context
+	print "\t      (moveToBaseGroup) Move roles to the base role config group\n";				# role context
+	print "\t      (addCluster) Create cluster (args: -clusterName, -displayName, -fullVersion)\n"; 
+	print "\t      (updateCluster) Update cluster information (args: -displayName, -fullVersion)\n";	# cluster context
+	print "\t      (deleteCluster) Delete cluster\n";							# cluster context
+	print "\t      (serviceTypes) List the supported service types for a cluster\n";			# cluster context
+	print "\t      (addService) Create service (args: -serviceName, -serviceType, -displayName)\n";		# cluster context
+	print "\t      (updateService) Update service information (args: -displayName)\n";			# service context
+	print "\t      (deleteService) Delete service\n";							# service context
+	print "\t      (roleTypes) List the supported role types for a service\n";				# service context
 	print "\t -confirmed : Proceed with the command execution\n";
 	print "\t -trackCmd : Display the result of all executed asynchronous commands before exiting\n";
 	print "\t -run : Shortcut for '-confirmed -trackCmd'\n";
@@ -1392,7 +1413,7 @@ sub usage {
 	print "\t -sMetrics : Service metrics\n";
 	print "\t -rChecks : Role health checks\n";
 	print "\t -rMetrics : Role metrics\n";
-	print "\t -log : Display role log (type: full, stdout, stderr -stacks, stacksBundle for mgmt service-)\n";
+	print "\t -log : Display role log (type: full, stdout, stderr /plus stacks, stacksBundle for mgmt service/)\n";
 	print "\t -yarnApps : Display YARN applications (example: -yarnApps='filter='executing=true'')\n";
 	print "\t -impalaQueries : Display Impala queries (example: -impalaQueries='filter='user=<userName>'')\n";
 	print "\t -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)\n\n";
