@@ -1,5 +1,6 @@
-### Version 8.0 is now available!
+### Version 8.1 is now available!
 
+- `-cmdAction=abort|retry` safeguarded by the `-confirmed|-run` options
 - Rewrote the user management section to make it consistent with the rest of the code:
 ```
  -userAction: User action
@@ -129,7 +130,7 @@ Here is the usage information for both utilities:
 
 ```
 Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=cm_user] [-p=cm_password]
-	[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]
+	[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry]]
 	[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]
 	[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
 	  [-setRackId=/...] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]
@@ -163,8 +164,8 @@ Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<i
 	 -deployment : Retrieve full description of the entire CM deployment
 	 -cmdId : Retrieve information on an asynchronous command
 	 -cmdAction : Command action
-	            (abort) Abort a running command
-	            (retry) Try to rerun a command
+	              (abort) Abort a running command
+	              (retry) Try to rerun a command
 	 -hInfo : Host information (regex UUID, hostname, IP, rackId | default: all)
 	 -hFilter : Host health summary, entity status, commission state (regex)
 	 -hRoles : Display roles associated with host

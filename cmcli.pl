@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Cloudera Manager Command-Line Interface
-# Version: 8.0
+# Version: 8.1
 # Use -help for options
 
 use strict;
@@ -37,19 +37,19 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 8.0\n";
-	print "Release date: 04/27/2017\n";
+	print "Version: 8.1\n";
+	print "Release date: 04/29/2017\n";
 	exit;
 }
 
 &usage if $help;
 die "-cm is not set. Use -help for options\n" unless $cm;
 
-my %opts = ('cmdId'=>$cmdId, 'cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'userAction'=>$userAction,
-		'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction,
-		'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName,
-		'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType, 'roleType'=>$roleType, 'copyFromRoleGroup'=>$copyFromRoleGroup,
-		'f'=>$f, 'userName'=>$userName, 'userPassword'=>$userPassword, 'userRole'=>$userRole);
+my %opts = ('cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'userAction'=>$userAction,
+	'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction,
+	'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName,
+	'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType, 'roleType'=>$roleType, 'copyFromRoleGroup'=>$copyFromRoleGroup,
+	'f'=>$f, 'userName'=>$userName, 'userPassword'=>$userPassword, 'userRole'=>$userRole);
 my %hInfo_opts = ('hRoles'=>$hRoles, 'hChecks'=>$hChecks, 'setRackId'=>$setRackId, 'deleteHost'=>$deleteHost,
 		'addToCluster'=>$addToCluster, 'removeFromCluster'=>$removeFromCluster, 'hAction'=>$hAction, 'addRole'=>$addRole);
 my %rr_opts = ('slaveBatchSize'=>$slaveBatchSize, 'sleepSeconds'=>$sleepSeconds, 'slaveFailCountThreshold'=>$slaveFailCountThreshold,
@@ -263,13 +263,12 @@ if ( $userAction ) {
 			}
 			exit;
 		}
+		$userAction eq 'delete' ? &rest_call($method, $cm_url, 0) : &rest_call($method, $cm_url, 0, undef, $body_content);
 	} else {
 		print "# Use -confirmed to execute the '$userAction' user action";
 		print " for user '$userName'" if $userName;
 		print "\n";
-		exit;
 	}
-	$userAction eq 'delete' ? &rest_call($method, $cm_url, 0) : &rest_call($method, $cm_url, 0, undef, $body_content);
 	exit;
 }
 	
@@ -295,8 +294,13 @@ if ( $cmdId ) {
 	my $cmd;
 	$cm_url = "$cm_api/commands/$cmdId";
 	if ( $cmdAction ) {
-		$cm_url .= "/$cmdAction";
-		$cmd = &rest_call('POST', $cm_url, 1);
+		if ( $confirmed ) {
+			$cm_url .= "/$cmdAction";
+			$cmd = &rest_call('POST', $cm_url, 1);
+		} else {
+			print "# Use -confirmed or -run to execute the '$cmdAction' command action\n";
+			exit;
+		}
 	} else {
 		$cmd = &rest_call('GET', $cm_url, 1);
 	}
@@ -1316,7 +1320,7 @@ foreach my $cluster_name ( @clusters ) {
 
 sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=cm_user] [-p=cm_password]\n";
-	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry] [-trackCmd]]\n";
+	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry]]\n";
 	print "\t[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]\n";
 	print "\t[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
 	print "\t  [-setRackId=/...] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]\n";
@@ -1350,8 +1354,8 @@ sub usage {
 	print "\t -deployment : Retrieve full description of the entire CM deployment\n";
 	print "\t -cmdId : Retrieve information on an asynchronous command\n";
 	print "\t -cmdAction : Command action\n";
-	print "\t            (abort) Abort a running command\n";
-	print "\t            (retry) Try to rerun a command\n";
+	print "\t              (abort) Abort a running command\n";
+	print "\t              (retry) Try to rerun a command\n";
 	print "\t -hInfo : Host information (regex UUID, hostname, IP, rackId | default: all)\n";
 	print "\t -hFilter : Host health summary, entity status, commission state (regex)\n";
 	print "\t -hRoles : Display roles associated with host\n";
