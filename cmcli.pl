@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Cloudera Manager Command-Line Interface
-# Version: 8.1
+# Version: 8.2
 # Use -help for options
 
 use strict;
@@ -37,8 +37,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 8.1\n";
-	print "Release date: 04/29/2017\n";
+	print "Version: 8.2\n";
+	print "Release date: 08/23/2017\n";
 	exit;
 }
 
@@ -338,6 +338,7 @@ if ( defined $hInfo ) {
 	my $hosts = &rest_call('GET', $cm_url, 1);
 	my @services;
 	my $host_summary;
+	my $hostName_list = {};
 	for ( my $i=0; $i < @{$hosts->{'items'}}; $i++ ) {
 		$hInfo_match = 0 if $hRoles;
 		my $host_id = $hosts->{'items'}[$i]->{'hostId'};
@@ -496,18 +497,17 @@ if ( defined $hInfo ) {
 			}
 
 			if ( $hAction ) {
-				print "$host_name | ACTION: $hAction ";
+				print "$host_name | ACTION: $hAction " unless $hAction =~ /decommission|recommission/;
 				$cm_url = "$cm_api/cm/commands";
-				if ( $hAction eq 'decommission' ) {
-					$cm_url .= "/hostsDecommission"
-				} elsif ( $hAction eq 'recommission' ) {
-					$cm_url .= "/hostsRecommission";
+				if ( $hAction =~ /decommission|recommission/ ) {
+					push @{$hostName_list->{'items'}}, $host_name;
+					next;
 				} elsif ( $hAction eq 'startRoles' ) {
 					$cm_url .= "/hostsStartRoles";
+					$body_content = "{ \"items\" : [\"$host_name\"] }";
 				} elsif ( $hAction =~ /enterMaintenanceMode|exitMaintenanceMode/ ) {
 					$cm_url = "$cm_api/hosts/$host_id/commands/$hAction";
 				}
-				$body_content = "{ \"items\" : [\"$host_name\"] }" if $hAction =~ /decommission|recommission|startRoles/;
 				my $cmd = $body_content ? &rest_call('POST', $cm_url, 1, undef, $body_content) : &rest_call('POST', $cm_url, 1);
 				my $id = $cmd->{'id'};
 				print "| CMDID: $id\n";
@@ -523,6 +523,20 @@ if ( defined $hInfo ) {
 				print "$host_name | No health data\n"
 			}
 		}
+	}
+	
+	if ( $hAction && $confirmed && $hAction =~ /decommission|recommission/ ) {
+		print "ACTION: $hAction ";
+		if ( $hAction eq 'decommission' ) {
+			$cm_url .= "/hostsDecommission";
+		} elsif ( $hAction eq 'recommission' ) {
+			$cm_url .= "/hostsRecommission";
+		}
+		$body_content = to_json($hostName_list);
+		my $cmd = &rest_call('POST', $cm_url, 1, undef, $body_content);
+		my $id = $cmd->{'id'};
+		print "| CMDID: $id\n";
+		( $trackCmd && $id != -1 ) ? $cmd_list->{$id} = $cmd : &cmd_id(\%{$cmd});
 	}
 
 	my $num_hosts = keys %{$uuid_host_map};
@@ -1120,6 +1134,7 @@ foreach my $cluster_name ( @clusters ) {
 			my $cm_roles = &rest_call('GET', $cm_url, 1);
 			# roles
 			my $role_summary;
+			my $roleName_list = {};
 			for ( my $i=0; $i < @{$cm_roles->{'items'}}; $i++ ) {
 				my $host_id = $cm_roles->{'items'}[$i]->{'hostRef'}->{'hostId'};
 				# role instance
@@ -1229,7 +1244,7 @@ foreach my $cluster_name ( @clusters ) {
 
 						if ( $a && ( $list_active_commands || $confirmed ) ) {
 							my $role_action = $list_active_commands ? 'list active role commands' : $a;
-							print "|__ $service_header | $host_id | $role_name | ACTION: $role_action " unless $a eq 'rollingRestart';
+							print "|__ $service_header | $host_id | $role_name | ACTION: $role_action " unless $a =~ /rollingRestart|decommission|recommission/;
 							$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name";
 							my ($cmd, $id);
 							my $single_cmd = 1;
@@ -1253,7 +1268,8 @@ foreach my $cluster_name ( @clusters ) {
 								$rr_opts{'restartRoleNames'} .= "$role_name,";
 								next;
 							} elsif ( $a =~ /decommission|recommission/ ) {
-								$cm_url .= "/commands/$a";
+								push @{$roleName_list->{'items'}}, $role_name;
+								next;
 							} elsif ( $a =~ /enterMaintenanceMode|exitMaintenanceMode/ ) {
 								$cm_url .= "/roles/$role_name/commands/$a";
 							} elsif ( $a eq 'deleteRole' ) {
@@ -1298,15 +1314,19 @@ foreach my $cluster_name ( @clusters ) {
 			} # roles
 			print "# Use -confirmed or -run to execute the '$a' role action\n" if ( $a and not $confirmed and not $list_active_commands );
 			&display_role_summary($role_summary, $cluster_name, $service_name, undef);
-			if ( $a && $confirmed && $a eq 'rollingRestart' ) {
+			if ( $a && $confirmed && $a =~ /rollingRestart|decommission|recommission/ ) {
 				print "$cluster_name | $service_name | ACTION: $a ";
 				$cm_url .= "/commands/$a";
-				$body_content = &rolling_restart($cluster_name, $service_name);
+				if ( $a eq 'rollingRestart' ) {
+					$body_content = &rolling_restart($cluster_name, $service_name);
+					$rr_opts{'restartRoleNames'} = undef;
+				} elsif ( $a =~ /decommission|recommission/ ) {
+					$body_content = to_json($roleName_list);
+				}
 				my $cmd = &rest_call('POST', $cm_url, 1, undef, $body_content);
 				my $id = $cmd->{'id'};
 				print "| CMDID: $id\n";
 				$trackCmd ? $cmd_list->{$id} = $cmd : &cmd_id(\%{$cmd});
-				$rr_opts{'restartRoleNames'} = undef;
 			}
 		} # service instance
 	} # services

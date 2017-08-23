@@ -1,4 +1,8 @@
-### Version 8.1 is now available!
+### Version 8.2 is now available!
+
+- The `decommission` and `recommission` actions for both hosts and roles now use a lists of items instead of a single item (sequentially) to avoid concurrency issues while refreshing master nodes
+
+### Version 8.1
 
 - `-cmdAction=abort|retry` safeguarded by the `-confirmed|-run` options
 - Rewrote the user management section to make it consistent with the rest of the code:
