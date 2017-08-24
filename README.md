@@ -1,6 +1,6 @@
 ### Version 8.2 is now available!
 
-- The `decommission` and `recommission` actions for both hosts and roles now use a list of items instead of a single item (sequentially) to avoid concurrency issues while refreshing master nodes
+- To avoid concurrency issues while refreshing master nodes, the `decommission` and `recommission` actions for both hosts and roles have been revised to use a list of items instead of a single item sequentially
 
 ### Version 8.1
 
