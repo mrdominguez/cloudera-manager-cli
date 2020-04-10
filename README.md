@@ -283,7 +283,7 @@ The preference is as follows (highest first):
 3. Environment variables (using the `export` command)
 4. Default credentials (*admin*/*admin*)
 
-## Suported cluster/service/role commands
+## Supported cluster/service/role commands
 
 In addition to the actions listed in the usage section, to execute a command endpoint, set `-a={commandName}` in the appropriate context. These are the supported commands:
 
@@ -362,11 +362,11 @@ Here are some common use cases:
 
     `$ cmcli.pl -cm=cm_server -hInfo=host_name -hRoles`
 
-* Show all the hosts associated with a given cluster:
+* Show hosts associated with a given cluster:
 
     `$ cmcli.pl -cm=cm_server -hInfo -c=cluster_name`
 
-* Decommission the hosts in bad health:
+* Decommission hosts in bad health:
 
     `$ cmcli.pl -cm=cm_server -c=cluster_name -hFilter=bad -hAction=decommission`
 
@@ -406,7 +406,7 @@ Here are some common use cases:
 
     `$ cmcli.pl -cm=cm_server -c=cluster2 -s=yarn -a=deployClientConfig`
 
-* Restart ALL the Flume services:
+* Restart all the Flume services:
 
     `$ cmcli.pl -cm=cm_server -c=cluster2 -s=flume -a=restart`
 
@@ -539,7 +539,7 @@ user5 : ROLE_OPERATOR
 
 	`cmcli.pl -cm=cm_server -hInfo=<perl_regex> -removeFromCluster=cluster2`
 
-* Roll restart ALL the roles on the selected hosts:
+* Roll restart all the roles on the selected hosts:
 
     `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -a=rollingRestart`
 
@@ -573,11 +573,11 @@ user5 : ROLE_OPERATOR
 
     `cmcli.pl -cm=cm_server -c=cluster2 -s=hdfs —r='name|journal' -a=rollingRestart`
 
-* Roll restart ALL ZooKeeper and Flume services:
+* Roll restart all ZooKeeper and Flume services:
 
     `cmcli.pl -cm=cm_server -c=cluster2 -s='zoo|flume' -a=rollingRestart`
 
-* Multi-action command: Add hosts to cluster 'cluster2', set rack Id, create HIVESERVER2 and GATEWAY roles (service 'hive1') and set the hosts in maintenance mode:
+* Multi-action command: Add hosts to cluster 'cluster2', set rack Id, create HIVESERVER2 and GATEWAY roles (service 'hive1') and enable maintenance mode on the hosts:
 
     `cmcli.pl -cm=cm_server -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster2 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
 
