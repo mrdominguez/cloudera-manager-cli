@@ -1,6 +1,6 @@
 #!/usr/bin/perl -ws
 
-# Copyright 2017 Mariano Dominguez
+# Copyright 2020 Mariano Dominguez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Cloudera Manager REST API client
-# Version: 8.2
+# Version: 8.2.1
 # Use -help for options
 
 use strict;
@@ -29,8 +29,8 @@ use vars qw($help $version $u $p $m $d $f $i $bt $bc);
 if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 8.2\n";
-	print "Release date: 08/23/2017\n";
+	print "Version: 8.2.1\n";
+	print "Release date: 04/28/2020\n";
 	exit;
 }
 
@@ -124,25 +124,15 @@ if ( $d && defined $body_content ) {
 	print "body_content = $body_content\n";
 }
 
-# Can't verify SSL peers without knowing which Certificate Authorities to trust
-#
-# This problem can be fixed by either setting the PERL_LWP_SSL_CA_FILE
-# envirionment variable or by installing the Mozilla::CA module.
-#
-# To disable verification of SSL peers set the PERL_LWP_SSL_VERIFY_HOSTNAME
-# envirionment variable to 0.  If you do this you can't be sure that you
-# communicate with the expected peer.
-
 # http://search.cpan.org/dist/libwww-perl/lib/LWP.pm
-$ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0 if $https; # disable hostname verification
+# LWP::Protocol::https::Socket: SSL connect attempt failed error:14090086:SSL routines:ssl3_get_server_certificate:certificate verify failed
+#$ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0 if $https; # disable hostname verification
 
 # http://search.cpan.org/~kkane/REST-Client/lib/REST/Client.pm
 my $client = REST::Client->new();
 if ( $https ) {
-	# http://search.cpan.org/~ether/libwww-perl/lib/LWP/UserAgent.pm#CONSTRUCTOR_METHODS
-	$client->getUseragent()->ssl_opts( verify_hostname => 0 ); # this works without explicitly setting PERL_LWP_SSL_VERIFY_HOSTNAME to 0
-	$client->getUseragent()->ssl_opts( SSL_verify_mode => 0 ); # optional?
-	#$client->getUseragent()->ssl_opts( SSL_verify_mode => SSL_VERIFY_NONE ); # Bareword "SSL_VERIFY_NONE" not allowed while "strict subs" in use
+        # http://search.cpan.org/~ether/libwww-perl/lib/LWP/UserAgent.pm#CONSTRUCTOR_METHODS
+        $client->getUseragent()->ssl_opts( verify_hostname => 0 ); # or set $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}
 }
 
 if ( $method =~ m/GET/i ) {
@@ -179,6 +169,6 @@ sub usage {
 	print "\t       To set multiple objects, use -bt=json or -f to pass a JSON file\n";
 	print "\t -i : Add the 'items' property to the body content (on by default if -bt=array)\n";
 	print "\t -f : JSON file containing body content (implies -bt=json)\n";
-	print "\t <ResourceUrl> : URL to REST resource (example: [http(s)://]cloudera-manager:7180/api/v15/clusters/)\n\n";
+	print "\t <ResourceUrl> : URL to REST resource (example: [http://]cloudera-manager:7180/api/v15/clusters/)\n\n";
 	exit;
 }
