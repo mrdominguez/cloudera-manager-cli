@@ -18,9 +18,9 @@
 	  (delete) Delete user (args: -userName)
 	  (show) Display users (args: [-userName] | default: all)
 ```
-- Minor changes
-
 Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiUser.html).
+
+- Minor changes
 
 ### Version 7.0
 
