@@ -1,6 +1,6 @@
 #!/usr/bin/perl -ws
 
-# Copyright 2017 Mariano Dominguez
+# Copyright 2020 Mariano Dominguez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Cloudera Manager Command-Line Interface
-# Version: 8.2
+# Version: 8.2.1
 # Use -help for options
 
 use strict;
@@ -37,8 +37,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 8.2\n";
-	print "Release date: 08/23/2017\n";
+	print "Version: 8.2.1\n";
+	print "Release date: 04/28/2020\n";
 	exit;
 }
 
@@ -172,19 +172,20 @@ my $body_content;
 my $cm_protocol = $https ? 'https://' : 'http://';
 my ($cm_host, $cm_port) = split(/:/, $cm, 2) if $cm ne '1';
 $cm_host = 'localhost' if !defined $cm_host;
-$cm_port = 7180 if !defined $cm_port;
+if ( !defined $cm_port ) {
+	$cm_port = $https ? 7183 : 7180
+}
 print "CM protocol = $cm_protocol\nCM host = $cm_host\nCM port = $cm_port\n" if $d;
 
 # http://search.cpan.org/dist/libwww-perl/lib/LWP.pm
-$ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0 if $https; # disable hostname verification
+# LWP::Protocol::https::Socket: SSL connect attempt failed error:14090086:SSL routines:ssl3_get_server_certificate:certificate verify failed
+#$ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0 if $https; # disable hostname verification
 
 # http://search.cpan.org/~kkane/REST-Client/lib/REST/Client.pm
 my $client = REST::Client->new();
 if ( $https ) {
 	# http://search.cpan.org/~ether/libwww-perl/lib/LWP/UserAgent.pm#CONSTRUCTOR_METHODS
-	$client->getUseragent()->ssl_opts( verify_hostname => 0 ); # this works without explicitly setting PERL_LWP_SSL_VERIFY_HOSTNAME to 0
-	$client->getUseragent()->ssl_opts( SSL_verify_mode => 0 ); # optional?
-	#$client->getUseragent()->ssl_opts( SSL_verify_mode => SSL_VERIFY_NONE ); # Bareword "SSL_VERIFY_NONE" not allowed while "strict subs" in use
+	$client->getUseragent()->ssl_opts( verify_hostname => 0 ); # or set $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}
 }
 
 my $cm_url = "$cm_protocol$cm_host:$cm_port/api/version";
@@ -208,7 +209,7 @@ if ( $addRole ) {
 	$addRole = uc $addRole;
 } 
 
-my $cm_api = "$cm_host:$cm_port/api/v$api_version";
+my $cm_api = "$cm_protocol$cm_host:$cm_port/api/v$api_version";
 if ( $cmVersion ) {
 	$cm_url = "$cm_api/cm/version";
 	my $cm_version = &rest_call('GET', $cm_url, 1);
@@ -228,6 +229,7 @@ if ( $userAction ) {
 		$body_content = to_json($user_info);
 		$cm_url .= "/$userName" unless $userAction eq 'add' or ( $userAction eq 'show' and not $userName );
 		if ( $userAction eq 'add') {
+			print "Set -api=v19 (currently v$api_version) and rerun '$userAction' user action\n" and exit if $api_version > 19;
 			if ( $f ) {
 				print "Loading file $f...\n";
 				$body_content = do {
@@ -242,6 +244,7 @@ if ( $userAction ) {
 			}
 			$method = 'POST';
 		} elsif ( $userAction eq 'update' ) {
+			print "Set -api=v19 (currently v$api_version) and rerun '$userAction' user action\n" and exit if $api_version > 19;
 			print "Updating user '$userName'...\n";
 			$method = 'PUT';
 		} elsif ( $userAction eq 'delete' ) {
@@ -252,14 +255,34 @@ if ( $userAction ) {
 			my $user_list = &rest_call($method, $cm_url, 1);
 			if ( not $userName ) {
 				for ( my $i=0; $i < @{$user_list->{'items'}}; $i++ ) {
-					my $user_name = $user_list->{'items'}[$i]->{'name'};
-					my $user_roles = $user_list->{'items'}[$i]->{'roles'};
-					print "$user_name : @$user_roles\n";
+					my $user_name = $user_list->{'items'}[$i]{'name'};
+					print "$user_name\n";
+					if ( $api_version <= 19 ) {
+						my $user_roles = $user_list->{'items'}[$i]{'roles'};
+						print @$user_roles ? " @$user_roles" : " No roles assigned";
+					} else {
+						foreach my $role ( @{$user_list->{'items'}[$i]{'authRoles'}} ) {
+							my $user_role = $role->{'name'};
+							print " $user_role";
+						}
+						print " No roles assigned" if !@{$user_list->{'items'}[$i]{'authRoles'}};
+					}
+					print "\n";
 				}
 			} else {
 				my $user_name = $user_list->{'name'};
-				my $user_roles = $user_list->{'roles'};
-				print "$user_name : @$user_roles\n";
+				print "$user_name\n";
+				if ( $api_version <= 19 ) {
+					my $user_roles = $user_list->{'roles'};
+					print @$user_roles ? " @$user_roles" : " No roles assigned";
+				} else {
+					foreach my $role ( @{$user_list->{'authRoles'}} ) {
+						my $user_role = $role->{'name'};
+						print " $user_role";
+					}
+					print " No roles assigned" if !@{$user_list->{'authRoles'}};
+				}
+				print "\n";
 			}
 			exit;
 		}
@@ -1339,7 +1362,7 @@ foreach my $cluster_name ( @clusters ) {
 &track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 
 sub usage {
-	print "\nUsage: $0 [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=cm_user] [-p=cm_password]\n";
+	print "\nUsage: $0 [-help] [-version] [-d] -cm[=hostname[:port]] [-https] [-api=v<integer>] [-u=cm_user] [-p=cm_password]\n";
 	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry]]\n";
 	print "\t[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]\n";
 	print "\t[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
@@ -1355,7 +1378,7 @@ sub usage {
 	print "\t -help : Display usage\n";
 	print "\t -version : Display version information\n";
 	print "\t -d : Enable debug mode\n";
-	print "\t -cm : CM hostname:port (default: localhost:7180)\n";
+	print "\t -cm : CM hostname:port (default: localhost:7180, or 7183 if using HTTPS)\n";
 	print "\t -https : Use HTTPS to communicate with CM (default: HTTP)\n";
 	print "\t -api : CM API version (v<integer> | default: response from <cm>/api/version)\n";
 	print "\t -u : CM user name (environment variable: \$CM_REST_USER | default: admin)\n";
@@ -1365,7 +1388,7 @@ sub usage {
 	print "\t -userAction: User action\n";
 	print "\t              (add|update) Create/update user\n";
 	print "\t                -userName : User name\n";
-	print "\t                -userPassword : User password (default: 'changeme' /for new users/)\n";
+	print "\t                -userPassword : User password (default: 'changeme')\n";
 	print "\t                -userRole : User role (default: ROLE_USER)\n"; # List of roles -> https://cloudera.github.io/cm_api/apidocs/v16/ns0_apiUser.html
 	print "\t                -f : JSON file to add users in bulk (instead of -userName)\n";
 	print "\t              (delete) Delete user (args: -userName)\n";
