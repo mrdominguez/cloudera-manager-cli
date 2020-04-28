@@ -1,5 +1,7 @@
-### Version 8.2 is now available!
+### Version 8.2.1 is now available!
 
+- Added HTTPS support
+- Revised user management logic
 - To avoid concurrency issues while refreshing master nodes, the `decommission` and `recommission` actions for both hosts and roles have been revised to use a list of items instead of a single item sequentially
 
 ### Version 8.1
@@ -10,7 +12,7 @@
  -userAction: User action
 	  (add|update) Create/update user
 		-userName : User name
-		-userPassword : User password (default: 'changeme' /for new users/)
+		-userPassword : User password (default: 'changeme')
 		-userRole : User role (default: ROLE_USER)
 		-f : JSON file to add users in bulk (instead of -userName)
 	  (delete) Delete user (args: -userName)
@@ -79,7 +81,7 @@ FEEDBACK/BUGS: Please contact me by email.
 
 The Cloudera Manager CLI (`cmcli.pl`) is a utility that facilitates cluster management and automation from the command-line through the Cloudera Manager REST API.
 
-It is compatible with Cloudera Manager 5.x (API v6 or higher). Most of the functionality should also work (not fully tested) with Cloudera Manager 4.x (API v5 or lower), although you may see `Use of uninitialized value...` messages and/or failures.
+It is compatible with Cloudera Manager 5 (API v6 or higher). Most of the functionality should also work (not fully tested) with CM 4 (API v5 or lower) as well as CM 6, although there could be unsupported features.
 
 A separate REST client (`cmapi.pl`) is provided to call the endpoints not supported by the CLI. `cmapi.pl` can also be used to get any command's downloadable result data, provided by`resultDataUrl`.
 
@@ -102,7 +104,7 @@ For information about the Cloudera Manager API, please check the following links
 
 ## Installation
 
-These utilities are written in Perl and have been tested using Perl 5.1x.x on RHEL 6.x.
+These utilities are written in Perl and have been tested using Perl 5.1x.x on RHEL 6 and 7.
 
 Use [cpan](http://perldoc.perl.org/cpan.html) to install the following modules; alternately, download them from the [CPAN Search Site](http://search.cpan.org/) for manual installation:
 - **REST::Client**
@@ -131,7 +133,7 @@ The only required option for `cmcli.pl` is `-cm` to reference the CM server host
 Here is the usage information for both utilities:
 
 ```
-Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<integer>]] [-u=cm_user] [-p=cm_password]
+Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port]] [-https] [-api=v<integer>] [-u=cm_user] [-p=cm_password]
 	[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry]]
 	[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]
 	[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
@@ -147,7 +149,7 @@ Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<i
 	 -help : Display usage
 	 -version : Display version information
 	 -d : Enable debug mode
-	 -cm : CM hostname:port (default: localhost:7180)
+	 -cm : CM hostname:port (default: localhost:7180, or 7183 if using HTTPS)
 	 -https : Use HTTPS to communicate with CM (default: HTTP)
 	 -api : CM API version (v<integer> | default: response from <cm>/api/version)
 	 -u : CM user name (environment variable: $CM_REST_USER | default: admin)
@@ -157,7 +159,7 @@ Usage: cmcli.pl [-help] [-version] [-d] -cm[=hostname[:port] [-https] [-api[=v<i
 	 -userAction: User action
 	              (add|update) Create/update user
 	                -userName : User name
-	                -userPassword : User password (default: 'changeme' /for new users/)
+	                -userPassword : User password (default: 'changeme')
 	                -userRole : User role (default: ROLE_USER)
 	                -f : JSON file to add users in bulk (instead of -userName)
 	              (delete) Delete user (args: -userName)
@@ -250,7 +252,7 @@ Usage: cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
 	       To set multiple objects, use -bt=json or -f to pass a JSON file
 	 -i : Add 'items' property to the body content (on by default if -bt=array)
 	 -f : JSON file containing body content (implies -bt=json)
-	 <ResourceUrl> : URL to REST resource (example: [http(s)://]cloudera-manager:7180/api/v15/clusters/)
+	 <ResourceUrl> : URL to REST resource (example: [http://]cloudera-manager:7180/api/v15/clusters/)
 ```
 
 ## Setting credentials
@@ -478,11 +480,16 @@ Loading file users.json...
   } ]
 }
 $ cmcli.pl -cm=cm_server -userAction=show
-admin : ROLE_ADMIN
-user1 : ROLE_USER
-user2 : ROLE_USER
-user3 : ROLE_CONFIGURATOR
-user4 : ROLE_OPERATOR
+admin
+ ROLE_ADMIN
+user1
+ ROLE_USER
+user2
+ ROLE_USER
+user3
+ ROLE_CONFIGURATOR
+user4
+ ROLE_OPERATOR
 ```
 
 * Create a single user (default password: 'changeme') without a JSON file:
@@ -520,11 +527,16 @@ Deleting user 'user4'...
   "roles" : [ "ROLE_OPERATOR" ]
 }
 $ cmcli.pl -cm=cm_server -userAction=show
-admin : ROLE_ADMIN
-user1 : ROLE_ADMIN
-user2 : ROLE_USER
-user3 : ROLE_CONFIGURATOR
-user5 : ROLE_OPERATOR
+admin
+ ROLE_ADMIN
+user1
+ ROLE_ADMIN
+user2
+ ROLE_USER
+user3
+ ROLE_CONFIGURATOR
+user5
+ ROLE_OPERATOR
 ```
 
 * Delete the selected hosts from CM:
