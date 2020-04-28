@@ -169,7 +169,7 @@ if ( -e $cm_password ) {
 my $headers = { 'Content-Type' => 'application/json', 'Authorization' => 'Basic ' . encode_base64($cm_user . ':' . $cm_password) };
 my $body_content;
 
-my $cm_protocol = $https ? 'https://' : 'http://';
+my $cm_protocol = $https ? 'https' : 'http';
 my ($cm_host, $cm_port) = split(/:/, $cm, 2) if $cm ne '1';
 $cm_host = 'localhost' if !defined $cm_host;
 if ( !defined $cm_port ) {
@@ -188,7 +188,7 @@ if ( $https ) {
 	$client->getUseragent()->ssl_opts( verify_hostname => 0 ); # or set $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}
 }
 
-my $cm_url = "$cm_protocol$cm_host:$cm_port/api/version";
+my $cm_url = "$cm_protocol://$cm_host:$cm_port/api/version";
 my $api_version;
 if ( $cmVersion || !$api ) {
 	print "Getting API version from CM... " if $d;
@@ -209,7 +209,7 @@ if ( $addRole ) {
 	$addRole = uc $addRole;
 } 
 
-my $cm_api = "$cm_protocol$cm_host:$cm_port/api/v$api_version";
+my $cm_api = "$cm_protocol://$cm_host:$cm_port/api/v$api_version";
 if ( $cmVersion ) {
 	$cm_url = "$cm_api/cm/version";
 	my $cm_version = &rest_call('GET', $cm_url, 1);
