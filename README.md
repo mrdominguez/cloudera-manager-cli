@@ -1,6 +1,6 @@
 ### Version 8.2.1 is now available!
 
-- Added HTTPS support
+- Added basic HTTPS support
 - Revised user management logic
 - To avoid concurrency issues while refreshing master nodes, the `decommission` and `recommission` actions for both hosts and roles have been revised to use a list of items instead of a single item sequentially
 
