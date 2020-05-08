@@ -338,101 +338,101 @@ Here are some common use cases:
 
 * Show all managed hosts:
 
-    `$ cmcli.pl -hInfo`
+ 	`$ cmcli.pl -hInfo`
 
 * Show hosts not associated with any cluster:
 
-    `$ cmcli.pl -hInfo -c='No cluster'`
+ 	`$ cmcli.pl -hInfo -c='No cluster'`
 
 * Show hosts with no roles:
 
-    `$ cmcli.pl -hInfo -s='No roles'`
+ 	`$ cmcli.pl -hInfo -s='No roles'`
 
 * Show hosts assigned to the /default rack:
 
-    `$ cmcli.pl -hInfo=/default`
+ 	`$ cmcli.pl -hInfo=/default`
 
 * Assign them to rack /rack1:
 
-    `$ cmcli.pl -hInfo=/default -setRackId=/rack1`
+ 	`$ cmcli.pl -hInfo=/default -setRackId=/rack1`
 
 * Show information about a given host:
 
-    `$ cmcli.pl -hInfo=host_name`
+ 	`$ cmcli.pl -hInfo=host_name`
 
 * Show role information:
 
-    `$ cmcli.pl -hInfo=host_name -hRoles`
+ 	`$ cmcli.pl -hInfo=host_name -hRoles`
 
 * Show hosts associated with a given cluster:
 
-    `$ cmcli.pl -hInfo -c=cluster_name`
+ 	`$ cmcli.pl -hInfo -c=cluster_name`
 
 * Decommission hosts in bad health:
 
-    `$ cmcli.pl -c=cluster_name -hFilter=bad -hAction=decommission`
+ 	`$ cmcli.pl -c=cluster_name -hFilter=bad -hAction=decommission`
 
 * Show clusters and services:
 
-    `$ cmcli.pl`
+ 	`$ cmcli.pl`
 
-    `$ cmcli.pl -cm=<cm_server_host>`
+ 	`$ cmcli.pl -cm=<cm_server_host>`
 
 * Show the Cloudera Management Service instances:
 
-    `$ cmcli.pl -mgmt -rInfo`
+ 	`$ cmcli.pl -mgmt -rInfo`
 
-    *or*
+	*or*
 
-    `$ cmcli.pl -s=mgmt -rInfo`
+ 	`$ cmcli.pl -s=mgmt -rInfo`
 
 * Show the roles of the HDFS service of 'cluster2':
 
-    `$ cmcli.pl -c=cluster2 -s=hdfs -rInfo`
+ 	`$ cmcli.pl -c=cluster2 -s=hdfs -rInfo`
 
     *To replace the host id (UUID) in the output with the host name, simply add `-hInfo`.*
 
 * Show the DataNode instances:
 
-    `$ cmcli.pl -c=cluster2 -s=hdfs -r=datanode`
+ 	`$ cmcli.pl -c=cluster2 -s=hdfs -r=datanode`
 
 * Show the stopped DataNodes:
 
-    `$ cmcli.pl -c=cluster2 -s=hdfs -r=datanode -rFilter=stopped`
+ 	`$ cmcli.pl -c=cluster2 -s=hdfs -r=datanode -rFilter=stopped`
 
 * Start the stopped DataNodes:
 
-    `$ cmcli.pl -c=cluster2 -s=hdfs -r=datanode -rFilter=stopped -a=start`
+ 	`$ cmcli.pl -c=cluster2 -s=hdfs -r=datanode -rFilter=stopped -a=start`
 
     *To execute the action, use `-confirmed`. To check the command execution status, add `-trackCmd`. To do both, just use the `-run` shortcut instead.*
 
 * Deploy the YARN client configuration at the service level:
 
-    `$ cmcli.pl -c=cluster2 -s=yarn -a=deployClientConfig`
+ 	`$ cmcli.pl -c=cluster2 -s=yarn -a=deployClientConfig`
 
 * Restart all the Flume services:
 
-    `$ cmcli.pl -c=cluster2 -s=flume -a=restart`
+ 	`$ cmcli.pl -c=cluster2 -s=flume -a=restart`
 
 * Restart the 'flume' service only:
 
-    `$ cmcli.pl -c=cluster2 -s='flume$' -a=restart` --> using regex
+ 	`$ cmcli.pl -c=cluster2 -s='flume$' -a=restart` --> using regex
 
 * Restart the 'hive2' and 'oozie1' services:
 
-    `$ cmcli.pl -c=cluster2 -s='hive2|oozie1' -a=restart` --> using regex
+ 	`$ cmcli.pl -c=cluster2 -s='hive2|oozie1' -a=restart` --> using regex
 
 * Start all the roles on a given host:
 
-    `$ cmcli.pl -hInfo=host_name -hAction=startRoles`
+ 	`$ cmcli.pl -hInfo=host_name -hAction=startRoles`
 
-    *or*
+	*or*
 
-    `$ cmcli.pl -hInfo=host_name -a=start`
+ 	`$ cmcli.pl -hInfo=host_name -a=start`
 
 * Decommission the NodeManager instance on a given host:
 
-    `$ cmcli.pl -hInfo=host_name -r=nodemanager -a=decommission`
+ 	`$ cmcli.pl -hInfo=host_name -r=nodemanager -a=decommission`
 
 * Restart the DataNode instance on a given host:
 
@@ -440,7 +440,7 @@ Here are some common use cases:
 	
 * Restart the agent of the 'flume2' service on a given host:
 
-    `$ cmcli.pl -hInfo=host_name -s=flume2 -a=restart`
+ 	`$ cmcli.pl -hInfo=host_name -s=flume2 -a=restart`
 
 * Create multiple CM users:
 
@@ -555,47 +555,47 @@ user5
 
 * Roll restart all the roles on the selected hosts:
 
-    `cmcli.pl -hInfo=<perl_regex> -a=rollingRestart`
+ 	`cmcli.pl -hInfo=<perl_regex> -a=rollingRestart`
 
 * Roll restart the HBase roles on the selected hosts:
 
-    `cmcli.pl -hInfo=<perl_regex> -a=rollingRestart -s=hbase`
+ 	`cmcli.pl -hInfo=<perl_regex> -a=rollingRestart -s=hbase`
 
 * Roll restart the NodeManager roles of the YARN service of 'cluster2' with extra options:
 
-    `cmcli.pl -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
+ 	`cmcli.pl -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
     
-    *`-restartRoleTypes` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=<...> -a=roleTypes`.*
+	*`-restartRoleTypes` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=<...> -a=roleTypes`.*
     
 * Roll restart the ResourceManager roles:
 
-    `cmcli.pl -c=cluster2 -s=yarn -a=rollingRestart -restartRoleTypes=resourcemanager`
+ 	`cmcli.pl -c=cluster2 -s=yarn -a=rollingRestart -restartRoleTypes=resourcemanager`
 
 * Roll restart YARN roles with stale configs only:
 
-    `cmcli.pl -c=cluster2 -s=yarn -a=rollingRestart -staleConfigsOnly=true`
+ 	`cmcli.pl -c=cluster2 -s=yarn -a=rollingRestart -staleConfigsOnly=true`
 
-    *or*
+	*or*
 
-    `cmcli.pl -c=cluster2 -s=yarn -rFilter=stale -a=rollingRestart`
+ 	`cmcli.pl -c=cluster2 -s=yarn -rFilter=stale -a=rollingRestart`
 
 * Roll restart NameNode and JournalNode roles:
 
-    `cmcli.pl -c=cluster2 -s=hdfs -a=rollingRestart -restartRoleTypes=namenode,journalnode`
+ 	`cmcli.pl -c=cluster2 -s=hdfs -a=rollingRestart -restartRoleTypes=namenode,journalnode`
 
-    *or*
+	*or*
 
-    `cmcli.pl -c=cluster2 -s=hdfs —r='name|journal' -a=rollingRestart`
+ 	`cmcli.pl -c=cluster2 -s=hdfs —r='name|journal' -a=rollingRestart`
 
 * Roll restart all ZooKeeper and Flume services:
 
-    `cmcli.pl -c=cluster2 -s='zoo|flume' -a=rollingRestart`
+ 	`cmcli.pl -c=cluster2 -s='zoo|flume' -a=rollingRestart`
 
 * Multi-action command: Add hosts to cluster 'cluster2', set rack Id, create HIVESERVER2 and GATEWAY roles (service 'hive1') and enable maintenance mode on the hosts:
 
-    `cmcli.pl -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster2 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
+ 	`cmcli.pl -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster2 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
 
-    *`-addRole` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=<...> -a=roleTypes`.*
+	*`-addRole` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=<...> -a=roleTypes`.*
 
 * Delete all the roles from a host:
 
@@ -611,33 +611,33 @@ user5
 
 * Display the configuration of the 'flume1' service:
 
-    `cmcli.pl -c=cluster2 -s=flume1 -a=getConfig`
+ 	`cmcli.pl -c=cluster2 -s=flume1 -a=getConfig`
 
 * Download the client configuration of all the Hive services:
 
-    `cmcli.pl -c=cluster2 -s=hive -a=getConfig -clientConfig`
+ 	`cmcli.pl -c=cluster2 -s=hive -a=getConfig -clientConfig`
 
 * Display the role config groups of the HDFS service:
 
-    `cmcli.pl -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroup`
+ 	`cmcli.pl -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroup`
 
 * Display the full-view configuration of the default role config group:
 
-    `cmcli.pl -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroup=hdfs1-DATANODE-BASE -full`
+ 	`cmcli.pl -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroup=hdfs1-DATANODE-BASE -full`
     
-    *In addition to `name` and `value`, the full view output includes the `validateState`, `validateMessage` and `displayName` properties (see [apiConfig](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiConfig.html))*
+	*In addition to `name` and `value`, the full view output includes the `validateState`, `validateMessage` and `displayName` properties (see [apiConfig](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiConfig.html))*
 
 * Update the 'dfs_data_dir_list' property:
 
-    `cmcli.pl -c=cluster2 -s=hdfs -a=updateConfig -roleConfigGroup=hdfs1-DATANODE-BASE -propertyName=dfs_data_dir_list -propertyValue=new_value`
+ 	`cmcli.pl -c=cluster2 -s=hdfs -a=updateConfig -roleConfigGroup=hdfs1-DATANODE-BASE -propertyName=dfs_data_dir_list -propertyValue=new_value`
 
 * Override the 'dfs_data_dir_list' property on a given host:
 
-    `cmcli.pl -hInfo=host_name -r=datanode -a=updateConfig -propertyName=dfs_data_dir_list -propertyValue=new_value`
+ 	`cmcli.pl -hInfo=host_name -r=datanode -a=updateConfig -propertyName=dfs_data_dir_list -propertyValue=new_value`
 
 * Reset the 'dfs_data_dir_list' property on a given host to the config group value:
 
-    `cmcli.pl -hInfo=host_name -r=datanode -a=updateConfig -propertyName=dfs_data_dir_list`
+ 	`cmcli.pl -hInfo=host_name -r=datanode -a=updateConfig -propertyName=dfs_data_dir_list`
 
 * Move the DataNode role on a given host to a different config group:
 
