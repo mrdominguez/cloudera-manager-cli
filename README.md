@@ -374,6 +374,8 @@ Here are some common use cases:
 
 * Show clusters and services:
 
+    `$ cmcli.pl`
+
     `$ cmcli.pl -cm=cm_server`
 
 * Show the Cloudera Management Service instances:
