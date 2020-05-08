@@ -38,12 +38,11 @@ if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 8.2.1\n";
-	print "Release date: 04/28/2020\n";
+	print "Release date: 05/08/2020\n";
 	exit;
 }
 
 &usage if $help;
-die "-cm is not set. Use -help for options\n" unless $cm;
 
 my %opts = ('cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'userAction'=>$userAction,
 	'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction,
@@ -170,9 +169,9 @@ my $headers = { 'Content-Type' => 'application/json', 'Authorization' => 'Basic 
 my $body_content;
 
 my $cm_protocol = $https ? 'https' : 'http';
-my ($cm_host, $cm_port) = split(/:/, $cm, 2) if $cm ne '1';
-$cm_host = 'localhost' if !defined $cm_host;
-if ( !defined $cm_port ) {
+my ($cm_host, $cm_port) = split(/:/, $cm, 2) if ( $cm and $cm ne '1' );
+$cm_host = 'localhost' unless $cm_host;
+unless ( $cm_port ) {
 	$cm_port = $https ? 7183 : 7180
 }
 print "CM protocol = $cm_protocol\nCM host = $cm_host\nCM port = $cm_port\n" if $d;
@@ -805,6 +804,7 @@ unless ( @clusters ) {
 		print "Fetching clusters...\n" if $d;
 		$cm_url = "$cm_api/clusters";
 		my $cm_clusters = &rest_call('GET', $cm_url, 1);
+		print "No cluster found\n" and exit unless @{$cm_clusters->{'items'}};
 		for ( my $i=0; $i < @{$cm_clusters->{'items'}}; $i++ ) {
 			my $cluster_name = $cm_clusters->{'items'}[$i]->{'name'};
 			print "Found cluster '$cluster_name'\n" if $d;
@@ -1362,7 +1362,7 @@ foreach my $cluster_name ( @clusters ) {
 &track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 
 sub usage {
-	print "\nUsage: $0 [-help] [-version] [-d] -cm[=hostname[:port]] [-https] [-api=v<integer>] [-u=cm_user] [-p=cm_password]\n";
+	print "\nUsage: $0 [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u=cm_user] [-p=cm_password]\n";
 	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry]]\n";
 	print "\t[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]\n";
 	print "\t[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
@@ -1460,7 +1460,7 @@ sub usage {
 	print "\t -sMetrics : Service metrics\n";
 	print "\t -rChecks : Role health checks\n";
 	print "\t -rMetrics : Role metrics\n";
-	print "\t -log : Display role log (type: full, stdout, stderr /plus stacks, stacksBundle for mgmt service/)\n";
+	print "\t -log : Display role log (type: full, stdout, stderr /also stacks, stacksBundle for mgmt service/)\n";
 	print "\t -yarnApps : Display YARN applications (example: -yarnApps='filter='executing=true'')\n";
 	print "\t -impalaQueries : Display Impala queries (example: -impalaQueries='filter='user=<userName>'')\n";
 	print "\t -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)\n\n";
