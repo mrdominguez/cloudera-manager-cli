@@ -376,7 +376,7 @@ Here are some common use cases:
 
     `$ cmcli.pl`
 
-    `$ cmcli.pl -cm=cm_server`
+    `$ cmcli.pl -cm=<cm_server_host>`
 
 * Show the Cloudera Management Service instances:
 
