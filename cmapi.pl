@@ -144,7 +144,7 @@ if ( $method =~ m/GET/i ) {
 } elsif ( $method =~ m/DELETE/i ) {
 	$client->DELETE($url, $headers); 
 } else {
-	die "Invalid HTTP method: $method";
+	die "Invalid method: $method";
 }
 
 my $http_rc = $client->responseCode();
@@ -177,6 +177,6 @@ sub usage {
 	print "\t       To set multiple objects, use -bt=json or -f to pass a JSON file\n";
 	print "\t -i : Add the 'items' property to the body content (on by default if -bt=array)\n";
 	print "\t -f : JSON file containing body content (implies -bt=json)\n";
-	print "\t <ResourceUrl> : URL to REST resource (example: [http://]cloudera-manager:7180/api/v15/clusters/)\n\n";
+	print "\t <ResourceUrl> : URL to REST resource (example: [http://]cloudera-manager:7180/api/v15/clusters)\n\n";
 	exit;
 }
