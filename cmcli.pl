@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Cloudera Manager Command-Line Interface
-# Version: 8.2.1
+# Version: 8.2.2
 # Use -help for options
 
 use strict;
@@ -38,7 +38,7 @@ if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 8.2.1\n";
-	print "Release date: 05/08/2020\n";
+	print "Release date: 05/09/2020\n";
 	exit;
 }
 
@@ -1475,13 +1475,13 @@ sub rest_call {
 	# 2 -> write output to file
 
 	if ( $d ) {
-		my $rest_debug_output = "<--\n";
+		my $rest_debug_output = "---\n";
 		$rest_debug_output .= " method = $method\n" if defined $method;
 		$rest_debug_output .= " url = $url\n" if defined $url;
 		$rest_debug_output .= " ret = $ret\n" if defined $ret;
 		$rest_debug_output .= " fn = $fn\n" if defined $fn;
 		$rest_debug_output .= " bc = $bc\n" if defined $bc;
-		$rest_debug_output .= "-->\n";
+		$rest_debug_output .= "---\n";
 		print $rest_debug_output;
 	}
 
@@ -1494,7 +1494,7 @@ sub rest_call {
 	} elsif ( $method =~ m/DELETE/i ) {
 		$client->DELETE($url, $headers); 
 	} else {
-		die "Invalid HTTP method: $method";
+		die "Invalid method: $method";
 	}
 
 	my $http_rc = $client->responseCode();
@@ -1505,8 +1505,15 @@ sub rest_call {
 		print $fh $content;
 		close $fh;
 	} else { 
+		if ( $d ) {
+			foreach ( $client->responseHeaders() ) {
+				print 'Header: ' . $_ . '=' . $client->responseHeader($_) . "\n";
+			}
+			print "Response code: $http_rc\n";
+			print "Response content:\n";
+		}
 		print "$content\n" if ( not $ret or $http_rc !~ /2\d\d/ or $d );
-		die "HTTP status code: $http_rc\n" if $http_rc !~ /2\d\d/;
+		die "The request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d/;
 		if ( $ret ) {
 			$content = from_json($content) if ( $content && $url !~ /api\/version/ );
 #			print Dumper($content);
