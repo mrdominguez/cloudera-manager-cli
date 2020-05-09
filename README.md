@@ -1,7 +1,7 @@
 ### Version 8.2.2 is now available!
 
 - Added basic HTTPS support
-- Added HTTP response headers (debug mode)
+- Added HTTP response code and headers (debug mode)
 - Revised user management logic
 - To avoid concurrency issues while refreshing master nodes, the `decommission` and `recommission` actions for both hosts and roles have been revised to use a list of items instead of a single item sequentially
 
