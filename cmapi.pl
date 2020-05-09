@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Cloudera Manager REST API client
-# Version: 8.2.1
+# Version: 8.2.2
 # Use -help for options
 
 use strict;
@@ -30,7 +30,7 @@ if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 8.2.1\n";
-	print "Release date: 04/28/2020\n";
+	print "Release date: 05/09/2020\n";
 	exit;
 }
 
@@ -149,8 +149,16 @@ if ( $method =~ m/GET/i ) {
 
 my $http_rc = $client->responseCode();
 my $content = $client->responseContent();
+
+if ( $d ) {
+	foreach ( $client->responseHeaders() ) {
+		print 'Header: ' . $_ . '=' . $client->responseHeader($_) . "\n";
+	}
+	print "Response code: $http_rc\n";
+	print "Response content:\n";
+}
 print "$content\n";
-print "HTTP status code: $http_rc\n" if $http_rc !~ /2\d\d/;
+print "The request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d/;
 
 sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] [-u=username] [-p=password]\n";
