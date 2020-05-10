@@ -61,10 +61,10 @@ foreach ( keys %opts ) {
 	die "-$_ is not set\n" if ( defined $opts{$_} && ( $opts{$_} eq '1' || $opts{$_} =~ /^\s*$/ ) ) }
 unless ( $hInfo ) {
 	foreach ( keys %hInfo_opts ) {
-		die "-$_ requires -hInfo to be set\n" if defined $hInfo_opts{$_} } }
+		die "-$_ requires -hInfo\n" if defined $hInfo_opts{$_} } }
 unless ( $s || $hInfo ) {
 	foreach ( keys %rr_opts ) {
-		die "-$_ requires -s or -hInfo to be set\n" if defined $rr_opts{$_} } }
+		die "-$_ requires -s or -hInfo\n" if defined $rr_opts{$_} } }
 
 if ( $userAction ) {
 	die "User action '$userAction' not supported. Use -help for options\n" if $userAction !~ /show|add|update|delete/;
@@ -73,19 +73,19 @@ if ( $userAction ) {
 	die "Set -userPassword and/or -userRole\n" if ( $userAction eq 'update' && !$userPassword && !$userRole );
 } else {
 	foreach ( keys %user_opts ) {
-		die "-$_ requires -userAction to be set\n" if defined $user_opts{$_} }
+		die "-$_ requires -userAction\n" if defined $user_opts{$_} }
 }
 
 if ( $cmdAction ) {
-	die "-cmdAction requires -cmdId to be set\n" if !$cmdId;
+	die "-cmdAction requires -cmdId\n" if !$cmdId;
 	die "Command action '$cmdAction' not supported. Use -help for options\n" if $cmdAction !~ /abort|retry/;
 }
 
 if ( $hAction && $hAction !~ /decommission|recommission|startRoles|enterMaintenanceMode|exitMaintenanceMode/ ) {
 	die "Host action '$hAction' not supported. Use -help for options\n" }
 if ( $trackCmd && !$a && !$cmdId && !$hAction ) {
-	die "-trackCmd requires -a, -cmdId or -hAction to be set\n" }
-die "-sChecks and -sMetrics require -s to be set\n" if ( ( $sChecks || $sMetrics ) && !$s );
+	die "-trackCmd requires -a, -cmdId or -hAction\n" }
+die "-sChecks and -sMetrics require -s\n" if ( ( $sChecks || $sMetrics ) && !$s );
 die "Set -maintenanceMode to YES/NO\n" if ( $maintenanceMode && $maintenanceMode !~ /1|YES|NO/ );
 if ( $a ) {
 	if ( $a =~ /createRoleGroup|updateRoleGroup|deleteRoleGroup/ ) {
@@ -203,7 +203,7 @@ die "-yarnApps is only available since API v6\n" if ( $api_version < 6 && $yarnA
 die "-impalaQueries is only available since API v4\n" if ( $api_version < 4 && $impalaQueries );
 
 if ( $addRole ) {
-	die "-addRole requires -serviceName to be set\n" unless $serviceName;
+	die "-addRole requires -serviceName\n" unless $serviceName;
 	die "Set -clusterName for API v10 or lower, or set -addToCluster if the host is not associated with any cluster yet\n" if ( $api_version < 11 && !$clusterName && !$addToCluster );
 	$addRole =~ s/\s+//g;
 	$addRole = uc $addRole;
@@ -319,7 +319,7 @@ if ( $cmdId ) {
 			$cm_url .= "/$cmdAction";
 			$cmd = &rest_call('POST', $cm_url, 1);
 		} else {
-			print "# Use -confirmed or -run to execute the '$cmdAction' command action\n";
+			print "# Use -confirmed or -run to execute command action '$cmdAction'\n";
 			exit;
 		}
 	} else {
@@ -591,7 +591,7 @@ if ( defined $hInfo ) {
 		last;
 	}
 	if ( $hAction && !$deleteHost ) {
-		print "# Use -confirmed or -run to execute the '$hAction' host action\n" if !$confirmed;
+		print "# Use -confirmed or -run to execute host action '$hAction'\n" if !$confirmed;
 		&track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 	}
 	foreach ( keys %hInfo_opts ) {
@@ -669,7 +669,7 @@ if ( $s && $s =~ /mgmt/ ) {
 				$trackCmd ? $cmd_list->{$id} = $cmd : &cmd_id(\%{$cmd});
 			}
 		} else {
-			print "# Use -confirmed or -run to execute the '$mgmt_action' mgmt action\n";
+			print "# Use -confirmed or -run to execute mgmt action '$mgmt_action'\n";
 		}
 	}
 
@@ -768,7 +768,7 @@ if ( $s && $s =~ /mgmt/ ) {
 				}
 			}
 		}
-		print "# Use -confirmed or -run to execute the '$a' mgmt role action\n" if ( $a && !$confirmed && !$list_active_commands );
+		print "# Use -confirmed or -run to execute mgmt role action '$a'\n" if ( $a && !$confirmed && !$list_active_commands );
 		&display_role_summary($mgmt_role_summary, undef, undef, $mgmt_name);
 	}
 
@@ -791,7 +791,7 @@ if ( $a && $a eq 'addCluster' ) {
 		print "(CDH $cluster_full_version) " if $cluster_full_version;
 		print "created\n";
 	} else {
-		print "# Use -confirmed to execute the '$a' action\n";
+		print "# Use -confirmed to execute action '$a'\n";
 	}
 	exit;
 }
@@ -896,7 +896,7 @@ foreach my $cluster_name ( @clusters ) {
 				print "Set -c to specify a different cluster\n" if ( !$confirmed && $cluster_cnt > 1 );
 				&track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 			} else {
-				print "# Use -confirmed or -run to execute the '$cluster_action' cluster action\n";
+				print "# Use -confirmed or -run to execute cluster action '$cluster_action'\n";
 				print "Set -c to specify a different cluster\n" unless ( $a =~ /(Cluster|Service)$/ || $cluster_cnt == 1 );
 			}
 			exit;
@@ -1337,7 +1337,7 @@ foreach my $cluster_name ( @clusters ) {
 					}
 				} # role instance
 			} # roles
-			print "# Use -confirmed or -run to execute the '$a' role action\n" if ( $a && !$confirmed && !$list_active_commands );
+			print "# Use -confirmed or -run to execute role action '$a'\n" if ( $a && !$confirmed && !$list_active_commands );
 			&display_role_summary($role_summary, $cluster_name, $service_name, undef);
 			if ( $a && $confirmed && $a =~ /rollingRestart|decommission|recommission/ ) {
 				print "$cluster_name | $service_name | ACTION: $a ";
@@ -1355,7 +1355,7 @@ foreach my $cluster_name ( @clusters ) {
 			}
 		} # service instance
 	} # services
-	print "# Use -confirmed or -run to execute the '$a' service action\n" if $a && $service_action_flag
+	print "# Use -confirmed or -run to execute service action '$a'\n" if $a && $service_action_flag
 									&& !defined $rInfo
 									&& !$confirmed
 									&& !$list_active_commands
