@@ -138,7 +138,7 @@ my $cm_cred_file = "$ENV{'HOME'}/.cm_rest";
 print "Credentials file $cm_cred_file " if $d;
 if ( -e $cm_cred_file ) {
 	print "found\n" if $d;
-	open my $fh, '<', $cm_cred_file || die "Can't open $cm_cred_file: $!";
+	open my $fh, '<', $cm_cred_file || die "Can't open file $cm_cred_file: $!";
 	my @cm_cred = grep /CM_REST_/, <$fh>;
 	foreach ( @cm_cred ) {
 		# colon-separated key/value pair
@@ -234,8 +234,7 @@ if ( $userAction ) {
 				print "Loading file $f...\n";
 				$body_content = do {
 					local $/ = undef;
-					open my $fh, "<", $f
-						|| die "Could not open file $f: $!\n";
+					open my $fh, "<", $f || die "Can't open file $f: $!\n";
 					<$fh>;
 				};
 			} elsif ( $userName ) {
@@ -1506,7 +1505,7 @@ sub rest_call {
 	my $content = $client->responseContent();
 
 	if ( $ret == 2 ) {
-		open(my $fh, '>', $fn) or die "Could not open file $fn: $!";
+		open(my $fh, '>', $fn) || die "Can't open file $fn: $!";
 		print $fh $content;
 		close $fh;
 	} else { 
