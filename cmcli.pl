@@ -68,7 +68,7 @@ unless ( $s || $hInfo ) {
 
 if ( $userAction ) {
 	die "User action '$userAction' not supported. Use -help for options\n" if $userAction !~ /show|add|update|delete/;
-	die "Set -f or -userName with -userAction=$userAction\n" if ( $userAction eq 'add' && !$f && !$userName );
+	die "Set -f or -userName\n" if ( $userAction eq 'add' && !$f && !$userName );
 	die "Set -userName\n" if ( $userAction !~ /show|add/ && !$userName );
 	die "Set -userPassword and/or -userRole\n" if ( $userAction eq 'update' && !$userPassword && !$userRole );
 } else {
@@ -218,9 +218,10 @@ if ( $cmVersion ) {
 }
 
 if ( $userAction ) {
-	my $method;
+	die "Set -api=v19 (currently v$api_version) and rerun user action '$userAction'\n" if ( $api_version > 19 && $userAction =~ /add|update/ );
 	$cm_url = "$cm_api/users";
-	if ( $confirmed ) {
+	my $method;
+	if ( $userAction eq 'show' || $confirmed ) {
 		my $user_info = {};
 		$user_info->{'name'} = $userName if $userName;
 		$user_info->{'password'} = $userPassword if $userPassword;
@@ -229,7 +230,6 @@ if ( $userAction ) {
 		$body_content = to_json($user_info);
 		$cm_url .= "/$userName" unless $userAction eq 'add' || ( $userAction eq 'show' && !$userName );
 		if ( $userAction eq 'add') {
-			print "Set -api=v19 (currently v$api_version) && rerun '$userAction' user action\n" && exit if $api_version > 19;
 			if ( $f ) {
 				print "Loading file $f...\n";
 				$body_content = do {
@@ -243,7 +243,6 @@ if ( $userAction ) {
 			}
 			$method = 'POST';
 		} elsif ( $userAction eq 'update' ) {
-			print "Set -api=v19 (currently v$api_version) && rerun '$userAction' user action\n" && exit if $api_version > 19;
 			print "Updating user '$userName'...\n";
 			$method = 'PUT';
 		} elsif ( $userAction eq 'delete' ) {
@@ -287,8 +286,8 @@ if ( $userAction ) {
 		}
 		$userAction eq 'delete' ? &rest_call($method, $cm_url, 0) : &rest_call($method, $cm_url, 0, undef, $body_content);
 	} else {
-		print "# Use -confirmed to execute the '$userAction' user action";
-		print " for user '$userName'" if $userName;
+		print "# Use -confirmed to execute user action '$userAction'";
+		print " : '$userName'" if $userName;
 		print "\n";
 	}
 	exit;
@@ -804,7 +803,7 @@ unless ( @clusters ) {
 		print "Fetching clusters...\n" if $d;
 		$cm_url = "$cm_api/clusters";
 		my $cm_clusters = &rest_call('GET', $cm_url, 1);
-		print "No clusters found\n" && exit unless @{$cm_clusters->{'items'}};
+		die "No clusters found\n" unless @{$cm_clusters->{'items'}};
 		for ( my $i=0; $i < @{$cm_clusters->{'items'}}; $i++ ) {
 			my $cluster_name = $cm_clusters->{'items'}[$i]->{'name'};
 			print "Found cluster '$cluster_name'\n" if $d;
