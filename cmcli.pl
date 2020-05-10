@@ -36,8 +36,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 8.2.2\n";
-	print "Release date: 05/09/2020\n";
+	print "Version: 8.2.3\n";
+	print "Release date: 05/10/2020\n";
 	exit;
 }
 
@@ -359,11 +359,12 @@ if ( defined $hInfo ) {
 	my $hosts = &rest_call('GET', $cm_url, 1);
 	my @services;
 	my $host_summary;
+	my $host_name;
 	my $hostName_list = {};
 	for ( my $i=0; $i < @{$hosts->{'items'}}; $i++ ) {
 		$hInfo_match = 0 if $hRoles;
 		my $host_id = $hosts->{'items'}[$i]->{'hostId'};
-		my $host_name = $hosts->{'items'}[$i]->{'hostname'};
+		$host_name = $hosts->{'items'}[$i]->{'hostname'};
 		my $ip = $hosts->{'items'}[$i]->{'ipAddress'};
 		my $rack_id = $hosts->{'items'}[$i]->{'rackId'};
 		my $host_health = $hosts->{'items'}[$i]->{'healthSummary'};
@@ -591,7 +592,7 @@ if ( defined $hInfo ) {
 		last;
 	}
 	if ( $hAction && !$deleteHost ) {
-		print "# Use -confirmed or -run to execute host action '$hAction'\n" if !$confirmed;
+		print "# Use -confirmed or -run to execute host action '$hAction' : '$host_name'\n" if !$confirmed;
 		&track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 	}
 	foreach ( keys %hInfo_opts ) {
@@ -745,7 +746,7 @@ if ( $s && $s =~ /mgmt/ ) {
 							} else { &cmd_id(\%{$cmd}) }
 						}
 					} else {
-						print "|__ No active mgmt role commands found\n";
+						print "|___ No active mgmt role commands found\n";
 					}
 				} elsif ( $a eq 'deleteRole' ) {
 					my $role = &rest_call('DELETE', $cm_url, 1);
@@ -896,7 +897,7 @@ foreach my $cluster_name ( @clusters ) {
 				print "Set -c to specify a different cluster\n" if ( !$confirmed && $cluster_cnt > 1 );
 				&track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 			} else {
-				print "# Use -confirmed or -run to execute cluster action '$cluster_action'\n";
+				print "# Use -confirmed or -run to execute cluster action '$cluster_action' : '$cluster_name'\n";
 				print "Set -c to specify a different cluster\n" unless ( $a =~ /(Cluster|Service)$/ || $cluster_cnt == 1 );
 			}
 			exit;
@@ -906,6 +907,7 @@ foreach my $cluster_name ( @clusters ) {
 	$cm_url = "$cm_api/clusters/$cluster_name/services";
 	my $cm_services = &rest_call('GET', $cm_url, 1);
 	my $service_action_flag = 0;
+	my $role_action_flag = 0;
 	# services
 	for ( my $i=0; $i < @{$cm_services->{'items'}}; $i++ ) {
 		my $service_name = $cm_services->{'items'}[$i]->{'name'};
@@ -1052,7 +1054,7 @@ foreach my $cluster_name ( @clusters ) {
 							} else { &cmd_id(\%{$cmd}) }
 						}
 					} else {
-						print "|__ No active service commands found\n";
+						print "|___ No active service commands found\n";
 					}
 				} elsif ( $a eq 'createRoleGroup' ) {
 					$roleType = uc $roleType;
@@ -1202,7 +1204,7 @@ foreach my $cluster_name ( @clusters ) {
 						++$role_summary->{$role_type}->{'role_config'}->{$role_config} if ( $api_version > 5 && $role_config ne 'FRESH' );
 						++$role_summary->{$role_type}->{'role_commission_state'}->{$role_commission_state} if ( $api_version > 1 && $role_commission_state ne 'COMMISSIONED' );
 
-						my $role_header = "|__ $service_header | $host_id | $role_type";
+						my $role_header = "|___ $service_header | $host_id | $role_type";
 						print "$role_header | ";
 						print "$role_config_group | " if ( $roleConfigGroup && $api_version > 2 );
 						if ( $api_version > 1 ) {
@@ -1212,6 +1214,8 @@ foreach my $cluster_name ( @clusters ) {
 						print "$role_name --- $role_state $role_health ";
 						print $role_config if $api_version > 5;
 						print "\n";
+
+						$role_action_flag = 1 if $a;
 
 						if ( $rChecks ) {
 							for ( my $j=0; $j < @{$cm_roles->{'items'}[$i]->{'healthChecks'}}; $j++ ) {
@@ -1269,7 +1273,7 @@ foreach my $cluster_name ( @clusters ) {
 
 						if ( $a && ( $list_active_commands || $confirmed ) ) {
 							my $role_action = $list_active_commands ? 'list active role commands' : $a;
-							print "|__ $service_header | $host_id | $role_name | ACTION: $role_action " unless $a =~ /rollingRestart|decommission|recommission/;
+							print "|___ $service_header | $host_id | $role_name | ACTION: $role_action " unless $a =~ /rollingRestart|decommission|recommission/;
 							$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name";
 							my ($cmd, $id);
 							my $single_cmd = 1;
@@ -1286,7 +1290,7 @@ foreach my $cluster_name ( @clusters ) {
 										} else { &cmd_id(\%{$cmd}) }
 									}
 								} else {
-									print "|___ No active role commands found\n";
+									print "|_____ No active role commands found\n";
 								}
 								next;
 							} elsif ( $a eq 'rollingRestart' ) {
@@ -1337,7 +1341,6 @@ foreach my $cluster_name ( @clusters ) {
 					}
 				} # role instance
 			} # roles
-			print "# Use -confirmed or -run to execute role action '$a'\n" if ( $a && !$confirmed && !$list_active_commands );
 			&display_role_summary($role_summary, $cluster_name, $service_name, undef);
 			if ( $a && $confirmed && $a =~ /rollingRestart|decommission|recommission/ ) {
 				print "$cluster_name | $service_name | ACTION: $a ";
@@ -1355,11 +1358,10 @@ foreach my $cluster_name ( @clusters ) {
 			}
 		} # service instance
 	} # services
-	print "# Use -confirmed or -run to execute service action '$a'\n" if $a && $service_action_flag
-									&& !defined $rInfo
-									&& !$confirmed
-									&& !$list_active_commands
-									&& $a ne 'roleTypes';
+	if ( $a && !$confirmed && !$list_active_commands ) {
+		print "# Use -confirmed or -run to execute role action '$a'\n" if $role_action_flag;
+		print "# Use -confirmed or -run to execute service action '$a'\n" if ( $service_action_flag && !defined $rInfo && $a ne 'roleTypes' );
+	}
 } # clusters
 
 &track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
