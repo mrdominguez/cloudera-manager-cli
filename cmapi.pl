@@ -40,7 +40,7 @@ my $cm_cred_file = "$ENV{'HOME'}/.cm_rest";
 print "Credentials file $cm_cred_file " if $d;
 if ( -e $cm_cred_file ) {
 	print "found\n" if $d;
-	open my $fh, '<', $cm_cred_file || die "Can't open $cm_cred_file: $!";
+	open my $fh, '<', $cm_cred_file || die "Can't open file $cm_cred_file: $!";
 	my @cm_cred = grep /CM_REST_/, <$fh>;
 	foreach ( @cm_cred ) {
 		# colon-separated key/value pair
