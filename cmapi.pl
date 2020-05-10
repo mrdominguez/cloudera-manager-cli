@@ -87,8 +87,7 @@ if ( $f ) {
 	$body_type = 'json';
 	$body_content = do {
 	local $/ = undef;
-	open my $fh, "<", $file
-		or die "Could not open file $file: $!";
+	open my $fh, "<", $file || die "Can't open file $file: $!";
 	<$fh>;
 	}
 }
