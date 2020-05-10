@@ -37,9 +37,10 @@ if ( $version ) {
 die "Argument <ResourceUrl> is missing\nUse -help for options\n" if @ARGV == 0;
 
 my $cm_cred_file = "$ENV{'HOME'}/.cm_rest";
+print "Credentials file $cm_cred_file " if $d;
 if ( -e $cm_cred_file ) {
-	print "Credentials file $cm_cred_file found\n" if $d;
-	open my $fh, '<', $cm_cred_file or die "Can't open $cm_cred_file: $!";
+	print "found\n" if $d;
+	open my $fh, '<', $cm_cred_file || die "Can't open $cm_cred_file: $!";
 	my @cm_cred = grep /CM_REST_/, <$fh>;
 	foreach ( @cm_cred ) {
 		# colon-separated key/value pair
@@ -51,19 +52,20 @@ if ( -e $cm_cred_file ) {
 	}
 	close $fh;
 } else {
-	print "Credentials file $cm_cred_file not found\n" if $d;
+	print "not found\n" if $d;
 }
 
 my $cm_user = $u || $ENV{'CM_REST_USER'} || 'admin';
 print "username = $cm_user\n" if $d;
 
 my $cm_password = $p || $ENV{'CM_REST_PASS'} || 'admin';
+print "Password file $cm_password " if $d;
 if ( -e $cm_password ) {
-	print "Password file $cm_password found\n" if $d;
-	$cm_password = qx/cat $cm_password/ or die;
+	print "found\n" if $d;
+	$cm_password = qx/cat $cm_password/ || die "Can't get password from file $cm_password\n";
 	chomp($cm_password);
 } else {
-	print "Password file not found\n" if $d;
+	print "not found\n" if $d;
 }
 
 my $headers = { 'Content-Type' => 'application/json', 'Authorization' => 'Basic ' . encode_base64($cm_user . ':' . $cm_password) };
