@@ -15,7 +15,6 @@
 # limitations under the License.
 
 # Cloudera Manager Command-Line Interface
-# Version: 8.2.2
 # Use -help for options
 
 use strict;
@@ -37,7 +36,7 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 8.2.1\n";
+	print "Version: 8.2.2\n";
 	print "Release date: 05/09/2020\n";
 	exit;
 }
@@ -63,55 +62,55 @@ foreach ( keys %opts ) {
 unless ( $hInfo ) {
 	foreach ( keys %hInfo_opts ) {
 		die "-$_ requires -hInfo to be set\n" if defined $hInfo_opts{$_} } }
-unless ( $s or $hInfo ) {
+unless ( $s || $hInfo ) {
 	foreach ( keys %rr_opts ) {
 		die "-$_ requires -s or -hInfo to be set\n" if defined $rr_opts{$_} } }
 
 if ( $userAction ) {
 	die "User action '$userAction' not supported. Use -help for options\n" if $userAction !~ /show|add|update|delete/;
-	die "Set -f or -userName with -userAction=$userAction\n" if ( $userAction eq 'add' and not $f and not $userName );
-	die "Set -userName\n" if ( $userAction !~ /show|add/ and not $userName );
-	die "Set -userPassword and/or -userRole\n" if ( $userAction eq 'update' and not $userPassword and not $userRole );
+	die "Set -f or -userName with -userAction=$userAction\n" if ( $userAction eq 'add' && !$f && !$userName );
+	die "Set -userName\n" if ( $userAction !~ /show|add/ && !$userName );
+	die "Set -userPassword and/or -userRole\n" if ( $userAction eq 'update' && !$userPassword && !$userRole );
 } else {
 	foreach ( keys %user_opts ) {
 		die "-$_ requires -userAction to be set\n" if defined $user_opts{$_} }
 }
 
 if ( $cmdAction ) {
-	die "-cmdAction requires -cmdId to be set\n" if not $cmdId;
+	die "-cmdAction requires -cmdId to be set\n" if !$cmdId;
 	die "Command action '$cmdAction' not supported. Use -help for options\n" if $cmdAction !~ /abort|retry/;
 }
 
 if ( $hAction && $hAction !~ /decommission|recommission|startRoles|enterMaintenanceMode|exitMaintenanceMode/ ) {
 	die "Host action '$hAction' not supported. Use -help for options\n" }
-if ( $trackCmd and not $a and not $cmdId and not $hAction ) {
+if ( $trackCmd && !$a && !$cmdId && !$hAction ) {
 	die "-trackCmd requires -a, -cmdId or -hAction to be set\n" }
-die "-sChecks and -sMetrics require -s to be set\n" if ( ( $sChecks or $sMetrics ) and not $s );
-die "Set -maintenanceMode to YES/NO\n" if ( $maintenanceMode and $maintenanceMode !~ /1|YES|NO/ );
+die "-sChecks and -sMetrics require -s to be set\n" if ( ( $sChecks || $sMetrics ) && !$s );
+die "Set -maintenanceMode to YES/NO\n" if ( $maintenanceMode && $maintenanceMode !~ /1|YES|NO/ );
 if ( $a ) {
 	if ( $a =~ /createRoleGroup|updateRoleGroup|deleteRoleGroup/ ) {
 		foreach ( sort keys %role_group_opts ) {
-			next if ( $a eq 'createRoleGroup' and $_ =~ /roleConfigGroup|copyFromRoleGroup/ );
+			next if ( $a eq 'createRoleGroup' && $_ =~ /roleConfigGroup|copyFromRoleGroup/ );
 			if ( $a eq 'updateRoleGroup' ) {
-				die "Set -displayName and/or -copyFromRoleGroup\n" unless ( $displayName or $copyFromRoleGroup );
-				next if $_ eq 'displayName' and $copyFromRoleGroup;
-				next if $_ eq 'copyFromRoleGroup' and $displayName;
+				die "Set -displayName and/or -copyFromRoleGroup\n" unless ( $displayName || $copyFromRoleGroup );
+				next if $_ eq 'displayName' && $copyFromRoleGroup;
+				next if $_ eq 'copyFromRoleGroup' && $displayName;
 				next if $_ eq 'roleType';
 			}
-			next if ( $a eq 'deleteRoleGroup' and $_ !~ /^(c|s|roleConfigGroup)$/ );
+			next if ( $a eq 'deleteRoleGroup' && $_ !~ /^(c|s|roleConfigGroup)$/ );
 			die "Set -$_\n" unless $role_group_opts{$_};
 		}
 	}
-	die "Set -roleConfigGroup to an existent config group\n" if ( $a eq 'moveToRoleGroup' and not $roleConfigGroup );
+	die "Set -roleConfigGroup to an existent config group\n" if ( $a eq 'moveToRoleGroup' && !$roleConfigGroup );
 	die "Set -roleConfigGroup to an existent config group\n" if ( $a eq 'updateConfig'
-									and $roleConfigGroup
-									and $roleConfigGroup eq '1' );
-	if ( $a eq 'updateConfig' and not $propertyName ) {
+									&& $roleConfigGroup
+									&& $roleConfigGroup eq '1' );
+	if ( $a eq 'updateConfig' && !$propertyName ) {
 		die "Set -propertyName to a valid property name. If -propertyValue is absent, the default value (if any) will be used\n" }
 	if ( $a =~ /addCluster|updateCluster|deleteCluster/ ) {
 		foreach ( sort keys %cluster_opts ) {
-			next if ( ( ( $a eq 'deleteCluster' ) || ( $a eq 'updateCluster' and $fullVersion ) ) and $_ eq 'displayName' );
-			next if ( ( ( $a eq 'deleteCluster' ) || ( $a eq 'updateCluster' and $displayName ) ) and $_ eq 'fullVersion' );
+			next if ( ( ( $a eq 'deleteCluster' ) || ( $a eq 'updateCluster' && $fullVersion ) ) && $_ eq 'displayName' );
+			next if ( ( ( $a eq 'deleteCluster' ) || ( $a eq 'updateCluster' && $displayName ) ) && $_ eq 'fullVersion' );
 			if ( $a eq 'addCluster' ) {
 				next if $_ eq 'c';
 			} else {
@@ -122,9 +121,9 @@ if ( $a ) {
 	}
 	if ( $a =~ /addService|updateService|deleteService/ ) {
 		foreach ( sort keys %service_opts ) {
-			next if ( $a eq 'updateService' and $_ =~ /serviceName|serviceType/ );
-			next if ( $a eq 'deleteService' and $_ !~ /^(c|s)$/ );
-			next if ( $a eq 'addService' and $_ eq 's' );
+			next if ( $a eq 'updateService' && $_ =~ /serviceName|serviceType/ );
+			next if ( $a eq 'deleteService' && $_ !~ /^(c|s)$/ );
+			next if ( $a eq 'addService' && $_ eq 's' );
 			die "Set -$_\n" unless $service_opts{$_};
 		}
 	}
@@ -132,13 +131,14 @@ if ( $a ) {
 
 ($confirmed, $trackCmd) = (1, 1) if $run;
 $s = 'mgmt' if $mgmt;
-$s = '^yarn' if ( $yarnApps and not $s );
-$s = '^impala' if ( $impalaQueries and not $s );
+$s = '^yarn' if ( $yarnApps && !$s );
+$s = '^impala' if ( $impalaQueries && !$s );
 
 my $cm_cred_file = "$ENV{'HOME'}/.cm_rest";
+print "Credentials file $cm_cred_file " if $d;
 if ( -e $cm_cred_file ) {
-	print "Credentials file $cm_cred_file found\n" if $d;
-	open my $fh, '<', $cm_cred_file or die "Can't open $cm_cred_file: $!";
+	print "found\n" if $d;
+	open my $fh, '<', $cm_cred_file || die "Can't open $cm_cred_file: $!";
 	my @cm_cred = grep /CM_REST_/, <$fh>;
 	foreach ( @cm_cred ) {
 		# colon-separated key/value pair
@@ -150,26 +150,27 @@ if ( -e $cm_cred_file ) {
 	}
 	close $fh;
 } else {
-	print "Credentials file $cm_cred_file not found\n" if $d;
+	print "not found\n" if $d;
 }
 
 my $cm_user = $u || $ENV{'CM_REST_USER'} || 'admin';
 print "username = $cm_user\n" if $d;
 
 my $cm_password = $p || $ENV{'CM_REST_PASS'} || 'admin';
+print "Password file $cm_password " if $d;
 if ( -e $cm_password ) {
-	print "Password file $cm_password found\n" if $d;
-	$cm_password = qx/cat $cm_password/ or die;
+	print "found\n" if $d;
+	$cm_password = qx/cat $cm_password/ || die "Can't get password from file $cm_password\n";
 	chomp($cm_password);
 } else {
-	print "Password file not found\n" if $d;
+	print "not found\n" if $d;
 }
 
 my $headers = { 'Content-Type' => 'application/json', 'Authorization' => 'Basic ' . encode_base64($cm_user . ':' . $cm_password) };
 my $body_content;
 
 my $cm_protocol = $https ? 'https' : 'http';
-my ($cm_host, $cm_port) = split(/:/, $cm, 2) if ( $cm and $cm ne '1' );
+my ($cm_host, $cm_port) = split(/:/, $cm, 2) if ( $cm && $cm ne '1' );
 $cm_host = 'localhost' unless $cm_host;
 unless ( $cm_port ) {
 	$cm_port = $https ? 7183 : 7180
@@ -203,7 +204,7 @@ die "-impalaQueries is only available since API v4\n" if ( $api_version < 4 && $
 
 if ( $addRole ) {
 	die "-addRole requires -serviceName to be set\n" unless $serviceName;
-	die "Set -clusterName for API v10 or lower, or set -addToCluster if the host is not associated with any cluster yet\n" if ( $api_version < 11 and not $clusterName and not $addToCluster );
+	die "Set -clusterName for API v10 or lower, or set -addToCluster if the host is not associated with any cluster yet\n" if ( $api_version < 11 && !$clusterName && !$addToCluster );
 	$addRole =~ s/\s+//g;
 	$addRole = uc $addRole;
 } 
@@ -223,18 +224,18 @@ if ( $userAction ) {
 		my $user_info = {};
 		$user_info->{'name'} = $userName if $userName;
 		$user_info->{'password'} = $userPassword if $userPassword;
-		$user_info->{'password'} = 'changeme' if ( $userAction eq 'add' and not $userPassword );
+		$user_info->{'password'} = 'changeme' if ( $userAction eq 'add' && !$userPassword );
 		push @{$user_info->{'roles'}}, uc $userRole if $userRole;
 		$body_content = to_json($user_info);
-		$cm_url .= "/$userName" unless $userAction eq 'add' or ( $userAction eq 'show' and not $userName );
+		$cm_url .= "/$userName" unless $userAction eq 'add' || ( $userAction eq 'show' && !$userName );
 		if ( $userAction eq 'add') {
-			print "Set -api=v19 (currently v$api_version) and rerun '$userAction' user action\n" and exit if $api_version > 19;
+			print "Set -api=v19 (currently v$api_version) && rerun '$userAction' user action\n" && exit if $api_version > 19;
 			if ( $f ) {
 				print "Loading file $f...\n";
 				$body_content = do {
 					local $/ = undef;
 					open my $fh, "<", $f
-						or die "Could not open file $f: $!\n";
+						|| die "Could not open file $f: $!\n";
 					<$fh>;
 				};
 			} elsif ( $userName ) {
@@ -243,7 +244,7 @@ if ( $userAction ) {
 			}
 			$method = 'POST';
 		} elsif ( $userAction eq 'update' ) {
-			print "Set -api=v19 (currently v$api_version) and rerun '$userAction' user action\n" and exit if $api_version > 19;
+			print "Set -api=v19 (currently v$api_version) && rerun '$userAction' user action\n" && exit if $api_version > 19;
 			print "Updating user '$userName'...\n";
 			$method = 'PUT';
 		} elsif ( $userAction eq 'delete' ) {
@@ -252,7 +253,7 @@ if ( $userAction ) {
 		} elsif ( $userAction eq 'show' ) {
 			$method = 'GET';
 			my $user_list = &rest_call($method, $cm_url, 1);
-			if ( not $userName ) {
+			if ( !$userName ) {
 				for ( my $i=0; $i < @{$user_list->{'items'}}; $i++ ) {
 					my $user_name = $user_list->{'items'}[$i]{'name'};
 					print "$user_name\n";
@@ -339,19 +340,19 @@ if ( $cmdId ) {
 $hInfo = '.' if ( ( defined $hInfo && $hInfo eq '1' ) || ( !defined $hInfo && $hFilter ) );
 $roleConfigGroup = '.' if ( defined $roleConfigGroup && $roleConfigGroup eq '1' );
 $propertyName = '.' if ( defined $propertyName && $propertyName eq '1' );
-my $list_active_commands = 1 if ( $a and $a eq '1' );
+my $list_active_commands = 1 if ( $a && $a eq '1' );
 my @clusters;
 my $uuid_host_map = {};
 my $role_host_map = {};
 if ( defined $hInfo ) {
-	die "-a=$a is not available for roles\n" if ( $a and $a eq 'deployClientConfig' );
+	die "-a=$a is not available for roles\n" if ( $a && $a eq 'deployClientConfig' );
 	my $role_info_flag = 1 if ( defined $rInfo || $a );
 	my $hInfo_match = 1;
 	my $hInfo_output;
 	$hRoles = 1 if ( ( $c && $api_version < 11 ) || $s || $r );
 	undef $rInfo if defined $rInfo;
 
-	if ( $hInfo eq '.' and $a and not $s and not $r ) {
+	if ( $hInfo eq '.' && $a && !$s && !$r ) {
 		print "When executing a role action, specify a value for -hInfo or set -s or -r; use a cluster/service action otherwise\n";
 		exit;
 	}
@@ -393,10 +394,10 @@ if ( defined $hInfo ) {
 				&& $host_maintenance_mode ne $maintenanceMode );
 
 		my $cluster_flag = 1;
-		if ( $role_info_flag and not $c and not $hRoles ) {
-			unless ( not defined $cluster_name
-					or grep { $_ eq $cluster_name } @clusters
-				 	or $cluster_name eq 'No cluster' ) {
+		if ( $role_info_flag && !$c && !$hRoles ) {
+			unless ( !defined $cluster_name
+					|| grep { $_ eq $cluster_name } @clusters
+				 	|| $cluster_name eq 'No cluster' ) {
 				push @clusters, $cluster_name;
 				$cluster_flag = 0;
 			}
@@ -421,9 +422,9 @@ if ( defined $hInfo ) {
 				for ( my $j=0; $j < @sorted; $j++ ) {
 					$cluster_name = $sorted[$j]->{'clusterName'};
 					$service_name = $sorted[$j]->{'serviceName'};
-					next if ( $c and not defined $cluster_name );
-					if ( $c && $cluster_name ne $c ) { next } else { $hInfo_match = 1 if ( not $s and not $r ) };
-					if ( $s && $service_name !~ /$s/i ) { next } else { $hInfo_match = 1 if not $r };
+					next if ( $c && !defined $cluster_name );
+					if ( $c && $cluster_name ne $c ) { next } else { $hInfo_match = 1 if ( !$s && !$r ) };
+					if ( $s && $service_name !~ /$s/i ) { next } else { $hInfo_match = 1 if !$r };
 					if ( $hRoles ) {
 						my $role_name = $sorted[$j]->{'roleName'};
 						if ( $r && $role_name !~ /$r/i ) { next } else { $hInfo_match = 1 };
@@ -434,11 +435,11 @@ if ( defined $hInfo ) {
 							$hInfo_output .= " | $role_name\n";
 						}
 					}
-					if ( $role_info_flag and not $s ) {
+					if ( $role_info_flag && !$s ) {
 						push @services, $service_name unless grep { $_ eq $service_name } @services;
 					}
-					if ( $role_info_flag and not $c and $cluster_flag ) {
-						unless ( not defined $cluster_name or grep { $_ eq $cluster_name } @clusters ) {
+					if ( $role_info_flag && !$c && $cluster_flag ) {
+						unless ( !defined $cluster_name || grep { $_ eq $cluster_name } @clusters ) {
 							push @clusters, $cluster_name;
 							$cluster_flag = 0;
 						}
@@ -446,7 +447,7 @@ if ( defined $hInfo ) {
 				}
 			} else {
 				$hInfo_output .= "|_ $host_name | No roles\n" if $hRoles;
-				$hInfo_match = 1 if ( $s and $s eq 'No roles' );
+				$hInfo_match = 1 if ( $s && $s eq 'No roles' );
 			}
 		}
 
@@ -493,7 +494,7 @@ if ( defined $hInfo ) {
 			}
 
 			if ( $addRole ) {
-				if ( not $clusterName and not $addToCluster ) {
+				if ( !$clusterName && !$addToCluster ) {
 					if ( $cluster_name eq 'No cluster' ) {
 						print "$host_name | hostId $host_id is not associated with any cluster\nUse -addToCluster=cluster_name along with -addRole\n";
 						next;
@@ -542,7 +543,7 @@ if ( defined $hInfo ) {
 				my @sorted = sort { $a->{'name'} cmp $b->{'name'} } @{$hosts->{'items'}[$i]->{'healthChecks'}};
 				print join("\n", map { $host_name." | ".$_->{'name'}." --- ".$_->{'summary'} } @sorted),"\n";
 			} else {
-				print "$host_name | No health data\n"
+				print "$host_name | No health data found\n"
 			}
 		}
 	}
@@ -572,7 +573,7 @@ if ( defined $hInfo ) {
 	print "\n";
 	exit unless $num_hosts;
 
-	while ( not $confirmed ) {
+	while ( !$confirmed ) {
 		if ( $removeFromCluster ) {
 			print "# Use -confirmed to remove the selected hosts from the cluster\n";
 		}
@@ -591,8 +592,8 @@ if ( defined $hInfo ) {
 		}
 		last;
 	}
-	if ( $hAction and not $deleteHost ) {
-		print "# Use -confirmed or -run to execute the '$hAction' host action\n" if not $confirmed;
+	if ( $hAction && !$deleteHost ) {
+		print "# Use -confirmed or -run to execute the '$hAction' host action\n" if !$confirmed;
 		&track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 	}
 	foreach ( keys %hInfo_opts ) {
@@ -600,13 +601,13 @@ if ( defined $hInfo ) {
 	}
 	
 	if ( $role_info_flag ) {
-		if ( @services and not $s ) {
+		if ( @services && !$s ) {
 			# match exact word -> wrap around \b
 			$s = '\b';
 			$s .= join '\b|\b', @services;
 			$s .= '\b';
 		}
-		$rInfo = ( $hInfo ne '.' or $hFilter ) ? join '|', keys %{$uuid_host_map} : 1;
+		$rInfo = ( $hInfo ne '.' || $hFilter ) ? join '|', keys %{$uuid_host_map} : 1;
 	}
 
 #	print "@clusters\n@services\n$c\n$s\n$r\n$rInfo\n";
@@ -615,7 +616,7 @@ if ( defined $hInfo ) {
 }
 
 $rInfo = '.' if ( defined $rInfo && $rInfo eq '1' ) || ( !defined $rInfo && ( $r || $rFilter ) );
-die "-a=$a is not available for roles\n" if ( $rInfo and $a and $a eq 'deployClientConfig' );
+die "-a=$a is not available for roles\n" if ( $rInfo && $a && $a eq 'deployClientConfig' );
 
 if ( $s && $s =~ /mgmt/ ) {
 	$cm_url = "$cm_api/cm/service";
@@ -634,7 +635,7 @@ if ( $s && $s =~ /mgmt/ ) {
 
 	if ( $a && !defined $rInfo ) {
 		my $mgmt_action = $list_active_commands ? 'list active mgmt service commands' : $a;
-		if ( $list_active_commands || $confirmed ) {
+		if ( $list_active_commands || $a eq 'roleTypes' || $confirmed ) {
 			print "$mgmt_name | ACTION: $mgmt_action ";
 			$cm_url = "$cm_api/cm/service";
 			my ($cmd, $id);
@@ -680,7 +681,7 @@ if ( $s && $s =~ /mgmt/ ) {
 		my $mgmt_roles = &rest_call('GET', $cm_url, 1);
 		for ( my $i=0; $i < @{$mgmt_roles->{'items'}}; $i++ ) {
 			my $host_id = $mgmt_roles->{'items'}[$i]->{'hostRef'}->{'hostId'};
-			next if ( defined $hInfo and not defined $uuid_host_map->{$host_id} );
+			next if ( defined $hInfo && !defined $uuid_host_map->{$host_id} );
 			next unless $host_id =~ qr/$rInfo/;
 			my $mgmt_role_name = $mgmt_roles->{'items'}[$i]->{'name'};
 			my $mgmt_role_type = $mgmt_roles->{'items'}[$i]->{'type'};
@@ -769,7 +770,7 @@ if ( $s && $s =~ /mgmt/ ) {
 				}
 			}
 		}
-		print "# Use -confirmed or -run to execute the '$a' mgmt role action\n" if ( $a and not $confirmed and not $list_active_commands );
+		print "# Use -confirmed or -run to execute the '$a' mgmt role action\n" if ( $a && !$confirmed && !$list_active_commands );
 		&display_role_summary($mgmt_role_summary, undef, undef, $mgmt_name);
 	}
 
@@ -780,7 +781,7 @@ if ( $s && $s =~ /mgmt/ ) {
 }
 #print "After the mgmt block...\n";
 
-if ( $a and $a eq 'addCluster' ) {
+if ( $a && $a eq 'addCluster' ) {
 	if ( $confirmed ) {
 		$cm_url = "$cm_api/clusters";
 		$body_content = "{ \"items\" : [ { \"name\" : \"$clusterName\", \"displayName\" : \"$displayName\", \"fullVersion\" : \"$fullVersion\" } ] }";
@@ -804,7 +805,7 @@ unless ( @clusters ) {
 		print "Fetching clusters...\n" if $d;
 		$cm_url = "$cm_api/clusters";
 		my $cm_clusters = &rest_call('GET', $cm_url, 1);
-		print "No cluster found\n" and exit unless @{$cm_clusters->{'items'}};
+		print "No clusters found\n" && exit unless @{$cm_clusters->{'items'}};
 		for ( my $i=0; $i < @{$cm_clusters->{'items'}}; $i++ ) {
 			my $cluster_name = $cm_clusters->{'items'}[$i]->{'name'};
 			print "Found cluster '$cluster_name'\n" if $d;
@@ -815,6 +816,9 @@ unless ( @clusters ) {
 
 # clusters
 my $service_header;
+my $cluster_cnt=scalar @clusters;
+print "Number of clusters: $cluster_cnt\n" if $d;
+
 foreach my $cluster_name ( @clusters ) {
 	if ( !$s && !defined $rInfo ) {
 		$cm_url = "$cm_api/clusters/$cluster_name";
@@ -832,73 +836,73 @@ foreach my $cluster_name ( @clusters ) {
 			print " --- $cluster_status";
 		}
 		print "\n";
-	}
-	
-	if ( $a && !$s && !defined $rInfo ) {
-		my $cluster_action = $list_active_commands ? 'list active cluster commands' : $a;
-		if ( $list_active_commands || $confirmed ) {
-			print "$cluster_name | ACTION: $cluster_action ";
-			$cm_url = "$cm_api/clusters/$cluster_name";
-			my ($cmd, $id, $cluster, $service);
-			if ( $list_active_commands ) {
-				print "\n";
-				$cm_url .= "/commands";
-				my $items = &rest_call('GET', $cm_url, 1);
-				if ( @{$items->{'items'}} ) {
-					foreach $cmd ( sort { $a->{'id'} <=> $b->{'id'} } @{$items->{'items'}} ) {
-						if ( $trackCmd ) {
-							$id = $cmd->{'id'};
-							print "CMDID: $id\n";
-							$cmd_list->{$id} = $cmd;
-						} else { &cmd_id(\%{$cmd}) }
+		if ( $a ) {
+			my $cluster_action = $list_active_commands ? 'list active cluster commands' : $a;
+			if ( $list_active_commands || $a eq 'serviceTypes' || $confirmed ) {
+				print "$cluster_name | ACTION: $cluster_action ";
+				$cm_url = "$cm_api/clusters/$cluster_name";
+				my ($cmd, $id, $cluster, $service);
+				if ( $list_active_commands ) {
+					print "\n";
+					$cm_url .= "/commands";
+					my $items = &rest_call('GET', $cm_url, 1);
+					if ( @{$items->{'items'}} ) {
+						foreach $cmd ( sort { $a->{'id'} <=> $b->{'id'} } @{$items->{'items'}} ) {
+							if ( $trackCmd ) {
+								$id = $cmd->{'id'};
+								print "CMDID: $id\n";
+								$cmd_list->{$id} = $cmd;
+							} else { &cmd_id(\%{$cmd}) }
+						}
+					} else {
+						print "|_ No active cluster commands found\n";
 					}
+				} elsif ( $a eq 'updateCluster' ) {
+					$body_content = "{ ";
+					$body_content .= "\"displayName\" : \"$displayName\"" if $displayName;
+					$body_content .= ", " if ( $displayName && $fullVersion );
+					$body_content .= "\"fullVersion\" : \"$fullVersion\"" if $fullVersion; 
+					$body_content .= " }";
+					$cluster = &rest_call('PUT', $cm_url, 1, undef, $body_content);
+					print "| Cluster updated\n";
+				} elsif ( $a eq 'deleteCluster' ) {
+					$cluster = &rest_call('DELETE', $cm_url, 1);
+					print "| Cluster deleted\n";
+				} elsif ( $a eq 'addService' ) {
+					$serviceType = uc $serviceType;
+					$cm_url .= "/services";
+					$body_content = "{ \"items\" : [ { \"name\" : \"$serviceName\", \"displayName\" : \"$displayName\", \"type\" : \"$serviceType\" } ] }";
+					$service = &rest_call('POST', $cm_url, 1, undef, $body_content);
+					my $service_display_name = $service->{'items'}[0]->{'displayName'};
+					my $service_type = $service->{'items'}[0]->{'type'};
+					print "| Service '$serviceName' ";
+					print "-> '$service_display_name' " if $service_display_name;
+					print "($service_type) " if $service_type;
+					print "created\n";
+				} elsif ( $a eq 'serviceTypes' ) {
+					$cm_url .= "/$a";
+					my $service_types = &rest_call('GET', $cm_url, 1);
+					print "\n";
+					print map { "$_\n" } sort @{$service_types->{'items'}};
 				} else {
-					print "|_ No active cluster commands found\n";
+					$cm_url .= "/commands/$a";
+					$cmd = &rest_call('POST', $cm_url, 1);
+					$id = $cmd->{'id'};
+					print "| CMDID: $id\n";
+					if ( $trackCmd && $id != -1 ) {
+						$cmd_list->{$id} = $cmd;
+					} else {
+						&cmd_id(\%{$cmd});
+					}
 				}
-			} elsif ( $a eq 'updateCluster' ) {
-				$body_content = "{ ";
-				$body_content .= "\"displayName\" : \"$displayName\"" if $displayName;
-				$body_content .= ", " if ( $displayName and $fullVersion );
-				$body_content .= "\"fullVersion\" : \"$fullVersion\"" if $fullVersion; 
-				$body_content .= " }";
-				$cluster = &rest_call('PUT', $cm_url, 1, undef, $body_content);
-				print "| Cluster updated\n";
-			} elsif ( $a eq 'deleteCluster' ) {
-				$cluster = &rest_call('DELETE', $cm_url, 1);
-				print "| Cluster deleted\n";
-			} elsif ( $a eq 'addService' ) {
-				$serviceType = uc $serviceType;
-				$cm_url .= "/services";
-				$body_content = "{ \"items\" : [ { \"name\" : \"$serviceName\", \"displayName\" : \"$displayName\", \"type\" : \"$serviceType\" } ] }";
-				$service = &rest_call('POST', $cm_url, 1, undef, $body_content);
-				my $service_display_name = $service->{'items'}[0]->{'displayName'};
-				my $service_type = $service->{'items'}[0]->{'type'};
-				print "| Service '$serviceName' ";
-				print "-> '$service_display_name' " if $service_display_name;
-				print "($service_type) " if $service_type;
-				print "created\n";
-			} elsif ( $a eq 'serviceTypes' ) {
-				$cm_url .= "/$a";
-				my $service_types = &rest_call('GET', $cm_url, 1);
-				print "\n";
-				print map { "$_\n" } sort @{$service_types->{'items'}};
+				print "Set -c to specify a different cluster\n" if ( !$confirmed && $cluster_cnt > 1 );
+				&track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 			} else {
-				$cm_url .= "/commands/$a";
-				$cmd = &rest_call('POST', $cm_url, 1);
-				$id = $cmd->{'id'};
-				print "| CMDID: $id\n";
-				if ( $trackCmd && $id != -1 ) {
-					$cmd_list->{$id} = $cmd;
-				} else {
-					&cmd_id(\%{$cmd});
-				}
+				print "# Use -confirmed or -run to execute the '$cluster_action' cluster action\n";
+				print "Set -c to specify a different cluster\n" unless ( $a =~ /(Cluster|Service)$/ || $cluster_cnt == 1 );
 			}
-			&track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
-		} else {
-			print "# Use -confirmed or -run to execute the '$cluster_action' cluster action\n";
-			print "Set -c to specify a different cluster\n" unless $a =~ /(Cluster|Service)$/;
+			exit;
 		}
-		exit;
 	}
 
 	$cm_url = "$cm_api/clusters/$cluster_name/services";
@@ -1032,7 +1036,7 @@ foreach my $cluster_name ( @clusters ) {
 				}
 			} }
 
-			if ( $a && !defined $rInfo && ( $list_active_commands || $confirmed ) ) {
+			if ( $a && !defined $rInfo && ( $list_active_commands || $a eq 'roleTypes' || $confirmed ) ) {
 				my $service_action = $list_active_commands ? 'list active service commands' : $a;
 				print "|_ $service_header | ACTION: $service_action ";
 				$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name";
@@ -1182,7 +1186,7 @@ foreach my $cluster_name ( @clusters ) {
 								&& defined $role_maintenance_mode
 								&& $maintenanceMode ne '1'
 								&& $role_maintenance_mode ne $maintenanceMode );
-						unless ( $a and $a eq 'moveToRoleGroup' ) {
+						unless ( $a && $a eq 'moveToRoleGroup' ) {
 							next if ( defined $roleConfigGroup
 									&& defined $role_config_group
 									&& $role_config_group !~ /$roleConfigGroup/i );
@@ -1335,7 +1339,7 @@ foreach my $cluster_name ( @clusters ) {
 					}
 				} # role instance
 			} # roles
-			print "# Use -confirmed or -run to execute the '$a' role action\n" if ( $a and not $confirmed and not $list_active_commands );
+			print "# Use -confirmed or -run to execute the '$a' role action\n" if ( $a && !$confirmed && !$list_active_commands );
 			&display_role_summary($role_summary, $cluster_name, $service_name, undef);
 			if ( $a && $confirmed && $a =~ /rollingRestart|decommission|recommission/ ) {
 				print "$cluster_name | $service_name | ACTION: $a ";
@@ -1353,10 +1357,11 @@ foreach my $cluster_name ( @clusters ) {
 			}
 		} # service instance
 	} # services
-	print "# Use -confirmed or -run to execute the '$a' service action\n" if $a and $service_action_flag
-									and not defined $rInfo
-									and not $confirmed
-									and not $list_active_commands;
+	print "# Use -confirmed or -run to execute the '$a' service action\n" if $a && $service_action_flag
+									&& !defined $rInfo
+									&& !$confirmed
+									&& !$list_active_commands
+									&& $a ne 'roleTypes';
 } # clusters
 
 &track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
@@ -1512,7 +1517,7 @@ sub rest_call {
 			print "Response code: $http_rc\n";
 			print "Response content:\n";
 		}
-		print "$content\n" if ( not $ret or $http_rc !~ /2\d\d/ or $d );
+		print "$content\n" if ( !$ret || $http_rc !~ /2\d\d/ || $d );
 		die "The request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d/;
 		if ( $ret ) {
 			$content = from_json($content) if ( $content && $url !~ /api\/version/ );
@@ -1537,7 +1542,6 @@ sub display_role_summary {
 			}
 			print "\n";
 		}
-		print "#\n";
 	}
 } 
 
@@ -1565,7 +1569,7 @@ sub cmd_id {
 				if ( $ref eq 'roleRef' ) {
 					next if ( $key =~ 'clusterName|serviceName' );
 					my $host_name = $role_host_map->{$cmd->{$ref}->{'roleName'}} if defined $role_host_map->{$cmd->{$ref}->{'roleName'}};
-					print "$host_name | " if $hInfo and defined $host_name and not $cmdId;
+					print "$host_name | " if $hInfo && defined $host_name && !$cmdId;
 				}
 #				print "$key: $cmd->{$ref}->{$key} ";
 				print "$cmd->{$ref}->{$key} ";
@@ -1663,7 +1667,7 @@ sub get_config {
 	return $config_list if $ret;
 	print "\n";
 	foreach my $config_property ( sort { $a->{'name'} cmp $b->{'name'} } @{$config_list->{'items'}} ) {
-		next if ( $name and $config_property->{'name'} !~ qr/$name/i );
+		next if ( $name && $config_property->{'name'} !~ qr/$name/i );
 		print "$config_property->{'name'} = ";
 		if ( $config_property->{'value'} ) {
 			print $config_property->{'value'}
