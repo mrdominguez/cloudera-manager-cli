@@ -15,7 +15,6 @@
 # limitations under the License.
 
 # Cloudera Manager REST API client
-# Version: 8.2.2
 # Use -help for options
 
 use strict;
@@ -29,7 +28,7 @@ use vars qw($help $version $u $p $m $d $f $i $bt $bc);
 if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 8.2.1\n";
+	print "Version: 8.2.2\n";
 	print "Release date: 05/09/2020\n";
 	exit;
 }
@@ -92,7 +91,7 @@ if ( $f ) {
 	}
 }
 
-$body_content = "{ \"items\" \: $body_content }" if ( !$f && $i && $body_type eq 'json');
+$body_content = "{ \"items\" \: $body_content }" if ( !$f && $i && $body_type eq 'json' );
 
 if ( defined $body_content && $body_type ne 'json' ) {
 	$body_content =~ s/\s+//g; # remove whitespaces
@@ -177,6 +176,6 @@ sub usage {
 	print "\t       To set multiple objects, use -bt=json or -f to pass a JSON file\n";
 	print "\t -i : Add the 'items' property to the body content (on by default if -bt=array)\n";
 	print "\t -f : JSON file containing body content (implies -bt=json)\n";
-	print "\t <ResourceUrl> : URL to REST resource (example: [http://]cloudera-manager:7180/api/v15/clusters)\n\n";
+	print "\t <ResourceUrl> : URL to REST resource (example: [http://]cm_server_host:7180/api/v15/clusters)\n\n";
 	exit;
 }
