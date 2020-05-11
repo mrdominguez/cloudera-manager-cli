@@ -206,7 +206,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	        -staleConfigsOnly : Restart roles with stale configs only (default: false)
 	        -unUpgradedOnly : Restart roles that haven't been upgraded yet (default: false)
 	      (getConfig|updateConfig) : Display/update the configuration of services/role config groups/roles
-	        Syntax: -a=getConfig [-clientConfig] | [-roleConfigGroup[=config_group_name]] [-propertyName[=property_name]]
+	        Syntax: -a=getConfig [-propertyName=property_name] [-clientConfig] [-roleConfigGroup[=config_group_name]]
 	                -a=updateConfig [-roleConfigGroup=config_group_name] -propertyName=property_name [-propertyValue=property_value]
 	        -clientConfig : Save service client configuration to file (default: disabled)
 	        -roleConfigGroup : Role config group name. If empty, list role config groups for a given service (default: disabled)
@@ -611,7 +611,7 @@ user5
 
 	`cmcli.pl -hInfo=host_name -s=hive -r=gateway -a=deleteRole`
 
-* Display the configuration of the 'flume1' service:
+* Display the summary configuration of the 'flume1' service:
 
  	`cmcli.pl -c=cluster2 -s=flume1 -a=getConfig`
 
@@ -623,7 +623,7 @@ user5
 
  	`cmcli.pl -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroup`
 
-* Display the full-view configuration of the default role config group:
+* Display the full configuration of the default role config group:
 
  	`cmcli.pl -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroup=hdfs1-DATANODE-BASE -full`
     
