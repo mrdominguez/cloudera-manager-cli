@@ -29,7 +29,7 @@ if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 8.2.3\n";
-	print "Release date: 05/10/2020\n";
+	print "Release date: 05/11/2020\n";
 	exit;
 }
 
@@ -47,7 +47,7 @@ if ( -e $cm_cred_file ) {
 #		chomp;
 #		my ($env_var, $env_val) = split /:/, $_, 2;
 		# quote credentials containing white spaces and use the -u/-p options or the environment variables instead of the credentials file
-		my ($env_var, $env_val) = $_ =~ /([^\s]*)\s*:\s*([^\s]*)/;
+		my ($env_var, $env_val) = $_ =~ /([^\s]+)\s*:\s*([^\s]+)/;
 		$ENV{$env_var} = $env_val if ( defined $env_var && defined $env_val );
 	}
 	close $fh;
