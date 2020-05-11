@@ -47,7 +47,7 @@ my %opts = ('cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFil
 	'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction,
 	'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName,
 	'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType, 'roleType'=>$roleType, 'copyFromRoleGroup'=>$copyFromRoleGroup,
-	'f'=>$f, 'userName'=>$userName, 'userPassword'=>$userPassword, 'userRole'=>$userRole);
+	'f'=>$f, 'userName'=>$userName, 'userPassword'=>$userPassword, 'userRole'=>$userRole, 'propertyName'=>$propertyName, 'propertyValue'=>$propertyValue);
 my %hInfo_opts = ('hRoles'=>$hRoles, 'hChecks'=>$hChecks, 'setRackId'=>$setRackId, 'deleteHost'=>$deleteHost,
 		'addToCluster'=>$addToCluster, 'removeFromCluster'=>$removeFromCluster, 'hAction'=>$hAction, 'addRole'=>$addRole);
 my %rr_opts = ('slaveBatchSize'=>$slaveBatchSize, 'sleepSeconds'=>$sleepSeconds, 'slaveFailCountThreshold'=>$slaveFailCountThreshold,
@@ -101,8 +101,8 @@ if ( $a ) {
 			die "Set -$_\n" unless $role_group_opts{$_};
 		}
 	}
-	die "Set -roleConfigGroup to an existent config group\n" if ( $a eq 'moveToRoleGroup' && !$roleConfigGroup );
-	die "Set -roleConfigGroup to an existent config group\n" if ( $a eq 'updateConfig'
+	die "Set -roleConfigGroup to an existing config group\n" if ( $a eq 'moveToRoleGroup' && !$roleConfigGroup );
+	die "Set -roleConfigGroup to an existing config group\n" if ( $a eq 'updateConfig'
 									&& $roleConfigGroup
 									&& $roleConfigGroup eq '1' );
 	if ( $a eq 'updateConfig' && !$propertyName ) {
@@ -335,9 +335,8 @@ if ( $cmdId ) {
 	exit;
 }
 
-$hInfo = '.' if ( ( defined $hInfo && $hInfo eq '1' ) || ( !defined $hInfo && $hFilter ) );
-$roleConfigGroup = '.' if ( defined $roleConfigGroup && $roleConfigGroup eq '1' );
-$propertyName = '.' if ( defined $propertyName && $propertyName eq '1' );
+$hInfo = '.' if ( ( $hInfo && $hInfo eq '1' ) || $hFilter );
+$roleConfigGroup = '.' if ( $roleConfigGroup && $roleConfigGroup eq '1' );
 my $list_active_commands = 1 if ( $a && $a eq '1' );
 my @clusters;
 my $uuid_host_map = {};
@@ -614,7 +613,7 @@ if ( defined $hInfo ) {
 	exit unless ( $rInfo && ( $c || @clusters || $s =~ /mgmt/ ) );
 }
 
-$rInfo = '.' if ( defined $rInfo && $rInfo eq '1' ) || ( !defined $rInfo && ( $r || $rFilter ) );
+$rInfo = '.' if ( $rInfo && $rInfo eq '1' ) || ( $r || $rFilter );
 die "-a=$a is not available for roles\n" if ( $rInfo && $a && $a eq 'deployClientConfig' );
 
 if ( $s && $s =~ /mgmt/ ) {
@@ -634,7 +633,7 @@ if ( $s && $s =~ /mgmt/ ) {
 
 	if ( $a && !defined $rInfo ) {
 		my $mgmt_action = $list_active_commands ? 'list active mgmt service commands' : $a;
-		if ( $list_active_commands || $a eq 'roleTypes' || $confirmed ) {
+		if ( $list_active_commands || $confirmed || $a =~ /roleTypes|getConfig/ ) {
 			print "$mgmt_name | ACTION: $mgmt_action ";
 			$cm_url = "$cm_api/cm/service";
 			my ($cmd, $id);
@@ -728,7 +727,7 @@ if ( $s && $s =~ /mgmt/ ) {
 				}
 			}
 
-			if ( $a && ( $list_active_commands || $confirmed ) ) {
+			if ( $a && ( $list_active_commands || $confirmed || $a eq 'getConfig' ) ) {
 				my $mgmt_role_action = $list_active_commands ? 'list active mgmt role commands' : $a;
 				print "$mgmt_header | $mgmt_role_name | ACTION: $mgmt_role_action ";
 				my ($cmd, $id);
@@ -769,7 +768,7 @@ if ( $s && $s =~ /mgmt/ ) {
 				}
 			}
 		}
-		print "# Use -confirmed or -run to execute mgmt role action '$a'\n" if ( $a && !$confirmed && !$list_active_commands );
+		print "# Use -confirmed or -run to execute mgmt role action '$a'\n" if ( $a && $a ne 'getConfig' && !$confirmed && !$list_active_commands );
 		&display_role_summary($mgmt_role_summary, undef, undef, $mgmt_name);
 	}
 
@@ -1036,7 +1035,7 @@ foreach my $cluster_name ( @clusters ) {
 				}
 			} }
 
-			if ( $a && !defined $rInfo && ( $list_active_commands || $a eq 'roleTypes' || $confirmed ) ) {
+			if ( $a && !defined $rInfo && ( $list_active_commands || $confirmed || $a =~ /roleTypes|getConfig/ ) ) {
 				my $service_action = $list_active_commands ? 'list active service commands' : $a;
 				print "|_ $service_header | ACTION: $service_action ";
 				$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name";
@@ -1110,7 +1109,6 @@ foreach my $cluster_name ( @clusters ) {
 							print "| Role config group: $roleConfigGroup";
 							&get_config($cm_url, $propertyName);
 						}
-						print "#\n";
 					} elsif ( $clientConfig ) {
 						$cm_url .= "/clientConfig";
 						my $filename = "$cm_host\_$cluster_name\_$service_name\_client\_config.zip";
@@ -1271,7 +1269,7 @@ foreach my $cluster_name ( @clusters ) {
 							}
 						}
 
-						if ( $a && ( $list_active_commands || $confirmed ) ) {
+						if ( $a && ( $list_active_commands || $confirmed || $a eq 'getConfig' ) ) {
 							my $role_action = $list_active_commands ? 'list active role commands' : $a;
 							print "|___ $service_header | $host_id | $role_name | ACTION: $role_action " unless $a =~ /rollingRestart|decommission|recommission/;
 							$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name";
@@ -1358,9 +1356,12 @@ foreach my $cluster_name ( @clusters ) {
 			}
 		} # service instance
 	} # services
-	if ( $a && !$confirmed && !$list_active_commands ) {
-		print "# Use -confirmed or -run to execute role action '$a'\n" if $role_action_flag;
-		print "# Use -confirmed or -run to execute service action '$a'\n" if ( $service_action_flag && !defined $rInfo && $a ne 'roleTypes' );
+	if ( $a && $a !~ /roleTypes|getConfig/ && !$confirmed && !$list_active_commands ) {
+		if ( $role_action_flag ) {
+			print "# Use -confirmed or -run to execute role action '$a'\n" if $role_action_flag;
+		} elsif ( $service_action_flag && !defined $rInfo ) {
+			print "# Use -confirmed or -run to execute service action '$a'\n";
+		}
 	}
 } # clusters
 
@@ -1438,7 +1439,7 @@ sub usage {
  	print "\t        -staleConfigsOnly : Restart roles with stale configs only (default: false)\n";
  	print "\t        -unUpgradedOnly : Restart roles that haven't been upgraded yet (default: false)\n";
 	print "\t      (getConfig|updateConfig) : Display/update the configuration of services/role config groups/roles\n";
-	print "\t        Syntax: -a=getConfig [-clientConfig] | [-roleConfigGroup[=config_group_name]] [-propertyName[=property_name]]\n";
+	print "\t        Syntax: -a=getConfig [-propertyName=property_name] [-clientConfig] [-roleConfigGroup[=config_group_name]]\n";
 	print "\t                -a=updateConfig [-roleConfigGroup=config_group_name] -propertyName=property_name [-propertyValue=property_value]\n";
 	print "\t        -clientConfig : Save service client configuration to file (default: disabled)\n";
 	print "\t        -roleConfigGroup : Role config group name. If empty, list role config groups for a given service (default: disabled)\n";
