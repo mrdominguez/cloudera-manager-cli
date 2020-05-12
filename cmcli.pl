@@ -679,7 +679,7 @@ if ( $s && $s =~ /mgmt/ ) {
 		for ( my $i=0; $i < @{$mgmt_roles->{'items'}}; $i++ ) {
 			my $host_id = $mgmt_roles->{'items'}[$i]->{'hostRef'}->{'hostId'};
 			next if ( $hInfo && !$uuid_host_map->{$host_id} );
-			next unless $host_id =~ qr/$rInfo/;
+			next unless $host_id =~ /$rInfo/;
 			my $mgmt_role_name = $mgmt_roles->{'items'}[$i]->{'name'};
 			my $mgmt_role_type = $mgmt_roles->{'items'}[$i]->{'type'};
 			if ( $r ) { next unless ( $mgmt_role_type =~ /$r/i || $mgmt_role_name =~ /$r/i ) };
@@ -911,7 +911,7 @@ foreach my $cluster_name ( @clusters ) {
 		my $service_name = $cm_services->{'items'}[$i]->{'name'};
 		$service_header = "$cluster_name | $service_name";
 		# service instance
-		if ( !$s || $service_name =~ qr/$s/i ) {
+		if ( !$s || $service_name =~ /$s/i ) {
 			my $service_type = $cm_services->{'items'}[$i]->{'type'};
 			my $service_state = $cm_services->{'items'}[$i]->{'serviceState'};
 			my $service_health = $cm_services->{'items'}[$i]->{'healthSummary'};
@@ -1098,7 +1098,7 @@ foreach my $cluster_name ( @clusters ) {
 								print "$service_header | $group_name | $groups->{'roleType'} | $groups->{'displayName'} | $group_base\n";
 								if ( $propertyName ) {
 								foreach my $config_property ( sort { $a->{'name'} cmp $b->{'name'} } @{$groups->{'config'}->{'items'}} ) {
-									next unless ( $config_property->{'name'} =~ qr/$propertyName/i );
+									next unless ( $config_property->{'name'} =~ /$propertyName/i );
 									print "$config_property->{'name'} = $config_property->{'value'}\n"
 								} }
 							}
@@ -1161,10 +1161,10 @@ foreach my $cluster_name ( @clusters ) {
 			for ( my $i=0; $i < @{$cm_roles->{'items'}}; $i++ ) {
 				my $host_id = $cm_roles->{'items'}[$i]->{'hostRef'}->{'hostId'};
 				# role instance
-				if ( $host_id =~ qr/$rInfo/ ) {
+				if ( $host_id =~ /$rInfo/ ) {
 					my $role_type = $cm_roles->{'items'}[$i]->{'type'};
 					my $role_name = $cm_roles->{'items'}[$i]->{'name'};
-					if ( !$r || $role_type =~ qr/$r/i || $role_name =~ qr/$r/i ) {
+					if ( !$r || $role_type =~ /$r/i || $role_name =~ /$r/i ) {
 						my $role_state = $cm_roles->{'items'}[$i]->{'roleState'};
 						my $role_health = $cm_roles->{'items'}[$i]->{'healthSummary'};
 						my $role_config = $cm_roles->{'items'}[$i]->{'configStalenessStatus'};
@@ -1665,7 +1665,7 @@ sub get_config {
 	return $config_list if $ret;
 	print "\n";
 	foreach my $config_property ( sort { $a->{'name'} cmp $b->{'name'} } @{$config_list->{'items'}} ) {
-		next if ( $name && $config_property->{'name'} !~ qr/$name/i );
+		next if ( $name && $config_property->{'name'} !~ /$name/i );
 		print "$config_property->{'name'} = ";
 		if ( $config_property->{'value'} ) {
 			print $config_property->{'value'}
