@@ -37,7 +37,7 @@ if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 8.2.3\n";
-	print "Release date: 05/11/2020\n";
+	print "Release date: 05/12/2020\n";
 	exit;
 }
 
@@ -1440,7 +1440,7 @@ sub usage {
 	print "\t                -a=updateConfig [-roleConfigGroup=config_group_name] -propertyName=property_name [-propertyValue=property_value]\n";
 	print "\t        -clientConfig : Save service client configuration to file (default: disabled)\n";
 	print "\t        -roleConfigGroup : Role config group name. If empty, list role config groups for a given service (default: disabled)\n";
-	print "\t        -propertyName : Configuration parameter canonical name. Required for -updateConfig. Regex filter for -getConfig (default: all)\n";
+	print "\t        -propertyName : Configuration parameter name. Required for -updateConfig. Regex filter for -getConfig (default: all)\n";
 	print "\t        -propertyValue : User-defined value. When absent, the default value (if any) will be used\n";
 	print "\t        -full : Full view (default view: summary)\n";
 	print "\t      (createRoleGroup) Create role config group (args: -displayName, -roleType, [-copyFromRoleGroup])\n";	# service context
