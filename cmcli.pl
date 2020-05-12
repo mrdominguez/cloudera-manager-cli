@@ -358,12 +358,11 @@ if ( $hInfo ) {
 	my $hosts = &rest_call('GET', $cm_url, 1);
 	my @services;
 	my $host_summary;
-	my $host_name;
 	my $hostName_list = {};
 	for ( my $i=0; $i < @{$hosts->{'items'}}; $i++ ) {
 		$hInfo_match = 0 if $hRoles;
 		my $host_id = $hosts->{'items'}[$i]->{'hostId'};
-		$host_name = $hosts->{'items'}[$i]->{'hostname'};
+		my $host_name = $hosts->{'items'}[$i]->{'hostname'};
 		my $ip = $hosts->{'items'}[$i]->{'ipAddress'};
 		my $rack_id = $hosts->{'items'}[$i]->{'rackId'};
 		my $host_health = $hosts->{'items'}[$i]->{'healthSummary'};
@@ -518,7 +517,7 @@ if ( $hInfo ) {
 			}
 
 			if ( $hAction ) {
-				print "$host_name | ACTION: $hAction " unless $hAction =~ /decommission|recommission/;
+				print "... $host_name | ACTION: $hAction " unless $hAction =~ /decommission|recommission/;
 				$cm_url = "$cm_api/cm/commands";
 				if ( $hAction =~ /decommission|recommission/ ) {
 					push @{$hostName_list->{'items'}}, $host_name;
@@ -547,7 +546,7 @@ if ( $hInfo ) {
 	}
 	
 	if ( $hAction && $confirmed && $hAction =~ /decommission|recommission/ ) {
-		print "ACTION: $hAction ";
+		print "... ACTION: $hAction ";
 		if ( $hAction eq 'decommission' ) {
 			$cm_url .= "/hostsDecommission";
 		} elsif ( $hAction eq 'recommission' ) {
@@ -573,25 +572,25 @@ if ( $hInfo ) {
 
 	while ( !$confirmed ) {
 		if ( $removeFromCluster ) {
-			print "# Use -confirmed to remove the selected hosts from the cluster\n";
+			print "# Use -confirmed to remove the hosts from the cluster\n";
 		}
 		if ( $deleteHost ) {
-			print "# Use -confirmed to delete the selected hosts from Cloudera Manager\n";
+			print "# Use -confirmed to delete the hosts from Cloudera Manager\n";
 			last;
 		}
 		if ( $setRackId ) {
-			print "# Use -confirmed to update the rackId to $setRackId for the selected hosts\n";
+			print "# Use -confirmed to assign rackId '$setRackId'\n";
 		}
 		if ( $addToCluster ) {
-			print "# Use -confirmed to add the selected hosts to cluster '$addToCluster'\n";
+			print "# Use -confirmed to add the hosts to cluster '$addToCluster'\n";
 		}
 		if ( $addRole ) {
-			print "# Use -confirmed to add role $addRole (service '$serviceName') to the selected hosts\n";
+			print "# Use -confirmed to add role $addRole (service '$serviceName') to the hosts\n";
 		}
 		last;
 	}
 	if ( $hAction && !$deleteHost ) {
-		print "# Use -confirmed or -run to execute host action '$hAction' : '$host_name'\n" if !$confirmed;
+		print "# Use -confirmed or -run to execute host action '$hAction'\n" if !$confirmed;
 		&track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 	}
 	foreach ( keys %hInfo_opts ) {
@@ -634,7 +633,7 @@ if ( $s && $s =~ /mgmt/ ) {
 	if ( $a && !$rInfo ) {
 		my $mgmt_action = $list_active_commands ? 'list active mgmt service commands' : $a;
 		if ( $list_active_commands || $confirmed || $a =~ /roleTypes|getConfig/ ) {
-			print "$mgmt_name | ACTION: $mgmt_action ";
+			print "... $mgmt_name | ACTION: $mgmt_action ";
 			$cm_url = "$cm_api/cm/service";
 			my ($cmd, $id);
 			if ( $list_active_commands ) {
@@ -650,7 +649,7 @@ if ( $s && $s =~ /mgmt/ ) {
 						} else { &cmd_id(\%{$cmd}) }
 					}
 				} else {
-					print "|_ No active mgmt commands found\n";
+					print "No active mgmt commands found\n";
 				}
 			} elsif ( $a eq 'getConfig' ) {
 				&get_config($cm_url, $propertyName);
@@ -709,8 +708,8 @@ if ( $s && $s =~ /mgmt/ ) {
 			++$mgmt_role_summary->{$mgmt_role_type}->{'role_health'}->{$mgmt_role_health} unless $mgmt_role_health eq 'GOOD';
 			++$mgmt_role_summary->{$mgmt_role_type}->{'role_config'}->{$mgmt_role_config} if ( $api_version > 5 && $mgmt_role_config ne 'FRESH' );
 
-			my $mgmt_header = "|_ $mgmt_name | $host_id";
-			print "$mgmt_header | $mgmt_role_type ";
+			my $mgmt_header = "$mgmt_name | $host_id";
+			print "|_ $mgmt_header | $mgmt_role_type ";
 			print "| $mgmt_role_maintenance_mode " if ( $maintenanceMode && $api_version > 1 );
 			print "| $mgmt_role_name --- $mgmt_role_state $mgmt_role_health ";
 			print $mgmt_role_config if $api_version > 5;
@@ -729,7 +728,7 @@ if ( $s && $s =~ /mgmt/ ) {
 
 			if ( $a && ( $list_active_commands || $confirmed || $a eq 'getConfig' ) ) {
 				my $mgmt_role_action = $list_active_commands ? 'list active mgmt role commands' : $a;
-				print "$mgmt_header | $mgmt_role_name | ACTION: $mgmt_role_action ";
+				print "... $mgmt_header | $mgmt_role_name | ACTION: $mgmt_role_action ";
 				my ($cmd, $id);
 				$cm_url = "$cm_api/cm/service/roles/$mgmt_role_name";
 				if ( $list_active_commands ) {
@@ -745,7 +744,7 @@ if ( $s && $s =~ /mgmt/ ) {
 							} else { &cmd_id(\%{$cmd}) }
 						}
 					} else {
-						print "|___ No active mgmt role commands found\n";
+						print "No active mgmt role commands found\n";
 					}
 				} elsif ( $a eq 'deleteRole' ) {
 					my $role = &rest_call('DELETE', $cm_url, 1);
@@ -837,7 +836,7 @@ foreach my $cluster_name ( @clusters ) {
 		if ( $a ) {
 			my $cluster_action = $list_active_commands ? 'list active cluster commands' : $a;
 			if ( $list_active_commands || $a eq 'serviceTypes' || $confirmed ) {
-				print "$cluster_name | ACTION: $cluster_action ";
+				print "... $cluster_name | ACTION: $cluster_action ";
 				$cm_url = "$cm_api/clusters/$cluster_name";
 				my ($cmd, $id, $cluster, $service);
 				if ( $list_active_commands ) {
@@ -853,7 +852,7 @@ foreach my $cluster_name ( @clusters ) {
 							} else { &cmd_id(\%{$cmd}) }
 						}
 					} else {
-						print "|_ No active cluster commands found\n";
+						print "No active cluster commands found\n";
 					}
 				} elsif ( $a eq 'updateCluster' ) {
 					$body_content = "{ ";
@@ -1036,7 +1035,7 @@ foreach my $cluster_name ( @clusters ) {
 
 			if ( $a && !$rInfo && ( $list_active_commands || $confirmed || $a =~ /roleTypes|getConfig/ ) ) {
 				my $service_action = $list_active_commands ? 'list active service commands' : $a;
-				print "|_ $service_header | ACTION: $service_action ";
+				print "... $service_header | ACTION: $service_action ";
 				$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name";
 				my ($cmd, $id, $service, $role_config_group);
 				if ( $list_active_commands ) {
@@ -1052,7 +1051,7 @@ foreach my $cluster_name ( @clusters ) {
 							} else { &cmd_id(\%{$cmd}) }
 						}
 					} else {
-						print "|___ No active service commands found\n";
+						print "No active service commands found\n";
 					}
 				} elsif ( $a eq 'createRoleGroup' ) {
 					$roleType = uc $roleType;
@@ -1096,11 +1095,11 @@ foreach my $cluster_name ( @clusters ) {
 							foreach my $groups ( sort { $a->{'name'} cmp $b->{'name'} } @{$role_config_groups->{'items'}} ) {
 								my $group_name = $groups->{'name'};
 								my $group_base = $groups->{'base'} ? 'YES' : 'NO';
-								print "GROUP: $service_header | $group_name | $groups->{'roleType'} | $groups->{'displayName'} | $group_base\n";
+								print "$service_header | $group_name | $groups->{'roleType'} | $groups->{'displayName'} | $group_base\n";
 								if ( $propertyName ) {
 								foreach my $config_property ( sort { $a->{'name'} cmp $b->{'name'} } @{$groups->{'config'}->{'items'}} ) {
 									next unless ( $config_property->{'name'} =~ qr/$propertyName/i );
-									print "|_ $config_property->{'name'} = $config_property->{'value'}\n"
+									print "$config_property->{'name'} = $config_property->{'value'}\n"
 								} }
 							}
 						} else {
@@ -1185,8 +1184,8 @@ foreach my $cluster_name ( @clusters ) {
 								&& $role_maintenance_mode ne $maintenanceMode );
 						unless ( $a && $a eq 'moveToRoleGroup' ) {
 							next if ( $roleConfigGroup
-									&& $role_config_group
-									&& $role_config_group !~ /$roleConfigGroup/i );
+								&& $role_config_group
+								&& $role_config_group !~ /$roleConfigGroup/i );
 						}
 
 						if ( $hInfo ) {
@@ -1201,8 +1200,8 @@ foreach my $cluster_name ( @clusters ) {
 						++$role_summary->{$role_type}->{'role_config'}->{$role_config} if ( $api_version > 5 && $role_config ne 'FRESH' );
 						++$role_summary->{$role_type}->{'role_commission_state'}->{$role_commission_state} if ( $api_version > 1 && $role_commission_state ne 'COMMISSIONED' );
 
-						my $role_header = "|___ $service_header | $host_id | $role_type";
-						print "$role_header | ";
+						my $role_header = "$service_header | $host_id | $role_type";
+						print "  |_ $role_header | ";
 						print "$role_config_group | " if ( $roleConfigGroup && $api_version > 2 );
 						if ( $api_version > 1 ) {
 							print "$role_maintenance_mode | " if $maintenanceMode;
@@ -1269,7 +1268,7 @@ foreach my $cluster_name ( @clusters ) {
 
 						if ( $a && ( $list_active_commands || $confirmed || $a eq 'getConfig' ) ) {
 							my $role_action = $list_active_commands ? 'list active role commands' : $a;
-							print "|___ $service_header | $host_id | $role_name | ACTION: $role_action " unless $a =~ /rollingRestart|decommission|recommission/;
+							print "... $service_header | $host_id | $role_name | ACTION: $role_action " unless $a =~ /rollingRestart|decommission|recommission/;
 							$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name";
 							my ($cmd, $id);
 							my $single_cmd = 1;
@@ -1286,7 +1285,7 @@ foreach my $cluster_name ( @clusters ) {
 										} else { &cmd_id(\%{$cmd}) }
 									}
 								} else {
-									print "|_____ No active role commands found\n";
+									print "No active role commands found\n";
 								}
 								next;
 							} elsif ( $a eq 'rollingRestart' ) {
@@ -1339,7 +1338,7 @@ foreach my $cluster_name ( @clusters ) {
 			} # roles
 			&display_role_summary($role_summary, $cluster_name, $service_name, undef);
 			if ( $a && $confirmed && $a =~ /rollingRestart|decommission|recommission/ ) {
-				print "$cluster_name | $service_name | ACTION: $a ";
+				print "... $cluster_name | $service_name | ACTION: $a ";
 				$cm_url .= "/commands/$a";
 				if ( $a eq 'rollingRestart' ) {
 					$body_content = &rolling_restart($cluster_name, $service_name);
