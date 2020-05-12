@@ -210,7 +210,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	                -a=updateConfig [-roleConfigGroup=config_group_name] -propertyName=property_name [-propertyValue=property_value]
 	        -clientConfig : Save service client configuration to file (default: disabled)
 	        -roleConfigGroup : Role config group name. If empty, list role config groups for a given service (default: disabled)
-	        -propertyName : Configuration parameter canonical name. Required for -updateConfig. Regex filter for -getConfig (default: all)
+	        -propertyName : Configuration parameter name. Required for -updateConfig. Regex filter for -getConfig (default: all)
 	        -propertyValue : User-defined value. When absent, the default value (if any) will be used
 	        -full : Full view (default view: summary)
 	      (createRoleGroup) Create role config group (args: -displayName, -roleType, [-copyFromRoleGroup])
