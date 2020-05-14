@@ -1396,7 +1396,7 @@ sub usage {
 	print "\t              (show) Display users (args: [-userName] | default: all)\n";
 	print "\t -cmConfig : Save CM configuration to file\n";
 	print "\t -deployment : Retrieve full description of the entire CM deployment\n";
-	print "\t -cmdId : Retrieve information on asynchronous commands (comma-separated list of commandIds)\n";
+	print "\t -cmdId : Retrieve information on asynchronous commands (comma-separated list of command IDs)\n";
 	print "\t -cmdAction : Command action\n";
 	print "\t              (abort) Abort a running command\n";
 	print "\t              (retry) Try to rerun a command\n";
