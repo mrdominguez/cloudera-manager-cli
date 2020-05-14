@@ -36,8 +36,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 8.2.3\n";
-	print "Release date: 05/12/2020\n";
+	print "Version: 8.2.4\n";
+	print "Release date: 05/14/2020\n";
 	exit;
 }
 
@@ -313,25 +313,23 @@ if ( $cmConfig || $deployment ) {
 my $cmd_list;
 if ( $cmdId ) {
 	my $cmd;
-	$cm_url = "$cm_api/commands/$cmdId";
-	if ( $cmdAction ) {
-		if ( $confirmed ) {
-			$cm_url .= "/$cmdAction";
-			$cmd = &rest_call('POST', $cm_url, 1);
+	foreach ( split /,/, $cmdId ) {
+		$cm_url = "$cm_api/commands/$_";
+		if ( $cmdAction ) {
+			if ( $confirmed ) {
+				$cm_url .= "/$cmdAction";
+				$cmd = &rest_call('POST', $cm_url, 1);
+			} else {
+				print "# Use -confirmed or -run to execute command action '$cmdAction'\n";
+				exit;
+			}
 		} else {
-			print "# Use -confirmed or -run to execute command action '$cmdAction'\n";
-			exit;
+			$cmd = &rest_call('GET', $cm_url, 1);
 		}
-	} else {
-		$cmd = &rest_call('GET', $cm_url, 1);
-	}
 
-	if ( $trackCmd ) {
-		$cmd_list->{$cmd->{'id'}} = $cmd;
-		&track_cmd(\%{$cmd_list});
-	} else {
-		&cmd_id(\%{$cmd})
+		$trackCmd ? $cmd_list->{$cmd->{'id'}} = $cmd : &cmd_id(\%{$cmd});
 	}
+	&track_cmd(\%{$cmd_list}) if $trackCmd;
 	exit;
 }
 
@@ -1366,14 +1364,14 @@ foreach my $cluster_name ( @clusters ) {
 
 sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u=cm_user] [-p=cm_password]\n";
-	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry]]\n";
+	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=commandId_list [-cmdAction=abort|retry]]\n";
 	print "\t[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]\n";
-	print "\t[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
-	print "\t  [-setRackId=/...] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]\n";
+	print "\t[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
+	print "\t  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]\n";
 	print "\t[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]\n";
-	print "\t[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=...] [-rChecks] [-rMetrics] [-log=log_type]]\n";
+	print "\t[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=role_filter] [-rChecks] [-rMetrics] [-log=log_type]]\n";
 	print "\t[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]\n";
-	print "\t[-a[=command_name]] [[-confirmed [-trackCmd]]|-run]\n";
+	print "\t[-a[=command_name]] [-confirmed] [-trackCmd] [-run]\n";
 	print "\t[-yarnApps[=parameters]]\n";
 	print "\t[-impalaQueries[=parameters]]\n";
 	print "\t[-mgmt] (<> -s=mgmt)\n\n";
@@ -1398,7 +1396,7 @@ sub usage {
 	print "\t              (show) Display users (args: [-userName] | default: all)\n";
 	print "\t -cmConfig : Save CM configuration to file\n";
 	print "\t -deployment : Retrieve full description of the entire CM deployment\n";
-	print "\t -cmdId : Retrieve information on an asynchronous command\n";
+	print "\t -cmdId : Retrieve information on asynchronous commands (comma-separated list of commandIds)\n";
 	print "\t -cmdAction : Command action\n";
 	print "\t              (abort) Abort a running command\n";
 	print "\t              (retry) Try to rerun a command\n";
@@ -1456,8 +1454,8 @@ sub usage {
 	print "\t      (updateService) Update service information (args: -displayName)\n";			# service context
 	print "\t      (deleteService) Delete service\n";							# service context
 	print "\t      (roleTypes) List the supported role types for a service\n";				# service context
-	print "\t -confirmed : Proceed with the command execution\n";
-	print "\t -trackCmd : Display the result of all executed asynchronous commands before exiting\n";
+	print "\t -confirmed : Proceed with command execution\n";
+	print "\t -trackCmd : Wait for all asynchronous commands to end before exiting\n";
 	print "\t -run : Shortcut for '-confirmed -trackCmd'\n";
 	print "\t -sChecks : Service health checks\n";
 	print "\t -sMetrics : Service metrics\n";
