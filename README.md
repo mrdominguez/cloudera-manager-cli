@@ -1,7 +1,8 @@
-### Version 8.2.3 is now available!
+### Version 8.2.4 is now available!
 
-- Added basic HTTPS support
-- Added HTTP response code and headers (debug mode)
+- Added basic HTTPS support (-https)
+- Added HTTP response code and headers in debug mode (-d)
+- Support for comma-separated list of commandIds (-cmdId)
 - Improved output formatting
 - Revised user management logic
 - To avoid concurrency issues while refreshing master nodes, the `decommission` and `recommission` actions for both hosts and roles have been revised to use a list of items instead of a single item sequentially
@@ -136,14 +137,14 @@ Here is the usage information for both utilities:
 
 ```
 Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u=cm_user] [-p=cm_password]
-	[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_id [-cmdAction=abort|retry]]
+	[-cmVersion] [-cmConfig|-deployment] [-cmdId=commandId_list [-cmdAction=abort|retry]]
 	[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]
-	[-hInfo[=...] [-hFilter=...] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
-	  [-setRackId=/...] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]
+	[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
+	  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]
 	[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]
-	[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=...] [-rChecks] [-rMetrics] [-log=log_type]]
+	[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=host_filter] [-rChecks] [-rMetrics] [-log=log_type]]
 	[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]
-	[-a[=command_name]] [[-confirmed [-trackCmd]]|-run]
+	[-a[=command_name]] [-confirmed] [-trackCmd] [-run]
 	[-yarnApps[=parameters]]
 	[-impalaQueries[=parameters]]
 	[-mgmt] (<> -s=mgmt)
@@ -168,7 +169,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	              (show) Display users (args: [-userName] | default: all)
 	 -cmConfig : Save CM configuration to file
 	 -deployment : Retrieve full description of the entire CM deployment
-	 -cmdId : Retrieve information on an asynchronous command
+	 -cmdId : Retrieve information on asynchronous commands (comma-separated list of commandIds)
 	 -cmdAction : Command action
 	              (abort) Abort a running command
 	              (retry) Try to rerun a command
@@ -226,8 +227,8 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	      (updateService) Update service information (args: -displayName)
 	      (deleteService) Delete service
 	      (roleTypes) List the supported role types for a service
-	 -confirmed : Proceed with the command execution
-	 -trackCmd : Display the result of all executed asynchronous commands before exiting
+	 -confirmed : Proceed with command execution
+	 -trackCmd : Wait for all asynchronous commands to end before exiting
 	 -run : Shortcut for '-confirmed -trackCmd'
 	 -sChecks : Service health checks
 	 -sMetrics : Service metrics
