@@ -2,7 +2,7 @@
 
 - Added basic HTTPS support (-https)
 - Added HTTP response code and headers in debug mode (-d)
-- Support for comma-separated list of commandIds (-cmdId)
+- Support for comma-separated list of command IDs (-cmdId)
 - Improved output formatting
 - Revised user management logic
 - To avoid concurrency issues while refreshing master nodes, the `decommission` and `recommission` actions for both hosts and roles have been revised to use a list of items instead of a single item sequentially
@@ -169,7 +169,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	              (show) Display users (args: [-userName] | default: all)
 	 -cmConfig : Save CM configuration to file
 	 -deployment : Retrieve full description of the entire CM deployment
-	 -cmdId : Retrieve information on asynchronous commands (comma-separated list of commandIds)
+	 -cmdId : Retrieve information on asynchronous commands (comma-separated list of command IDs)
 	 -cmdAction : Command action
 	              (abort) Abort a running command
 	              (retry) Try to rerun a command
