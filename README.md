@@ -1,15 +1,15 @@
 ### Version 8.2.4 is now available!
 
-- Added basic HTTPS support (-https)
-- Added HTTP response code and headers in debug mode (-d)
-- Support for comma-separated list of command IDs (-cmdId)
+- Added basic HTTPS support: `-https`
+- Show HTTP response code and headers in debug mode (`-d`)
+- Support for comma-separated list of command IDs: `-cmdId`
 - Improved output formatting
 - Revised user management logic
 - To avoid concurrency issues while refreshing master nodes, the `decommission` and `recommission` actions for both hosts and roles have been revised to use a list of items instead of a single item sequentially
 
 ### Version 8.1
 
-- `-cmdAction=abort|retry` safeguarded by the `-confirmed|-run` options
+- `-cmdAction=abort|retry` safeguarded by `-confirmed|-run` options
 - Rewrote the user management section to make it consistent with the rest of the code:
 ```
  -userAction: User action
@@ -61,8 +61,8 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v15/
 
 - Improved functionality: `-removeFromCluster`
 - New options: `-maintenanceMode` and `-roleConfigGroup`
-- List active commands for roles (already supported by clusters/services): `-a`
-- New role actions (already supported by clusters/services):
+- List active commands for roles (already supported for clusters/services): `-a`
+- New role actions (already supported for clusters/services):
   * `-a=enterMaintenanceMode`
   * `-a=exitMaintenanceMode`
 
