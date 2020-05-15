@@ -36,8 +36,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 8.2.4\n";
-	print "Release date: 05/14/2020\n";
+	print "Version: 8.2.5\n";
+	print "Release date: 05/15/2020\n";
 	exit;
 }
 
@@ -629,26 +629,13 @@ if ( $s && $s =~ /mgmt/ ) {
 	print "\n";
 
 	if ( $a && !$rInfo ) {
-		my $mgmt_action = $list_active_commands ? 'list active mgmt service commands' : $a;
+		my $context = 'mgmt service';
+		my $mgmt_action = $list_active_commands ? "list active $context commands" : $a;
 		if ( $list_active_commands || $confirmed || $a =~ /roleTypes|getConfig/ ) {
 			print "... $mgmt_name | ACTION: $mgmt_action ";
 			$cm_url = "$cm_api/cm/service";
-			my ($cmd, $id);
 			if ( $list_active_commands ) {
-				print "\n";
-				$cm_url .= "/commands";
-				my $items = &rest_call('GET', $cm_url, 1);
-				if ( @{$items->{'items'}} ) {
-					foreach $cmd ( sort { $a->{'id'} <=> $b->{'id'} } @{$items->{'items'}} ) {
-						if ( $trackCmd ) {
-							$id = $cmd->{'id'};
-							print "CMDID: $id\n";
-							$cmd_list->{$id} = $cmd;
-						} else { &cmd_id(\%{$cmd}) }
-					}
-				} else {
-					print "No active mgmt commands found\n";
-				}
+				&track_active_commands($context);
 			} elsif ( $a eq 'getConfig' ) {
 				&get_config($cm_url, $propertyName);
 			} elsif ( $a eq 'updateConfig' ) {
@@ -660,8 +647,8 @@ if ( $s && $s =~ /mgmt/ ) {
 				print map { "$_\n" } sort @{$role_types->{'items'}};
 			} else {
 				$cm_url .= "/commands/$a";
-				$cmd = &rest_call('POST', $cm_url, 1);
-				$id = $cmd->{'id'};
+				my $cmd = &rest_call('POST', $cm_url, 1);
+				my $id = $cmd->{'id'};
 				print "| CMDID: $id\n";
 				$trackCmd ? $cmd_list->{$id} = $cmd : &cmd_id(\%{$cmd});
 			}
@@ -725,25 +712,12 @@ if ( $s && $s =~ /mgmt/ ) {
 			}
 
 			if ( $a && ( $list_active_commands || $confirmed || $a eq 'getConfig' ) ) {
-				my $mgmt_role_action = $list_active_commands ? 'list active mgmt role commands' : $a;
+				my $context = 'mgmt role';
+				my $mgmt_role_action = $list_active_commands ? "list active $context commands" : $a;
 				print "... $mgmt_header | $mgmt_role_name | ACTION: $mgmt_role_action ";
-				my ($cmd, $id);
 				$cm_url = "$cm_api/cm/service/roles/$mgmt_role_name";
 				if ( $list_active_commands ) {
-					print "\n";
-					$cm_url .= "/commands";
-					my $items = &rest_call('GET', $cm_url, 1);
-					if ( @{$items->{'items'}} ) {
-						foreach $cmd ( sort { $a->{'id'} <=> $b->{'id'} } @{$items->{'items'}} ) {
-							if ( $trackCmd ) {
-								$id = $cmd->{'id'};
-								print "CMDID: $id\n";
-								$cmd_list->{$id} = $cmd;
-							} else { &cmd_id(\%{$cmd}) }
-						}
-					} else {
-						print "No active mgmt role commands found\n";
-					}
+					&track_active_commands($context);
 				} elsif ( $a eq 'deleteRole' ) {
 					my $role = &rest_call('DELETE', $cm_url, 1);
 					print "| Role deleted\n";
@@ -754,12 +728,12 @@ if ( $s && $s =~ /mgmt/ ) {
 				} else {
 					$cm_url = "$cm_api/cm/service/roleCommands/$a";
 					$body_content = "{ \"items\" : [\"$mgmt_role_name\"] }";
-					$cmd = &rest_call('POST', $cm_url, 1, undef, $body_content);
+					my $cmd = &rest_call('POST', $cm_url, 1, undef, $body_content);
 					if ( @{$cmd->{'errors'}} ) {
 						print "\nERROR: $cmd->{'errors'}[0]\n";
 						next;
 					}
-					$id = $cmd->{'items'}[0]->{'id'};
+					my $id = $cmd->{'items'}[0]->{'id'};
 					print "| CMDID: $id\n";
 					$trackCmd ? $cmd_list->{$id} = $cmd->{'items'}[0] : &cmd_id($cmd->{'items'}[0]);
 				}
@@ -832,26 +806,14 @@ foreach my $cluster_name ( @clusters ) {
 		}
 		print "\n";
 		if ( $a ) {
-			my $cluster_action = $list_active_commands ? 'list active cluster commands' : $a;
+			my $context = 'cluster';
+			my $cluster_action = $list_active_commands ? "list active $context commands" : $a;
 			if ( $list_active_commands || $a eq 'serviceTypes' || $confirmed ) {
 				print "... $cluster_name | ACTION: $cluster_action ";
 				$cm_url = "$cm_api/clusters/$cluster_name";
-				my ($cmd, $id, $cluster, $service);
+				my $cluster;
 				if ( $list_active_commands ) {
-					print "\n";
-					$cm_url .= "/commands";
-					my $items = &rest_call('GET', $cm_url, 1);
-					if ( @{$items->{'items'}} ) {
-						foreach $cmd ( sort { $a->{'id'} <=> $b->{'id'} } @{$items->{'items'}} ) {
-							if ( $trackCmd ) {
-								$id = $cmd->{'id'};
-								print "CMDID: $id\n";
-								$cmd_list->{$id} = $cmd;
-							} else { &cmd_id(\%{$cmd}) }
-						}
-					} else {
-						print "No active cluster commands found\n";
-					}
+					&track_active_commands($context);
 				} elsif ( $a eq 'updateCluster' ) {
 					$body_content = "{ ";
 					$body_content .= "\"displayName\" : \"$displayName\"" if $displayName;
@@ -867,7 +829,7 @@ foreach my $cluster_name ( @clusters ) {
 					$serviceType = uc $serviceType;
 					$cm_url .= "/services";
 					$body_content = "{ \"items\" : [ { \"name\" : \"$serviceName\", \"displayName\" : \"$displayName\", \"type\" : \"$serviceType\" } ] }";
-					$service = &rest_call('POST', $cm_url, 1, undef, $body_content);
+					my $service = &rest_call('POST', $cm_url, 1, undef, $body_content);
 					my $service_display_name = $service->{'items'}[0]->{'displayName'};
 					my $service_type = $service->{'items'}[0]->{'type'};
 					print "| Service '$serviceName' ";
@@ -881,8 +843,8 @@ foreach my $cluster_name ( @clusters ) {
 					print map { "$_\n" } sort @{$service_types->{'items'}};
 				} else {
 					$cm_url .= "/commands/$a";
-					$cmd = &rest_call('POST', $cm_url, 1);
-					$id = $cmd->{'id'};
+					my $cmd = &rest_call('POST', $cm_url, 1);
+					my $id = $cmd->{'id'};
 					print "| CMDID: $id\n";
 					if ( $trackCmd && $id != -1 ) {
 						$cmd_list->{$id} = $cmd;
@@ -1032,25 +994,13 @@ foreach my $cluster_name ( @clusters ) {
 			} }
 
 			if ( $a && !$rInfo && ( $list_active_commands || $confirmed || $a =~ /roleTypes|getConfig/ ) ) {
-				my $service_action = $list_active_commands ? 'list active service commands' : $a;
+				my $context = 'service';
+				my $service_action = $list_active_commands ? "list active $context commands" : $a;
 				print "... $service_header | ACTION: $service_action ";
 				$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name";
-				my ($cmd, $id, $service, $role_config_group);
+				my ($service, $role_config_group);
 				if ( $list_active_commands ) {
-					print "\n";
-					$cm_url .= "/commands";
-					my $items = &rest_call('GET', $cm_url, 1);
-					if ( @{$items->{'items'}} ) {
-						foreach $cmd ( sort { $a->{'id'} <=> $b->{'id'} } @{$items->{'items'}} ) {
-							if ( $trackCmd ) {
-								$id = $cmd->{'id'};
-								print "CMDID: $id\n";
-								$cmd_list->{$id} = $cmd;
-							} else { &cmd_id(\%{$cmd}) }
-						}
-					} else {
-						print "No active service commands found\n";
-					}
+					&track_active_commands($context);
 				} elsif ( $a eq 'createRoleGroup' ) {
 					$roleType = uc $roleType;
 					my $roleGroupDisplayName = $displayName;
@@ -1138,8 +1088,8 @@ foreach my $cluster_name ( @clusters ) {
 					} elsif ( $a eq 'deployClientConfig' ) {
 						$body_content = '{ "items" : [] }';
 					}
-					$cmd = $body_content ? &rest_call('POST', $cm_url, 1, undef, $body_content) : &rest_call('POST', $cm_url, 1);
-					$id = $cmd->{'id'};
+					my $cmd = $body_content ? &rest_call('POST', $cm_url, 1, undef, $body_content) : &rest_call('POST', $cm_url, 1);
+					my $id = $cmd->{'id'};
 					print "| CMDID: $id\n";
 					if ( $trackCmd && $id != -1 ) {
 						$cmd_list->{$id} = $cmd;
@@ -1265,26 +1215,14 @@ foreach my $cluster_name ( @clusters ) {
 						}
 
 						if ( $a && ( $list_active_commands || $confirmed || $a eq 'getConfig' ) ) {
-							my $role_action = $list_active_commands ? 'list active role commands' : $a;
+							my $context = 'role';
+							my $role_action = $list_active_commands ? "list active $context commands" : $a;
 							print "... $service_header | $host_id | $role_name | ACTION: $role_action " unless $a =~ /rollingRestart|decommission|recommission/;
 							$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name";
-							my ($cmd, $id);
 							my $single_cmd = 1;
 							if ( $list_active_commands ) {
-								print "\n";
-								$cm_url .= "/roles/$role_name/commands";
-								my $items = &rest_call('GET', $cm_url, 1);
-								if ( @{$items->{'items'}} ) {
-									foreach $cmd ( sort { $a->{'id'} <=> $b->{'id'} } @{$items->{'items'}} ) {
-										if ( $trackCmd ) {
-											$id = $cmd->{'id'};
-											print "CMDID: $id\n";
-											$cmd_list->{$id} = $cmd;
-										} else { &cmd_id(\%{$cmd}) }
-									}
-								} else {
-									print "No active role commands found\n";
-								}
+								$cm_url .= "/roles/$role_name";
+								&track_active_commands($context);
 								next;
 							} elsif ( $a eq 'rollingRestart' ) {
 								$rr_opts{'restartRoleNames'} .= "$role_name,";
@@ -1318,12 +1256,12 @@ foreach my $cluster_name ( @clusters ) {
 								print "| Role config group updated\n";
 								next;
 							}
-							$cmd = $body_content ? &rest_call('POST', $cm_url, 1, undef, $body_content) : &rest_call('POST', $cm_url, 1);
+							my $cmd = $body_content ? &rest_call('POST', $cm_url, 1, undef, $body_content) : &rest_call('POST', $cm_url, 1);
 							if ( $cmd->{'errors'} && @{$cmd->{'errors'}} ) {
 								print "\nERROR: $cmd->{'errors'}[0]\n";
 								next;
 							}
-							$id = $single_cmd ? $cmd->{'id'} : $cmd->{'items'}[0]->{'id'};
+							my $id = $single_cmd ? $cmd->{'id'} : $cmd->{'items'}[0]->{'id'};
 							print "| CMDID: $id\n";
 							if ( $trackCmd && $id != -1 ) {
 								$cmd_list->{$id} = $single_cmd ? $cmd_list->{$id} = $cmd : $cmd->{'items'}[0];
@@ -1694,4 +1632,20 @@ sub copy_from {
 	my $config = &rest_call('GET', $url, 1);
 	$config = to_json($config->{'config'});
 	return ", \"config\" : $config";
+}
+
+sub track_active_commands {
+	my $msg = shift;
+	print "\n";
+	$cm_url .= "/commands";
+	my $items = &rest_call('GET', $cm_url, 1);
+	if ( @{$items->{'items'}} ) {
+		foreach my $cmd ( sort { $a->{'id'} <=> $b->{'id'} } @{$items->{'items'}} ) {
+			if ( $trackCmd ) {
+				my $id = $cmd->{'id'};
+				print "CMDID: $id\n";
+				$cmd_list->{$id} = $cmd;
+			} else { &cmd_id(\%{$cmd}) }
+		}
+	} else { print "No active $msg commands found\n" }
 }
