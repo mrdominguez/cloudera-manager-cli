@@ -1635,7 +1635,7 @@ sub copy_from {
 }
 
 sub track_active_commands {
-	my $msg = shift;
+	my $context = shift;
 	print "\n";
 	$cm_url .= "/commands";
 	my $items = &rest_call('GET', $cm_url, 1);
@@ -1647,5 +1647,5 @@ sub track_active_commands {
 				$cmd_list->{$id} = $cmd;
 			} else { &cmd_id(\%{$cmd}) }
 		}
-	} else { print "No active $msg commands found\n" }
+	} else { print "No active $context commands found\n" }
 }
