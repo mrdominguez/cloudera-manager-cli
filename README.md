@@ -1,8 +1,9 @@
-### Version 8.2.5 is now available!
+### Version 8.2.6 is now available!
 
+- New service filters: `-sFilter`, `-maintenanceMode`
 - Added basic HTTPS support: `-https`
-- Show HTTP response code and headers in debug mode (`-d`)
 - Support for comma-separated list of command IDs: `-cmdId`
+- Show HTTP response code and headers in debug mode (`-d`)
 - Overall code improvements
 - Revised user management logic
 - To avoid concurrency issues while refreshing master nodes, the `decommission` and `recommission` actions for both hosts and roles have been updated to use a list of items instead of a single item sequentially
@@ -143,8 +144,8 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]
 	[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
 	  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]
-	[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]
-	[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=host_filter] [-rChecks] [-rMetrics] [-log=log_type]]
+	[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter]
+	[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=role_filter] [-rChecks] [-rMetrics] [-log=log_type]]
 	[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]
 	[-a[=command_name]] [-confirmed] [-trackCmd] [-run]
 	[-yarnApps[=parameters]]
@@ -193,7 +194,8 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -r : Role type/name (regex)
 	 -rInfo : Role information (regex UUID or set -hInfo | default: all)
 	 -rFilter : Role state, health summary, configuration status, commission state (regex)
-	 -maintenanceMode : Display maintenance mode. Select hosts/roles based on status (YES/NO | default: all)
+	 -sFilter : Service state, health summary, configuration status, client configuration status (regex)
+	 -maintenanceMode : Display maintenance mode. Select hosts/services/roles based on status (YES/NO | default: all)
 	 -roleConfigGroup : Display role config group in the role information. Select roles based on config group name (regex | default: all)
 	 -a : Cluster/service/role action (default: list active commands)
 	      (stop|start|restart|refresh|...)
@@ -391,9 +393,17 @@ Here are some common use cases:
 
  	`$ cmcli.pl -s=mgmt -rInfo`
 
+* Deploy the client configuration for any service with stale status:
+
+	`$ cmcli.pl -sFilter=stale -a=deployClientConfig`
+
+* Restart the services with stale configuration:
+
+	`$ cmcli.pl -sFilter=stale -a=restart`
+
 * Show the roles of the HDFS service of 'cluster2':
 
- 	`$ cmcli.pl -c=cluster2 -s=hdfs -rInfo`
+	`$ cmcli.pl -c=cluster2 -s=hdfs -rInfo`
 
     *To replace the host id (UUID) in the output with the host name, simply add `-hInfo`.*
 
