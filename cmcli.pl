@@ -28,7 +28,7 @@ use Data::Dumper;
 BEGIN { $| = 1 }
 
 use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword $userRole $https $api $sChecks $sMetrics $rChecks $rMetrics $cmConfig $u $p $cm
-	$c $s $r $rInfo $rFilter $yarnApps $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles $hChecks $deployment
+	$c $s $r $rInfo $rFilter $sFilter $yarnApps $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles $hChecks $deployment
 	$mgmt $impalaQueries $trackCmd $setRackId $deleteHost $addToCluster $removeFromCluster $addRole $serviceName $clusterName
 	$hAction $run $maintenanceMode $roleConfigGroup $propertyName $propertyValue $clientConfig $full $displayName $fullVersion $serviceType $roleType
 	$slaveBatchSize $sleepSeconds $slaveFailCountThreshold $staleConfigsOnly $unUpgradedOnly $restartRoleTypes $copyFromRoleGroup);
@@ -36,14 +36,14 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 8.2.5\n";
-	print "Release date: 05/15/2020\n";
+	print "Version: 8.2.6\n";
+	print "Release date: 05/22/2020\n";
 	exit;
 }
 
 &usage if $help;
 
-my %opts = ('cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'userAction'=>$userAction,
+my %opts = ('cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'sFilter'=>$sFilter, 'userAction'=>$userAction,
 	'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction,
 	'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName,
 	'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType, 'roleType'=>$roleType, 'copyFromRoleGroup'=>$copyFromRoleGroup,
@@ -374,19 +374,20 @@ if ( $hInfo ) {
 
 		next if ( $c && $api_version > 10 && $cluster_name ne $c );
 		next unless ( $host_name =~ /$hInfo/
-				|| $ip =~ /$hInfo/
-				|| $rack_id =~ /$hInfo/
-				|| $host_id =~ /$hInfo/ );
+			|| $ip =~ /$hInfo/
+			|| $rack_id =~ /$hInfo/
+			|| $host_id =~ /$hInfo/ );
 
 		if ( $hFilter ) {
 			next unless ( ( $host_health && $host_health =~ /$hFilter/i )
 				|| ( $host_status && $host_status =~ /$hFilter/i )
 				|| ( $host_commission_state && $host_commission_state =~ /$hFilter/i ) );
 		}
+
 		next if ( $maintenanceMode
-				&& $host_maintenance_mode
-				&& $maintenanceMode ne '1'
-				&& $host_maintenance_mode ne $maintenanceMode );
+			&& $host_maintenance_mode
+			&& $maintenanceMode ne '1'
+			&& $host_maintenance_mode ne $maintenanceMode );
 
 		my $cluster_flag = 1;
 		if ( $role_info_flag && !$c && !$hRoles ) {
@@ -587,10 +588,12 @@ if ( $hInfo ) {
 		}
 		last;
 	}
+
 	if ( $hAction && !$deleteHost ) {
 		print "# Use -confirmed or -run to execute host action '$hAction'\n" if !$confirmed;
 		&track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 	}
+
 	foreach ( keys %hInfo_opts ) {
 		exit if ( $_ !~ /hRoles|hChecks/ && $hInfo_opts{$_} );
 	}
@@ -611,6 +614,7 @@ if ( $hInfo ) {
 }
 
 $rInfo = '.' if ( $rInfo && $rInfo eq '1' ) || ( $r || $rFilter );
+$s = '.' if !$rInfo && !$s && ( $sFilter || ( $maintenanceMode && $maintenanceMode ne 1 ) );
 die "-a=$a is not available for roles\n" if ( $rInfo && $a && $a eq 'deployClientConfig' );
 
 if ( $s && $s =~ /mgmt/ ) {
@@ -673,15 +677,17 @@ if ( $s && $s =~ /mgmt/ ) {
 			my $mgmt_role_health = $mgmt_roles->{'items'}[$i]->{'healthSummary'};
 			my $mgmt_role_config = $mgmt_roles->{'items'}[$i]->{'configStalenessStatus'};
 			my $mgmt_role_maintenance_mode = $mgmt_roles->{'items'}[$i]->{'maintenanceMode'} ? 'YES' : 'NO';
+
 			if ( $rFilter ) {
 				next unless ( $mgmt_role_state =~ /$rFilter/i
 					|| $mgmt_role_health =~ /$rFilter/i
 					|| ( $mgmt_role_config && $mgmt_role_config =~ /$rFilter/i ) );
 			}
+
 			next if ( $maintenanceMode
-					&& $mgmt_role_maintenance_mode
-					&& $maintenanceMode ne '1'
-					&& $mgmt_role_maintenance_mode ne $maintenanceMode );
+				&& $mgmt_role_maintenance_mode
+				&& $maintenanceMode ne '1'
+				&& $mgmt_role_maintenance_mode ne $maintenanceMode );
 
 			if ( $hInfo ) {
 				$host_id = $uuid_host_map->{$host_id};
@@ -879,6 +885,17 @@ foreach my $cluster_name ( @clusters ) {
 			my $service_display_name = $cm_services->{'items'}[$i]->{'displayName'};
 			my $service_config = $cm_services->{'items'}[$i]->{'configStalenessStatus'};
 			my $service_clientConfig = $cm_services->{'items'}[$i]->{'clientConfigStalenessStatus'};
+
+			if ( $sFilter ) {
+				next unless ( $service_state =~ /$sFilter/i || $service_health =~ /$sFilter/i
+					|| ( $service_config && $service_config =~ /$sFilter/i )
+					|| ( $service_clientConfig && $service_clientConfig =~ /$sFilter/i ) );
+			}
+
+			next if ( !$rInfo && $maintenanceMode
+				&& $service_maintenance_mode
+				&& $maintenanceMode ne '1'
+				&& $service_maintenance_mode ne $maintenanceMode );
 
 			print "|_ $service_header | $service_type ";
 			if ( $api_version > 1 ) {
@@ -1126,10 +1143,12 @@ foreach my $cluster_name ( @clusters ) {
 								|| ( $role_config_group && $role_config_group =~ /$rFilter/i )
 								|| ( $role_commission_state && $role_commission_state =~ /$rFilter/i ) );
 						}
+
 						next if ( $maintenanceMode
 								&& $role_maintenance_mode
 								&& $maintenanceMode ne '1'
 								&& $role_maintenance_mode ne $maintenanceMode );
+
 						unless ( $a && $a eq 'moveToRoleGroup' ) {
 							next if ( $roleConfigGroup
 								&& $role_config_group
@@ -1306,7 +1325,7 @@ sub usage {
 	print "\t[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]\n";
 	print "\t[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
 	print "\t  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]\n";
-	print "\t[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]]\n";
+	print "\t[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter]\n";
 	print "\t[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=role_filter] [-rChecks] [-rMetrics] [-log=log_type]]\n";
 	print "\t[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]\n";
 	print "\t[-a[=command_name]] [-confirmed] [-trackCmd] [-run]\n";
@@ -1356,7 +1375,8 @@ sub usage {
 	print "\t -r : Role type/name (regex)\n";
 	print "\t -rInfo : Role information (regex UUID or set -hInfo | default: all)\n";
 	print "\t -rFilter : Role state, health summary, configuration status, commission state (regex)\n";
-	print "\t -maintenanceMode : Display maintenance mode. Select hosts/roles based on status (YES/NO | default: all)\n";
+	print "\t -sFilter : Service state, health summary, configuration status, client configuration status (regex)\n";
+	print "\t -maintenanceMode : Display maintenance mode. Select hosts/services/roles based on status (YES/NO | default: all)\n";
 	print "\t -roleConfigGroup : Display role config group in the role information. Select roles based on config group name (regex | default: all)\n";
 	print "\t -a : Cluster/service/role action (default: list active commands)\n";
 	print "\t      (stop|start|restart|refresh|...)\n";
