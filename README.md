@@ -257,9 +257,9 @@ Usage: cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
 	 -bt : Body type | array, hash, json (default: hash)
 	 -bc : Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)
 	       To set multiple objects, use -bt=json or -f to pass a JSON file
-	 -i : Add 'items' property to the body content (enabled by default if -bt=array)
+	 -i : Add the 'items' property to the body content (enabled by default if -bt=array)
 	 -f : JSON file containing body content (implies -bt=json)
-	 <ResourceUrl> : URL to REST resource (example: [http://]cm_server_host:7180/api/v15/clusters/)
+	 <ResourceUrl> : URL to REST resource (example: [http://]cm_server_host:7180/api/v15/clusters)
 ```
 
 ## Setting credentials
