@@ -1391,7 +1391,7 @@ sub usage {
  	print "\t        -slaveFailCountThreshold : Number of slave host batches that are allowed to fail to restart before the entire command is considered failed (default: 0)\n";
  	print "\t        -staleConfigsOnly : Restart roles with stale configs only (default: false)\n";
  	print "\t        -unUpgradedOnly : Restart roles that haven't been upgraded yet (default: false)\n";
-	print "\t      (getConfig|updateConfig) : Display/update the configuration of services/role config groups/roles\n";
+	print "\t      (getConfig|updateConfig) : Display/update the configuration of services/roles\n";
 	print "\t        Syntax: -a=getConfig [-propertyName=property_name] [-clientConfig] [-roleConfigGroup[=config_group_name]]\n";
 	print "\t                -a=updateConfig [-roleConfigGroup=config_group_name] -propertyName=property_name [-propertyValue=property_value]\n";
 	print "\t        -clientConfig : Save service client configuration to file (default: disabled)\n";
