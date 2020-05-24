@@ -210,7 +210,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	        -slaveFailCountThreshold : Number of slave host batches that are allowed to fail to restart before the entire command is considered failed (default: 0)
 	        -staleConfigsOnly : Restart roles with stale configs only (default: false)
 	        -unUpgradedOnly : Restart roles that haven't been upgraded yet (default: false)
-	      (getConfig|updateConfig) : Display/update the configuration of services/role config groups/roles
+	      (getConfig|updateConfig) : Display/update the configuration of services/roles
 	        Syntax: -a=getConfig [-propertyName=property_name] [-clientConfig] [-roleConfigGroup[=config_group_name]]
 	                -a=updateConfig [-roleConfigGroup=config_group_name] -propertyName=property_name [-propertyValue=property_value]
 	        -clientConfig : Save service client configuration to file (default: disabled)
