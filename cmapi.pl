@@ -38,6 +38,7 @@ die "Argument <ResourceUrl> is missing\nUse -help for options\n" if @ARGV == 0;
 
 my $cm_cred_file = "$ENV{'HOME'}/.cm_rest";
 print "Credentials file $cm_cred_file " if $d;
+
 if ( -e $cm_cred_file ) {
 	print "found\n" if $d;
 	open my $fh, '<', $cm_cred_file || die "Can't open file $cm_cred_file: $!";
@@ -60,6 +61,7 @@ print "username = $cm_user\n" if $d;
 
 my $cm_password = $p || $ENV{'CM_REST_PASS'} || 'admin';
 print "Password file $cm_password " if $d;
+
 if ( -e $cm_password ) {
 	print "found\n" if $d;
 	$cm_password = qx/cat $cm_password/ || die "Can't get password from file $cm_password\n";
@@ -72,7 +74,6 @@ my $headers = { 'Content-Type' => 'application/json', 'Authorization' => 'Basic 
 my $method = $m || 'GET';
 my $body_type = $bt || 'hash';
 my $body_content = $bc || undef;
-
 my $url = $ARGV[0];
 my $https = 1 if $url =~ /^https/i;
 
