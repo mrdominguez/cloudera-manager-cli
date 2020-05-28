@@ -2,9 +2,9 @@
 
 - New service filters: `-sFilter`, `-maintenanceMode`
 - Added support for:
-  * HTTPS protocol: `-https`
-  * Comma-separated list of command IDs: `-cmdId`
   * URL redirection
+  * Comma-separated list of command IDs: `-cmdId`
+  * HTTPS protocol: `-https`
 - Show HTTP response code and headers in debug mode (`-d`)
 - Overall code improvements
 - Revised user management logic
@@ -30,8 +30,7 @@ Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v15/ns0
 
 ### Version 7.0
 
-New service actions:
-
+*New service actions*
 - Create role config group: `-a=createRoleGroup`
 - Update role config group: `-a=updateRoleGroup`
 - Delete role config group: `-a=deleteRoleGroup`
