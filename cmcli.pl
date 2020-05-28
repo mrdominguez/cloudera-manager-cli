@@ -48,10 +48,13 @@ my %opts = ('cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFil
 	'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName,
 	'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType, 'roleType'=>$roleType, 'copyFromRoleGroup'=>$copyFromRoleGroup,
 	'f'=>$f, 'userName'=>$userName, 'userPassword'=>$userPassword, 'userRole'=>$userRole, 'propertyName'=>$propertyName, 'propertyValue'=>$propertyValue);
+
 my %hInfo_opts = ('hRoles'=>$hRoles, 'hChecks'=>$hChecks, 'setRackId'=>$setRackId, 'deleteHost'=>$deleteHost,
 		'addToCluster'=>$addToCluster, 'removeFromCluster'=>$removeFromCluster, 'hAction'=>$hAction, 'addRole'=>$addRole);
+
 my %rr_opts = ('slaveBatchSize'=>$slaveBatchSize, 'sleepSeconds'=>$sleepSeconds, 'slaveFailCountThreshold'=>$slaveFailCountThreshold,
 		'staleConfigsOnly'=>$staleConfigsOnly, 'unUpgradedOnly'=>$unUpgradedOnly, 'restartRoleTypes'=>$restartRoleTypes, 'restartRoleNames'=>undef);
+
 my %cluster_opts = ('c'=>$c, 'clusterName'=>$clusterName, 'displayName'=>$displayName, 'fullVersion'=>$fullVersion);
 my %service_opts = ('c'=>$c, 's'=>$s, 'serviceName'=>$serviceName, 'displayName'=>$displayName, 'serviceType'=>$serviceType);
 my %role_group_opts = ('c'=>$c, 's'=>$s, 'displayName'=>$displayName, 'roleType'=>$roleType, 'roleConfigGroup'=>$roleConfigGroup, 'copyFromRoleGroup'=>$copyFromRoleGroup);
@@ -59,9 +62,11 @@ my %user_opts = ('f'=>$f, 'userName'=>$userName, 'userPassword'=>$userPassword, 
 
 foreach ( keys %opts ) {
 	die "-$_ is not set\n" if ( $opts{$_} && $opts{$_} eq '1' ) }
+
 unless ( $hInfo ) {
 	foreach ( keys %hInfo_opts ) {
 		die "-$_ requires -hInfo\n" if $hInfo_opts{$_} } }
+
 unless ( $s || $hInfo ) {
 	foreach ( keys %rr_opts ) {
 		die "-$_ requires -s or -hInfo\n" if $rr_opts{$_} } }
@@ -83,10 +88,13 @@ if ( $cmdAction ) {
 
 if ( $hAction && $hAction !~ /decommission|recommission|startRoles|enterMaintenanceMode|exitMaintenanceMode/ ) {
 	die "Host action '$hAction' not supported. Use -help for options\n" }
+
 if ( $trackCmd && !$a && !$cmdId && !$hAction ) {
 	die "-trackCmd requires -a, -cmdId or -hAction\n" }
+
 die "-sChecks and -sMetrics require -s\n" if ( ( $sChecks || $sMetrics ) && !$s );
 die "Set -maintenanceMode to YES/NO\n" if ( $maintenanceMode && $maintenanceMode !~ /1|YES|NO/ );
+
 if ( $a ) {
 	if ( $a =~ /createRoleGroup|updateRoleGroup|deleteRoleGroup/ ) {
 		foreach ( sort keys %role_group_opts ) {
@@ -136,6 +144,7 @@ $s = '^impala' if ( $impalaQueries && !$s );
 
 my $cm_cred_file = "$ENV{'HOME'}/.cm_rest";
 print "Credentials file $cm_cred_file " if $d;
+
 if ( -e $cm_cred_file ) {
 	print "found\n" if $d;
 	open my $fh, '<', $cm_cred_file || die "Can't open file $cm_cred_file: $!";
@@ -158,6 +167,7 @@ print "username = $cm_user\n" if $d;
 
 my $cm_password = $p || $ENV{'CM_REST_PASS'} || 'admin';
 print "Password file $cm_password " if $d;
+
 if ( -e $cm_password ) {
 	print "found\n" if $d;
 	$cm_password = qx/cat $cm_password/ || die "Can't get password from file $cm_password\n";
@@ -168,10 +178,10 @@ if ( -e $cm_password ) {
 
 my $headers = { 'Content-Type' => 'application/json', 'Authorization' => 'Basic ' . encode_base64($cm_user . ':' . $cm_password) };
 my $body_content;
-
 my $cm_protocol = $https ? 'https' : 'http';
 my ($cm_host, $cm_port) = split(/:/, $cm, 2) if ( $cm && $cm ne '1' );
 $cm_host = 'localhost' unless $cm_host;
+
 unless ( $cm_port ) {
 	$cm_port = $https ? 7183 : 7180
 }
@@ -194,12 +204,14 @@ $client->getUseragent()->ssl_opts( verify_hostname => 0 ); # or set $ENV{PERL_LW
 
 my $cm_url = "$cm_protocol://$cm_host:$cm_port/api/version";
 my $api_version;
+
 if ( $cmVersion || !$api ) {
 	print "Getting API version from CM... " if $d;
 	$api_version = &rest_call('GET', $cm_url, 1);
 } else {
 	$api_version = $api;
 }
+
 $api_version = ($api_version =~ /v(\d+)/) ? $1 : die "Invalid API version format: $api_version";
 print "API version = $api_version\n" if $d;
 
@@ -296,7 +308,6 @@ if ( $userAction ) {
 	}
 	exit;
 }
-	
 
 if ( $cmConfig || $deployment ) {
 	my $filename;
@@ -330,7 +341,6 @@ if ( $cmdId ) {
 		} else {
 			$cmd = &rest_call('GET', $cm_url, 1);
 		}
-
 		$trackCmd ? $cmd_list->{$cmd->{'id'}} = $cmd : &cmd_id(\%{$cmd});
 	}
 	&track_cmd(\%{$cmd_list}) if $trackCmd;
@@ -343,6 +353,7 @@ my $list_active_commands = 1 if ( $a && $a eq '1' );
 my @clusters;
 my $uuid_host_map = {};
 my $role_host_map = {};
+
 if ( $hInfo ) {
 	die "-a=$a is not available for roles\n" if ( $a && $a eq 'deployClientConfig' );
 	my $role_info_flag = 1 if ( $rInfo || $a );
