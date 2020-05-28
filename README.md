@@ -1,14 +1,16 @@
-### Version 8.2.6 is now available!
+### Version 9.0 is now available!
 
 - New service filters: `-sFilter`, `-maintenanceMode`
-- Added basic HTTPS support: `-https`
-- Support for comma-separated list of command IDs: `-cmdId`
+- Added support for:
+  * HTTPS protocol: `-https`
+  * Comma-separated list of command IDs: `-cmdId`
+  * URL redirection
 - Show HTTP response code and headers in debug mode (`-d`)
 - Overall code improvements
 - Revised user management logic
-- To avoid concurrency issues while refreshing master nodes, the `decommission` and `recommission` actions for both hosts and roles have been updated to use a list of items instead of a single item sequentially
+- Updated `decommission` and `recommission` actions for both hosts and roles to use a list of items instead of a single item sequentially (to avoid concurrency issues while refreshing master nodes)
 
-### Version 8.1
+### Version 8.0
 
 - `-cmdAction=abort|retry` safeguarded by `-confirmed|-run` options
 - Rewrote the user management section to make it consistent with the rest of the code:
@@ -38,18 +40,18 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v15/
 
 ### Version 6.0
 
-- List the supported service types for a cluster: `-c=<...> -a=serviceTypes`
-- List the supported role types for a service: `-s=<...> -a=roleTypes`
+- List the supported service types for a cluster: `-c=... -a=serviceTypes`
+- List the supported role types for a service: `-s=... -a=roleTypes`
 - Create cluster: `-a=createCluster`
-- Update cluster: `-c=<...> -a=updateCluster`
-- Delete cluster: `-c=<...> -a=deleteCluster`
-- Create service: `-c=<...> -a=addService`
-- Update service: `-s=<...> -a=updateService`
-- Delete service: `-s=<...> -a=deleteService`
+- Update cluster: `-c=... -a=updateCluster`
+- Delete cluster: `-c=... -a=deleteCluster`
+- Create service: `-c=... -a=addService`
+- Update service: `-s=... -a=updateService`
+- Delete service: `-s=... -a=deleteService`
 
 ### Version 5.0
 
-- Create roles: `-hInfo=<...> -addRole=<role_types> -serviceName=<service_name>`
+- Create roles: `-hInfo=... -addRole=<role_types> -serviceName=<service_name>`
 - Delete roles: `-a=deleteRole`
 - Display configuration for services (including Cloudera Management), role groups and roles: `-a=getConfig`
 - Download service client configuration: `-s=<service_name> -a=getConfig -clientConfig`
@@ -580,7 +582,7 @@ user5
 
  	`cmcli.pl -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
     
-	*`-restartRoleTypes` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=<...> -a=roleTypes`.*
+	*`-restartRoleTypes` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=... -a=roleTypes`.*
     
 * Roll restart the ResourceManager roles:
 
@@ -610,7 +612,7 @@ user5
 
  	`cmcli.pl -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster2 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
 
-	*`-addRole` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=<...> -a=roleTypes`.*
+	*`-addRole` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=... -a=roleTypes`.*
 
 * Delete all the roles from a host:
 
