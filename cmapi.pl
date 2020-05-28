@@ -28,8 +28,8 @@ use vars qw($help $version $u $p $m $d $f $i $bt $bc);
 if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 8.2.6\n";
-	print "Release date: 05/22/2020\n";
+	print "Version: 9.0\n";
+	print "Release date: 05/28/2020\n";
 	exit;
 }
 
@@ -125,15 +125,19 @@ if ( $d && defined $body_content ) {
 }
 
 # http://search.cpan.org/dist/libwww-perl/lib/LWP.pm
-# LWP::Protocol::https::Socket: SSL connect attempt failed error:14090086:SSL routines:ssl3_get_server_certificate:certificate verify failed
-#$ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0 if $https; # disable hostname verification
+#  PERL_LWP_SSL_VERIFY_HOSTNAME
+#   The default verify_hostname setting for LWP::UserAgent. If not set the default will be 1. Set it as 0 to disable hostname verification (the default prior to libwww-perl 5.840).
+# http://search.cpan.org/~ether/libwww-perl/lib/LWP/UserAgent.pm#CONSTRUCTOR_METHODS
+#  verify_hostname => $bool
+#   This option is initialized from the PERL_LWP_SSL_VERIFY_HOSTNAME environment variable. If this environment variable isn't set; then verify_hostname defaults to 1.
+
+# SSL connect attempt failed error:14090086:SSL routines:ssl3_get_server_certificate:certificate verify failed
+
+#$ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
 
 # http://search.cpan.org/~kkane/REST-Client/lib/REST/Client.pm
 my $client = REST::Client->new();
-if ( $https ) {
-        # http://search.cpan.org/~ether/libwww-perl/lib/LWP/UserAgent.pm#CONSTRUCTOR_METHODS
-        $client->getUseragent()->ssl_opts( verify_hostname => 0 ); # or set $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}
-}
+$client->getUseragent()->ssl_opts( verify_hostname => 0 ) if $https; # or set $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}
 
 if ( $method =~ m/GET/i ) {
 	$client->GET($url, $headers); 
