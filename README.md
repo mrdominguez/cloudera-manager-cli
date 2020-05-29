@@ -88,7 +88,7 @@ FEEDBACK/BUGS: Please contact me by email.
 
 The Cloudera Manager CLI (`cmcli.pl`) is a utility that facilitates cluster management and automation from the command-line through the Cloudera Manager REST API.
 
-It is compatible with Cloudera Manager 5 (API v6 or higher). Most of the functionality should also work (not fully tested) with CM 4 (API v5 or lower) as well as CM 6, although there could be unsupported features.
+It is compatible with Cloudera Manager 5 and higher (API v6 and after).
 
 A separate REST client (`cmapi.pl`) is provided to call the endpoints not supported by the CLI. `cmapi.pl` can also be used to get any command's downloadable result data, provided by`resultDataUrl`.
 
