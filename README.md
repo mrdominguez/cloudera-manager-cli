@@ -107,7 +107,7 @@ For information about the Cloudera Manager API, please check the following links
 
 <https://www.cloudera.com/documentation/enterprise/latest/topics/cm_intro_api.html>
 
-<https://cloudera.github.io/cm_api/apidocs/v15/index.html>
+<https://cloudera.github.io/cm_api/apidocs/v19/index.html>
 
 *NOTE: Replace the API version in the URLs accordingly*
 
