@@ -109,6 +109,8 @@ For information about the Cloudera Manager API, please check the following links
 
 <https://cloudera.github.io/cm_api/apidocs/v15/index.html>
 
+*NOTE: Replace the API version in the URLs accordingly*
+
 ## Sample output
 
 By default, if not set explicitly, `-cm` points to `localhost:7180` (or `7183` if `https` is enabled):
