@@ -116,7 +116,7 @@ For information about the Cloudera Manager API, please check the following links
 By default, if not set explicitly, `-cm` points to `localhost:7180` (or `7183` if `https` is enabled):
 
 ```
-# cmcli.pl
+$ cmcli.pl
 Redirecting to https://localhost:7183/...
 Cluster 1 >>> Cluster 1 (CDH 6.3.3) --- GOOD_HEALTH
 |_ Cluster 1 | zookeeper | ZOOKEEPER | ZooKeeper --- STARTED GOOD FRESH FRESH
@@ -130,10 +130,10 @@ Cluster 1 >>> Cluster 1 (CDH 6.3.3) --- GOOD_HEALTH
 |_ Cluster 1 | sentry | SENTRY | Sentry --- STARTED GOOD FRESH FRESH
 |_ Cluster 1 | kudu | KUDU | Kudu --- STARTED GOOD FRESH FRESH
 |_ Cluster 1 | hbase | HBASE | HBase --- STARTED GOOD FRESH FRESH
-#
-# cmcli.pl -https -mgmt
+$
+$ cmcli.pl -https -mgmt
 mgmt | MGMT --- STARTED GOOD FRESH
-#
+$
 ```
 
 ## Installation
