@@ -109,6 +109,31 @@ For information about the Cloudera Manager API, please check the following links
 
 <https://cloudera.github.io/cm_api/apidocs/v15/index.html>
 
+## Sample output
+
+By default, if not set explicitly, `-cm` points to `localhost:7180` (or `7183` if `https` is enabled):
+
+```
+# cmcli.pl
+Redirecting to https://localhost:7183/...
+Cluster 1 >>> Cluster 1 (CDH 6.3.3) --- GOOD_HEALTH
+|_ Cluster 1 | zookeeper | ZOOKEEPER | ZooKeeper --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | oozie | OOZIE | Oozie --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | hue | HUE | Hue --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | hdfs | HDFS | HDFS --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | impala | IMPALA | Impala --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | yarn | YARN | YARN (MR2 Included) --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | hive | HIVE | Hive --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | spark_on_yarn | SPARK_ON_YARN | Spark --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | sentry | SENTRY | Sentry --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | kudu | KUDU | Kudu --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | hbase | HBASE | HBase --- STARTED GOOD FRESH FRESH
+#
+# cmcli.pl -https -mgmt
+mgmt | MGMT --- STARTED GOOD FRESH
+#
+```
+
 ## Installation
 
 These utilities are written in Perl and have been tested using Perl 5.1x.x on RHEL 6 and 7.
@@ -242,29 +267,6 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -yarnApps : Display YARN applications (example: -yarnApps='filter='executing=true'')
 	 -impalaQueries : Display Impala queries (example: -impalaQueries='filter='user=<userName>'')
 	 -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)
-```
-
-By default, if not set explicitly, `-cm` points to `localhost:7180` (or `7183` if `https` is enabled):
-
-```
-# cmcli.pl
-Redirecting to https://localhost:7183/...
-Cluster 1 >>> Cluster 1 (CDH 6.3.3) --- GOOD_HEALTH
-|_ Cluster 1 | zookeeper | ZOOKEEPER | ZooKeeper --- STARTED GOOD FRESH FRESH
-|_ Cluster 1 | oozie | OOZIE | Oozie --- STARTED GOOD FRESH FRESH
-|_ Cluster 1 | hue | HUE | Hue --- STARTED GOOD FRESH FRESH
-|_ Cluster 1 | hdfs | HDFS | HDFS --- STARTED GOOD FRESH FRESH
-|_ Cluster 1 | impala | IMPALA | Impala --- STARTED GOOD FRESH FRESH
-|_ Cluster 1 | yarn | YARN | YARN (MR2 Included) --- STARTED GOOD FRESH FRESH
-|_ Cluster 1 | hive | HIVE | Hive --- STARTED GOOD FRESH FRESH
-|_ Cluster 1 | spark_on_yarn | SPARK_ON_YARN | Spark --- STARTED GOOD FRESH FRESH
-|_ Cluster 1 | sentry | SENTRY | Sentry --- STARTED GOOD FRESH FRESH
-|_ Cluster 1 | kudu | KUDU | Kudu --- STARTED GOOD FRESH FRESH
-|_ Cluster 1 | hbase | HBASE | HBase --- STARTED GOOD FRESH FRESH
-#
-# cmcli.pl -https -mgmt
-mgmt | MGMT --- STARTED GOOD FRESH
-#
 ```
 
 **cmapi.pl**
