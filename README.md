@@ -162,8 +162,6 @@ Then, add the following line to the Perl code at the beginning of the `use` bloc
 
 ## Usage
 
-Here is the usage information for both utilities:
-
 **cmcli.pl**
 ```
 Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u=cm_user] [-p=cm_password]
@@ -369,8 +367,6 @@ https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiCommand.html
 `id | name | startTime | endTime | active | success | resultMessage | resultDataUrl | canRetry | clusterRef | serviceRef | roleRef | hostRef`
 
 ## How-To
-
-Here are some common use cases:
 
 * Show all managed hosts:
 
