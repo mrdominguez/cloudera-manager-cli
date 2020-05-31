@@ -135,10 +135,9 @@ Then, add the following line to the Perl code at the beginning of the `use` bloc
 
 ## Usage
 
-The only required option for `cmcli.pl` is `-cm` to reference the CM server host, whereas `cmapi.pl` requires `<ResourceUrl>`.
-
 Here is the usage information for both utilities:
 
+**cmcli.pl**
 ```
 Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u=cm_user] [-p=cm_password]
 	[-cmVersion] [-cmConfig|-deployment] [-cmdId=commandId_list [-cmdAction=abort|retry]]
@@ -244,6 +243,31 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -impalaQueries : Display Impala queries (example: -impalaQueries='filter='user=<userName>'')
 	 -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)
 ```
+
+By default, if not set explicitly, `-cm` points to `localhost:7180` (or `7183` if `https` is enabled):
+
+```
+# cmcli.pl
+Redirecting to https://localhost:7183/...
+Cluster 1 >>> Cluster 1 (CDH 6.3.3) --- GOOD_HEALTH
+|_ Cluster 1 | zookeeper | ZOOKEEPER | ZooKeeper --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | oozie | OOZIE | Oozie --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | hue | HUE | Hue --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | hdfs | HDFS | HDFS --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | impala | IMPALA | Impala --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | yarn | YARN | YARN (MR2 Included) --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | hive | HIVE | Hive --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | spark_on_yarn | SPARK_ON_YARN | Spark --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | sentry | SENTRY | Sentry --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | kudu | KUDU | Kudu --- STARTED GOOD FRESH FRESH
+|_ Cluster 1 | hbase | HBASE | HBase --- STARTED GOOD FRESH FRESH
+#
+# cmcli.pl -https -mgmt
+mgmt | MGMT --- STARTED GOOD FRESH
+#
+```
+
+**cmapi.pl**
 ```
 Usage: cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
 	[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] <ResourceUrl>
