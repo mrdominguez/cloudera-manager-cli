@@ -24,7 +24,7 @@
 	  (delete) Delete user (args: -userName)
 	  (show) Display users (args: [-userName] | default: all)
 ```
-Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiUser.html).
+Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiUser.html).
 
 - Minor changes
 
@@ -35,7 +35,7 @@ Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v15/ns0
 - Update role config group: `-a=updateRoleGroup`
 - Delete role config group: `-a=deleteRoleGroup`
 
-Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services.html) and [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html).
+Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services.html) and [role types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services_-serviceName-_roles.html).
 
 ### Version 6.0
 
@@ -288,7 +288,7 @@ Usage: cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
 	       To set multiple objects, use -bt=json or -f to pass a JSON file
 	 -i : Add the 'items' property to the body content (enabled by default if -bt=array)
 	 -f : JSON file containing body content (implies -bt=json)
-	 <ResourceUrl> : URL to REST resource (example: [http://]cm_server_host:7180/api/v15/clusters)
+	 <ResourceUrl> : URL to REST resource (example: [http://]cm_server_host:7180/api/v19/clusters)
 ```
 
 ## Setting credentials
@@ -344,27 +344,27 @@ For a complete list of commands, go to https://cloudera.github.io/cm_api/ and cl
 
 ## Cluster/Service/Role output
 
-<https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiCluster.html>
+<https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiCluster.html>
 
 `name | maintenanceMode >>> displayName (CDH fullVersion) --- entityStatus`
 
-<https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiService.html>
+<https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiService.html>
 
 `... | name | maintenanceMode | displayName --- serviceState healthSummary configStalenessStatus clientConfigStalenessStatus`
 
-<https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiRole.html>
+<https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiRole.html>
 
 `... | ... | hostId (hostname) | type | roleConfigGroupRef->roleConfigGroupName | maintenanceMode | commissionState | name --- roleState healthSummary configStalenessStatus` 
 
 ## Host output
 
-https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiHost.html
+https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiHost.html
 
 `hostname | hostId | ipAddress | rackId | maintenanceMode | commissionState | clusterRef->clusterName --- healthSummary entityStatus`
 
 ## Command output
 
-https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiCommand.html
+https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiCommand.html
 
 `id | name | startTime | endTime | active | success | resultMessage | resultDataUrl | canRetry | clusterRef | serviceRef | roleRef | hostRef`
 
@@ -550,7 +550,7 @@ Adding user 'user5'...
   } ]
 }
 ```
-*`-userRole` is NOT case-sensitive. Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiUser.html).*
+*`-userRole` is NOT case-sensitive. Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiUser.html).*
 
 * Change password and role for 'user1':
 
@@ -609,7 +609,7 @@ user5
 
  	`cmcli.pl -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
     
-	*`-restartRoleTypes` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=... -a=roleTypes`.*
+	*`-restartRoleTypes` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=... -a=roleTypes`.*
     
 * Roll restart the ResourceManager roles:
 
@@ -639,7 +639,7 @@ user5
 
  	`cmcli.pl -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster2 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
 
-	*`-addRole` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v15/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=... -a=roleTypes`.*
+	*`-addRole` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=... -a=roleTypes`.*
 
 * Delete all the roles from a host:
 
@@ -669,7 +669,7 @@ user5
 
  	`cmcli.pl -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroup=hdfs1-DATANODE-BASE -full`
     
-	*In addition to `name` and `value`, the full view output includes the `validateState`, `validateMessage` and `displayName` properties (see [apiConfig](https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiConfig.html))*
+	*In addition to `name` and `value`, the full view output includes the `validateState`, `validateMessage` and `displayName` properties (see [apiConfig](https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiConfig.html))*
 
 * Update the 'dfs_data_dir_list' property:
 
