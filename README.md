@@ -129,12 +129,21 @@ Cluster 1 >>> Cluster 1 (CDH 6.3.3) --- GOOD_HEALTH
 |_ Cluster 1 | kudu | KUDU | Kudu --- STARTED GOOD FRESH FRESH
 |_ Cluster 1 | hbase | HBASE | HBase --- STARTED GOOD FRESH FRESH
 $
-$ cmcli.pl -hInfo
+$ cmcli -hInfo -s=hive -rInfo
 Redirecting to https://localhost:7183/...
 node1.localdomain | 6c1df663-ec34-4367-8420-8477a2524791 | 192.168.0.191 | /default | COMMISSIONED | Cluster 1 --- GOOD GOOD_HEALTH
 node2.localdomain | 2e68d2f3-dd4e-4f6e-8dbb-17e68bd63948 | 192.168.0.192 | /default | COMMISSIONED | Cluster 1 --- GOOD GOOD_HEALTH
 node3.localdomain | 46bd1ea9-5ac6-4540-96da-9041d7bfb1c6 | 192.168.0.193 | /default | COMMISSIONED | Cluster 1 --- GOOD GOOD_HEALTH
 # Number of hosts: 3
+|_ Cluster 1 | hive | HIVE | Hive --- STARTED GOOD FRESH FRESH
+  |_ Cluster 1 | hive | node2.localdomain | HIVESERVER2 | COMMISSIONED | hive-HIVESERVER2-560991e0d064f19d3f49e994bb334d90 --- STARTED GOOD FRESH
+  |_ Cluster 1 | hive | node1.localdomain | HIVEMETASTORE | COMMISSIONED | hive-HIVEMETASTORE-1a2349b677ff4b7d158c0bc05441898c --- STARTED GOOD FRESH
+  |_ Cluster 1 | hive | node3.localdomain | GATEWAY | COMMISSIONED | hive-GATEWAY-c430b17e260c846cab6867cd28f78e13 --- NA GOOD FRESH
+  |_ Cluster 1 | hive | node1.localdomain | GATEWAY | COMMISSIONED | hive-GATEWAY-1a2349b677ff4b7d158c0bc05441898c --- NA GOOD FRESH
+  |_ Cluster 1 | hive | node2.localdomain | GATEWAY | COMMISSIONED | hive-GATEWAY-560991e0d064f19d3f49e994bb334d90 --- NA GOOD FRESH
+Cluster 1 | hive | GATEWAY: 3
+Cluster 1 | hive | HIVEMETASTORE: 1
+Cluster 1 | hive | HIVESERVER2: 1
 $
 $ cmcli.pl -https -mgmt
 mgmt | MGMT --- STARTED GOOD FRESH
