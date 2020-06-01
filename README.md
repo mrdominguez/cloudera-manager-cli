@@ -160,6 +160,36 @@ Then, add the following line to the Perl code at the beginning of the `use` bloc
 
 `use lib qw(<PREFIX>/share/perl5);`
 
+## Setting Credentials
+
+Cloudera Manager credentials can be passed by using the `-u` (username) and `-p` (password) options. The `-p` option can be set to the password string itself (**not recommended**) or to a file containing the password:
+
+`$ cmcli.pl -u=username -p=/path/to/password_file -cm=<cm_server_host>`
+
+Credentials can also be passed by using the `$CM_REST_USER` and `$CM_REST_PASS` environment variables. Just like the `-p` option, the `$CM_REST PASS` environment variable can be set to a file containing the password:
+
+```
+export CM_REST_USER=username
+export CM_REST_PASS=/path/to/password_file
+```
+
+The aforementioned environment variables can be loaded through a credentials file (`$HOME/.cm_rest`), if it exists:
+
+```
+$ cat $HOME/.cm_rest
+CM_REST_USER:username
+CM_REST_PASS:/path/to/password_file
+```
+
+NOTE: For passwords containing white spaces, quote them and, instead of using the credentials file, set the `-p` option or `export CM_REST_PASS`.
+
+The preference is as follows (highest first):
+
+1. Options `-u`, `-p`
+2. Credentials file
+3. Environment variables (using the `export` command)
+4. Default credentials (*admin*/*admin*)
+
 ## Usage
 
 **cmcli.pl**
@@ -288,36 +318,6 @@ Usage: cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
 	 -f : JSON file containing body content (implies -bt=json)
 	 <ResourceUrl> : URL to REST resource (example: [http://]cm_server_host:7180/api/v19/clusters)
 ```
-
-## Setting credentials
-
-CM credentials can be passed by using the `-u` (username) and `-p` (password) options. The `-p` option can be set to the password string itself (**not recommended**) or to a file containing the password:
-
-`$ cmcli.pl -u=username -p=/path/to/password_file -cm=<cm_server_host>`
-
-Credentials can also be passed by using the `$CM_REST_USER` and `$CM_REST_PASS` environment variables. Just like the `-p` option, the `$CM_REST PASS` environment variable can be set to a file containing the password:
-
-```
-export CM_REST_USER=username
-export CM_REST_PASS=/path/to/password_file
-```
-
-The aforementioned environment variables can be loaded through a credentials file (`$HOME/.cm_rest`), if it exists:
-
-```
-$ cat $HOME/.cm_rest
-CM_REST_USER:username
-CM_REST_PASS:/path/to/password_file
-```
-
-NOTE: For passwords containing white spaces, quote them and, instead of using the credentials file, set the `-p` option or `export CM_REST_PASS`.
-
-The preference is as follows (highest first):
-
-1. Options `-u`, `-p`
-2. Credentials file
-3. Environment variables (using the `export` command)
-4. Default credentials (*admin*/*admin*)
 
 ## Supported cluster/service/role commands
 
