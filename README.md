@@ -129,6 +129,13 @@ Cluster 1 >>> Cluster 1 (CDH 6.3.3) --- GOOD_HEALTH
 |_ Cluster 1 | kudu | KUDU | Kudu --- STARTED GOOD FRESH FRESH
 |_ Cluster 1 | hbase | HBASE | HBase --- STARTED GOOD FRESH FRESH
 $
+$ cmcli.pl -hInfo
+Redirecting to https://localhost:7183/...
+node1.localdomain | 6c1df663-ec34-4367-8420-8477a2524791 | 192.168.0.191 | /default | COMMISSIONED | Cluster 1 --- GOOD GOOD_HEALTH
+node2.localdomain | 2e68d2f3-dd4e-4f6e-8dbb-17e68bd63948 | 192.168.0.192 | /default | COMMISSIONED | Cluster 1 --- GOOD GOOD_HEALTH
+node3.localdomain | 46bd1ea9-5ac6-4540-96da-9041d7bfb1c6 | 192.168.0.193 | /default | COMMISSIONED | Cluster 1 --- GOOD GOOD_HEALTH
+# Number of hosts: 3
+$
 $ cmcli.pl -https -mgmt
 mgmt | MGMT --- STARTED GOOD FRESH
 $
