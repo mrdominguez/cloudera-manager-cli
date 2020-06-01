@@ -97,7 +97,6 @@ Unless overridden by the `-api` option, `cmcli.pl` will use the default API vers
 http://cloudera.github.io/cm_api/docs/releases/
 
 The `-cmVersion` option shows the default API version for a given CM server host:
-
 ```
 $ cmcli.pl -cm=<cm_server_host> -cmVersion
 CM version: 5.7.4 (API: v12)
@@ -111,10 +110,9 @@ For information about the Cloudera Manager API, please check the following links
 
 *NOTE: Replace the API version in the URLs accordingly*
 
-## Sample output
+## Sample Output
 
 By default, if not set explicitly, `-cm` points to `localhost:7180` (or `7183` if `https` is enabled):
-
 ```
 $ cmcli.pl
 Redirecting to https://localhost:7183/...
@@ -147,7 +145,6 @@ Use [cpan](http://perldoc.perl.org/cpan.html) to install the following modules; 
 Additionally, **LWP::Protocol::https** is required for HTTPS support.
 
 These are the steps to manually compile and install a module to a custom location:
-
 ```
 tar -xvf JSON-2.90.tar.gz
 cd JSON-2.90
@@ -167,14 +164,12 @@ Cloudera Manager credentials can be passed by using the `-u` (username) and `-p`
 `$ cmcli.pl -u=username -p=/path/to/password_file -cm=<cm_server_host>`
 
 Credentials can also be passed by using the `$CM_REST_USER` and `$CM_REST_PASS` environment variables. Just like the `-p` option, the `$CM_REST PASS` environment variable can be set to a file containing the password:
-
 ```
 export CM_REST_USER=username
 export CM_REST_PASS=/path/to/password_file
 ```
 
 The aforementioned environment variables can be loaded through a credentials file (`$HOME/.cm_rest`), if it exists:
-
 ```
 $ cat $HOME/.cm_rest
 CM_REST_USER:username
@@ -319,7 +314,7 @@ Usage: cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
 	 <ResourceUrl> : URL to REST resource (example: [http://]cm_server_host:7180/api/v19/clusters)
 ```
 
-## Supported cluster/service/role commands
+## Supported Cluster/Service/Role Commands
 
 In addition to the actions listed in the usage section, to execute a command endpoint, set `-a={commandName}` in the appropriate context. These are the supported commands:
 
@@ -340,7 +335,7 @@ Cluster actions
 
 For a complete list of commands, go to https://cloudera.github.io/cm_api/ and click on **Full API Docs > REST**.
 
-## Cluster/Service/Role output
+## Cluster/Service/Role Output
 
 <https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiCluster.html>
 
@@ -354,13 +349,13 @@ For a complete list of commands, go to https://cloudera.github.io/cm_api/ and cl
 
 `... | ... | hostId (hostname) | type | roleConfigGroupRef->roleConfigGroupName | maintenanceMode | commissionState | name --- roleState healthSummary configStalenessStatus` 
 
-## Host output
+## Host Output
 
 https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiHost.html
 
 `hostname | hostId | ipAddress | rackId | maintenanceMode | commissionState | clusterRef->clusterName --- healthSummary entityStatus`
 
-## Command output
+## Command Output
 
 https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiCommand.html
 
