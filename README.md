@@ -138,7 +138,7 @@ $
 
 ## Installation
 
-These utilities are written in Perl and have been tested using Perl 5.1x.x on RHEL 6 and 7.
+These utilities are written in Perl and have been tested using *Perl 5.1x.x* on *RHEL 6/7*.
 
 Use [cpan](http://perldoc.perl.org/cpan.html) to install the following modules; alternately, download them from the [CPAN Search Site](http://search.cpan.org/) for manual installation:
 - **REST::Client**
