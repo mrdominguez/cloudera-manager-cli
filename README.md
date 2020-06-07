@@ -1,4 +1,15 @@
-### Version 9.0 is now available!
+### Version 9.1 is now available!
+
+- Download command's downloadable result data, if any exists: `-download` (enables `-trackCmd`)
+- Collect the diagnostics data for Yarn applications:
+```
+-a=collectDiagnosticData
+	-applicationIds : Comma-separated list of application IDs
+	-ticketNumber : Ticket Number of the Cloudera Support Ticket (default: empty)
+	-comments : Comments to add to the support bundle (default: empty)
+``` 
+
+### Version 9.0
 
 - New service filters: `-sFilter`, `-maintenanceMode`
 - Added support for:
@@ -15,14 +26,14 @@
 - `-cmdAction=abort|retry` safeguarded by `-confirmed|-run` options
 - Rewrote the user management section to make it consistent with the rest of the code:
 ```
- -userAction: User action
-	  (add|update) Create/update user
+-userAction: User action
+	(add|update) Create/update user
 		-userName : User name
 		-userPassword : User password (default: 'changeme')
 		-userRole : User role (default: ROLE_USER)
 		-f : JSON file to add users in bulk (instead of -userName)
-	  (delete) Delete user (args: -userName)
-	  (show) Display users (args: [-userName] | default: all)
+	(delete) Delete user (args: -userName)
+	(show) Display users (args: [-userName] | default: all)
 ```
 Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiUser.html).
 
@@ -213,7 +224,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter]
 	[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=role_filter] [-rChecks] [-rMetrics] [-log=log_type]]
 	[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]
-	[-a[=command_name]] [-confirmed] [-trackCmd] [-run]
+	[-a[=command_name]] [-confirmed] [-trackCmd] [-download] [-run]
 	[-yarnApps[=parameters]]
 	[-impalaQueries[=parameters]]
 	[-mgmt] (<> -s=mgmt)
@@ -269,7 +280,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	      (decommission|recommission) Decommission/recommission roles of a service
 	      (enterMaintenanceMode|exitMaintenanceMode) Put/take the cluster/service/role into/out of maintenance mode
 	      (deleteRole) Delete a role from a given service
-	      (rollingRestart) Rolling restart of roles in a service. Optional arguments:
+	      (rollingRestart) Rolling restart of roles in a service
 	        -restartRoleTypes : Comma-separated list of role types to restart. If not set, all startable roles are restarted (default: all)
 	        -slaveBatchSize : Number of hosts with slave roles to restart at a time (default: 1)
 	        -sleepSeconds : Number of seconds to sleep between restarts of slave host batches (default: 0)
@@ -297,8 +308,13 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	      (updateService) Update service information (args: -displayName)
 	      (deleteService) Delete service
 	      (roleTypes) List the supported role types for a service
+	      (collectDiagnosticData) Collect the diagnostics data for Yarn applications
+	        -applicationIds : Comma-separated list of application IDs
+	        -ticketNumber : Ticket Number of the Cloudera Support Ticket (default: empty)
+	        -comments : Comments to add to the support bundle (default: empty)
 	 -confirmed : Proceed with command execution
-	 -trackCmd : Wait for all asynchronous commands to end before exiting
+	 -trackCmd : Wait for all asynchronous commands to end before exiting (default: disabled)
+	 -download : Download command's downloadable result data, if any exists (enables -trackCmd, default: disabled)'\n";
 	 -run : Shortcut for '-confirmed -trackCmd'
 	 -sChecks : Service health checks
 	 -sMetrics : Service metrics
@@ -344,6 +360,7 @@ Service actions
   * `decommission`
   * `recommission`
   * `rollingRestart`
+  * `yarnApplicationDiagnosticsCollection` (aliased by `collectDiagnosticData`)
 - MGMT: `/cm/service/commands/{commandName}`
 
 Cluster actions
@@ -716,3 +733,13 @@ user5
 * Refresh the Flume Agents of the default config group to apply the new configuration file:
 
 	`cmcli.pl -c=cluster2 -s=flume1 -roleConfigGroup=agent-base -rFilter=refreshable -a=refresh`
+
+* List YARN applications from a certain date until now and return a maximum of 50:
+
+	`$ cmcli.pl -yarnApps='from=2020-06-06&limit=50'
+
+	*List of [filter parameters](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services_-serviceName-_yarnApplications.html)*
+
+* Collect application logs for multiple jobs:
+
+	`$ cmcli -a=collectDiagnosticData -applicationIds=job_1591424769429_0001,job_1591424769429_0002 -download -confirmed`
