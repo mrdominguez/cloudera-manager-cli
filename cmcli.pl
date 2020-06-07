@@ -1649,10 +1649,14 @@ sub track_cmd {
 		print "\n";
 		foreach my $id ( sort keys %{$cmd_list} ) {
 			if ( $cmd_list->{$id}->{'success'} ) {
-				my $resultDataUrl = $cmd_list->{$id}->{'resultDataUrl'};
-				my $filename = "$id-scm-command-result.zip";
-				print "Downloading and saving to file $filename\n";
-				&rest_call('GET', $resultDataUrl, 2, $filename);
+				if ( $cmd_list->{$id}->{'resultDataUrl'} ) {
+					my $resultDataUrl = $cmd_list->{$id}->{'resultDataUrl'};
+					my $filename = "$id-scm-command-result.zip";
+					print "Downloading and saving to file $filename\n";
+					&rest_call('GET', $resultDataUrl, 2, $filename);
+				} else {
+					print "There is nothing to download\n";
+				}
 			}
 		}
 	}
