@@ -28,7 +28,7 @@ use Data::Dumper;
 BEGIN { $| = 1 }
 
 use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword $userRole $https $api $sChecks $sMetrics $rChecks $rMetrics $cmConfig $u $p $cm
-	$c $s $r $rInfo $rFilter $sFilter $yarnApps $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles $hChecks $deployment
+	$c $s $r $rInfo $rFilter $sFilter $yarnApps $applicationIds $ticketNumber $comments $download $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles $hChecks $deployment
 	$mgmt $impalaQueries $trackCmd $setRackId $deleteHost $addToCluster $removeFromCluster $addRole $serviceName $clusterName
 	$hAction $run $maintenanceMode $roleConfigGroup $propertyName $propertyValue $clientConfig $full $displayName $fullVersion $serviceType $roleType
 	$slaveBatchSize $sleepSeconds $slaveFailCountThreshold $staleConfigsOnly $unUpgradedOnly $restartRoleTypes $copyFromRoleGroup);
@@ -36,8 +36,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 9.0\n";
-	print "Release date: 05/28/2020\n";
+	print "Version: 9.1\n";
+	print "Release date: 2020-06-07\n";
 	exit;
 }
 
@@ -89,6 +89,9 @@ if ( $cmdAction ) {
 if ( $hAction && $hAction !~ /decommission|recommission|startRoles|enterMaintenanceMode|exitMaintenanceMode/ ) {
 	die "Host action '$hAction' not supported. Use -help for options\n" }
 
+($confirmed, $trackCmd) = (1, 1) if $run;
+$trackCmd = 1 if $download && !$trackCmd;
+
 if ( $trackCmd && !$a && !$cmdId && !$hAction ) {
 	die "-trackCmd requires -a, -cmdId or -hAction\n" }
 
@@ -109,12 +112,15 @@ if ( $a ) {
 			die "Set -$_\n" unless $role_group_opts{$_};
 		}
 	}
+
 	die "Set -roleConfigGroup to an existing config group\n" if ( $a eq 'moveToRoleGroup' && !$roleConfigGroup );
 	die "Set -roleConfigGroup to an existing config group\n" if ( $a eq 'updateConfig'
 									&& $roleConfigGroup
 									&& $roleConfigGroup eq '1' );
+
 	if ( $a eq 'updateConfig' && !$propertyName ) {
 		die "Set -propertyName to a valid property name. If -propertyValue is absent, the default value (if any) will be used\n" }
+
 	if ( $a =~ /addCluster|updateCluster|deleteCluster/ ) {
 		foreach ( sort keys %cluster_opts ) {
 			next if ( ( ( $a eq 'deleteCluster' ) || ( $a eq 'updateCluster' && $fullVersion ) ) && $_ eq 'displayName' );
@@ -127,6 +133,7 @@ if ( $a ) {
 			die "Set -$_\n" unless $cluster_opts{$_};
 		}
 	}
+
 	if ( $a =~ /addService|updateService|deleteService/ ) {
 		foreach ( sort keys %service_opts ) {
 			next if ( $a eq 'updateService' && $_ =~ /serviceName|serviceType/ );
@@ -137,7 +144,6 @@ if ( $a ) {
 	}
 }
 
-($confirmed, $trackCmd) = (1, 1) if $run;
 $s = 'mgmt' if $mgmt;
 $s = '^yarn' if ( $yarnApps && !$s );
 $s = '^impala' if ( $impalaQueries && !$s );
@@ -218,6 +224,11 @@ print "API version = $api_version\n" if $d;
 die "-yarnApps is only available since API v6\n" if ( $api_version < 6 && $yarnApps );
 die "-impalaQueries is only available since API v4\n" if ( $api_version < 4 && $impalaQueries );
 
+if ( $a && $a eq 'collectDiagnosticData' ) {
+	die "yarnApplicationDiagnosticsCollection is only available since API v8\n" if ( $api_version < 8 );
+	$applicationIds ? $s = '^yarn' : die "Set -applicationIds\n";
+}
+
 if ( $addRole ) {
 	die "-addRole requires -serviceName\n" unless $serviceName;
 	die "Set -clusterName for API v10 or lower, or set -addToCluster if the host is not associated with any cluster yet\n" if ( $api_version < 11 && !$clusterName && !$addToCluster );
@@ -242,7 +253,8 @@ if ( $userAction ) {
 		$user_info->{'name'} = $userName if $userName;
 		$user_info->{'password'} = $userPassword if $userPassword;
 		$user_info->{'password'} = 'changeme' if ( $userAction eq 'add' && !$userPassword );
-		push @{$user_info->{'roles'}}, uc $userRole if $userRole;
+		my $user_role = $userRole // 'ROLE_USER';
+		push @{$user_info->{'roles'}}, uc $user_role;
 		$body_content = to_json($user_info);
 		$cm_url .= "/$userName" unless $userAction eq 'add' || ( $userAction eq 'show' && !$userName );
 		if ( $userAction eq 'add') {
@@ -318,10 +330,10 @@ if ( $cmConfig || $deployment ) {
 	} else {
 		print "Retrieving full description of the entire CM deployment...\n";
 		$cm_url = "$cm_api/cm/deployment";
-		$filename = "$cm_host\_cm\_deployment.json";
+		$filename = "$cm_host-cm-deployment.json";
 	}
+	print "Saving to file $filename\n";
 	&rest_call('GET', $cm_url, 2, $filename);
-	print "Saved to $filename\n";
 	exit;
 }
 
@@ -1089,9 +1101,10 @@ foreach my $cluster_name ( @clusters ) {
 						}
 					} elsif ( $clientConfig ) {
 						$cm_url .= "/clientConfig";
-						my $filename = "$cm_host\_$cluster_name\_$service_name\_client\_config.zip";
+						my $filename = "$cm_host-$cluster_name-$service_name-clientConfig.zip";
+						$filename =~ s/\s+//g;
 						&rest_call('GET', $cm_url, 2, $filename);
-						print "| Saved to $filename\n";
+						print "| Saving to file $filename\n";
 					} else {
 						&get_config($cm_url, $propertyName);
 					}
@@ -1114,12 +1127,20 @@ foreach my $cluster_name ( @clusters ) {
 					my $role_types = &rest_call('GET', $cm_url, 1);
 					print map { "$_\n" } sort @{$role_types->{'items'}};
 				} else {
-					$cm_url .= "/commands/$a";
 					if ( $a eq 'rollingRestart' ) {
 						$body_content = &rolling_restart($cluster_name, $service_name);						
 					} elsif ( $a eq 'deployClientConfig' ) {
 						$body_content = '{ "items" : [] }';
+					} elsif ( $a eq 'collectDiagnosticData' ) {
+						$a = 'yarnApplicationDiagnosticsCollection';
+						my $diag_info = {};
+						$diag_info->{'ticketNumber'} = $ticketNumber if $ticketNumber;
+						$diag_info->{'comments'} = $comments if $comments;
+						$applicationIds =~ s/\s+//g;
+						@{$diag_info->{'applicationIds'}} = split /,/, $applicationIds;
+						$body_content = to_json($diag_info);
 					}
+					$cm_url .= "/commands/$a";
 					my $cmd = $body_content ? &rest_call('POST', $cm_url, 1, undef, $body_content) : &rest_call('POST', $cm_url, 1);
 					my $id = $cmd->{'id'};
 					print "| CMDID: $id\n";
@@ -1343,7 +1364,7 @@ sub usage {
 	print "\t[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter]\n";
 	print "\t[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=role_filter] [-rChecks] [-rMetrics] [-log=log_type]]\n";
 	print "\t[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]\n";
-	print "\t[-a[=command_name]] [-confirmed] [-trackCmd] [-run]\n";
+	print "\t[-a[=command_name]] [-confirmed] [-trackCmd] [-download] [-run]\n";
 	print "\t[-yarnApps[=parameters]]\n";
 	print "\t[-impalaQueries[=parameters]]\n";
 	print "\t[-mgmt] (<> -s=mgmt)\n\n";
@@ -1399,7 +1420,7 @@ sub usage {
 	print "\t      (decommission|recommission) Decommission/recommission roles of a service\n";
 	print "\t      (enterMaintenanceMode|exitMaintenanceMode) Put/take the cluster/service/role into/out of maintenance mode\n";
 	print "\t      (deleteRole) Delete a role from a given service\n";
-	print "\t      (rollingRestart) Rolling restart of roles in a service. Optional arguments:\n";
+	print "\t      (rollingRestart) Rolling restart of roles in a service\n";
  	print "\t        -restartRoleTypes : Comma-separated list of role types to restart. If not set, all startable roles are restarted (default: all)\n";
  	print "\t        -slaveBatchSize : Number of hosts with slave roles to restart at a time (default: 1)\n";
  	print "\t        -sleepSeconds : Number of seconds to sleep between restarts of slave host batches (default: 0)\n";
@@ -1427,8 +1448,13 @@ sub usage {
 	print "\t      (updateService) Update service information (args: -displayName)\n";			# service context
 	print "\t      (deleteService) Delete service\n";							# service context
 	print "\t      (roleTypes) List the supported role types for a service\n";				# service context
+	print "\t      (collectDiagnosticData) Collect the diagnostics data for Yarn applications\n";		# service context
+	print "\t        -applicationIds : Comma-separated list of application IDs\n";
+	print "\t        -ticketNumber : Ticket Number of the Cloudera Support Ticket (default: empty)\n";
+	print "\t        -comments : Comments to add to the support bundle (default: empty)\n";
 	print "\t -confirmed : Proceed with command execution\n";
-	print "\t -trackCmd : Wait for all asynchronous commands to end before exiting\n";
+	print "\t -trackCmd : Wait for all asynchronous commands to end before exiting (default: disabled)\n";
+	print "\t -download : Download command's downloadable result data, if any exists (enables -trackCmd, default: disabled)\n";
 	print "\t -run : Shortcut for '-confirmed -trackCmd'\n";
 	print "\t -sChecks : Service health checks\n";
 	print "\t -sMetrics : Service metrics\n";
@@ -1571,6 +1597,7 @@ sub track_cmd {
 	my $first_iteration = 1;
 	$cmd_list_summary->{'active'} = keys %{$cmd_list};
 	print "Tracking $cmd_list_summary->{'active'} commands\n";
+
 	while ( $cmd_list_summary->{'active'} ) {
 		foreach my $id ( sort keys %{$cmd_list} ) {
 			next if $cmd_list->{$id}->{'done'};
@@ -1601,17 +1628,32 @@ sub track_cmd {
 			sleep $track_pause;
 		}
 	}
+
 	print "# CMDID summary\n";
+
 	if ( $cmd_list_summary->{'ok'} ) {
 		print "OK: $cmd_list_summary->{'ok'}\n";
 		foreach my $id ( sort keys %{$cmd_list} ) {
 			&cmd_id(\%{$cmd_list->{$id}}) if $cmd_list->{$id}->{'success'};
 		}
 	}
+
 	if ( $cmd_list_summary->{'error'} ) {
 		print "Error: $cmd_list_summary->{'error'}\n";
 		foreach my $id ( sort keys %{$cmd_list} ) {
 			&cmd_id(\%{$cmd_list->{$id}}) unless $cmd_list->{$id}->{'success'};
+		}
+	}
+	
+	if ( $download ) {
+		print "\n";
+		foreach my $id ( sort keys %{$cmd_list} ) {
+			if ( $cmd_list->{$id}->{'success'} ) {
+				my $resultDataUrl = $cmd_list->{$id}->{'resultDataUrl'};
+				my $filename = "$id-scm-command-result.zip";
+				print "Downloading and saving to file $filename\n";
+				&rest_call('GET', $resultDataUrl, 2, $filename);
+			}
 		}
 	}
 }
