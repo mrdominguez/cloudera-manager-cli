@@ -1655,7 +1655,7 @@ sub track_cmd {
 					print "Downloading and saving to file $filename\n";
 					&rest_call('GET', $resultDataUrl, 2, $filename);
 				} else {
-					print "There is nothing to download\n";
+					print "No downloadable for commandId $id\n";
 				}
 			}
 		}
