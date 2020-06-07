@@ -742,4 +742,4 @@ user5
 
 * Collect application logs for multiple jobs:
 
-	`$ cmcli -a=collectDiagnosticData -applicationIds=job_1591424769429_0001,job_1591424769429_0002 -download -confirmed`
+	`$ cmcli -a=collectDiagnosticData -applicationIds=job_1591424769429_0001,job_1591424769429_0002 -download`
