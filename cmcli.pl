@@ -1526,7 +1526,7 @@ sub rest_call {
 
 			$content = &rest_call($method, $url_redirect, $ret, $fn, $bc);
 		} else {
-			die "The request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d/;
+			die "\nThe request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d/;
 		}
 		if ( $ret ) {
 			$content = from_json($content) if ( $content_redirect && $url !~ /api\/version/ );
