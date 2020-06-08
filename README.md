@@ -171,6 +171,35 @@ Use [cpan](http://perldoc.perl.org/cpan.html) to install the following modules; 
 
 Additionally, **LWP::Protocol::https** is required for HTTPS support.
 
+The following is an example of an unattended installation script for RHEL-based distributions:
+```
+#!/bin/bash
+
+sudo yum -y install git cpan gcc openssl openssl-devel
+
+REPOSITORY=cloudera-manager-cli
+
+cd; git clone https://github.com/mrdominguez/$REPOSITORY
+
+cd $REPOSITORY
+chmod +x *.pl
+ln -s cmcli.pl cmcli
+ln -s cmapi.pl cmapi
+
+cd; grep "PATH=.*$REPOSITORY" .bashrc || echo -e "\nexport PATH=\"\$HOME/$REPOSITORY:\$PATH\"" >> .bashrc
+
+echo | cpan
+. .bashrc
+
+perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->commit'
+
+cpan CPAN::Meta::Requirements CPAN
+cpan Module::Metadata JSON REST::Client
+
+cmcli.pl -help
+echo "Run 'source ~/.bashrc' to refresh environment variables"
+```
+
 These are the steps to manually compile and install a module to a custom location:
 ```
 tar -xvf JSON-2.90.tar.gz
@@ -446,7 +475,7 @@ https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiCommand.html
 
  	`$ cmcli.pl -s=mgmt -rInfo`
 
-* Deploy the client configuration for any service with stale status:
+* Deploy the client configuration of any service with stale status:
 
 	`$ cmcli.pl -sFilter=stale -a=deployClientConfig`
 
@@ -454,41 +483,41 @@ https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiCommand.html
 
 	`$ cmcli.pl -sFilter=stale -a=restart`
 
-* Show the roles of the HDFS service of 'cluster2':
+* Show the roles of the HDFS service:
 
-	`$ cmcli.pl -c=cluster2 -s=hdfs -rInfo`
+	`$ cmcli.pl -s=hdfs -rInfo`
 
     *To replace the host id (UUID) in the output with the host name, simply add `-hInfo`.*
 
 * Show the DataNode instances:
 
- 	`$ cmcli.pl -c=cluster2 -s=hdfs -r=datanode`
+ 	`$ cmcli.pl -s=hdfs -r=datanode`
 
 * Show the stopped DataNodes:
 
- 	`$ cmcli.pl -c=cluster2 -s=hdfs -r=datanode -rFilter=stopped`
+ 	`$ cmcli.pl -s=hdfs -r=datanode -rFilter=stopped`
 
 * Start the stopped DataNodes:
 
- 	`$ cmcli.pl -c=cluster2 -s=hdfs -r=datanode -rFilter=stopped -a=start`
+ 	`$ cmcli.pl -s=hdfs -r=datanode -rFilter=stopped -a=start`
 
     *To execute the action, use `-confirmed`. To check the command execution status, add `-trackCmd`. To do both, just use the `-run` shortcut instead.*
 
 * Deploy the YARN client configuration at the service level:
 
- 	`$ cmcli.pl -c=cluster2 -s=yarn -a=deployClientConfig`
+ 	`$ cmcli.pl -s=yarn -a=deployClientConfig`
 
 * Restart all the Flume services:
 
- 	`$ cmcli.pl -c=cluster2 -s=flume -a=restart`
+ 	`$ cmcli.pl -s=flume -a=restart`
 
 * Restart the 'flume' service only:
 
- 	`$ cmcli.pl -c=cluster2 -s='flume$' -a=restart` --> using regex
+ 	`$ cmcli.pl -s='flume$' -a=restart`
 
 * Restart the 'hive2' and 'oozie1' services:
 
- 	`$ cmcli.pl -c=cluster2 -s='hive2|oozie1' -a=restart` --> using regex
+ 	`$ cmcli.pl -s='hive2|oozie1' -a=restart`
 
 * Start all the roles on a given host:
 
@@ -617,9 +646,9 @@ user5
 
 	`cmcli.pl -hInfo=<perl_regex> -removeFromCluster`
 
-	*If using API v10 or lower, remove hosts from 'cluster2':*
+	*If using API v10 or lower, remove hosts from 'cluster1':*
 
-	`cmcli.pl -hInfo=<perl_regex> -removeFromCluster=cluster2`
+	`cmcli.pl -hInfo=<perl_regex> -removeFromCluster=cluster1`
 
 * Roll restart all the roles on the selected hosts:
 
@@ -629,39 +658,39 @@ user5
 
  	`cmcli.pl -hInfo=<perl_regex> -a=rollingRestart -s=hbase`
 
-* Roll restart the NodeManager roles of the YARN service of 'cluster2' with extra options:
+* Roll restart the NodeManager roles of the YARN service with extra options:
 
- 	`cmcli.pl -c=cluster2 -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
+ 	`cmcli.pl -s=yarn -a=rollingRestart -slaveBatchSize=3 -sleepSeconds=10 -restartRoleTypes=nodemanager`
     
 	*`-restartRoleTypes` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=... -a=roleTypes`.*
     
 * Roll restart the ResourceManager roles:
 
- 	`cmcli.pl -c=cluster2 -s=yarn -a=rollingRestart -restartRoleTypes=resourcemanager`
+ 	`cmcli.pl -s=yarn -a=rollingRestart -restartRoleTypes=resourcemanager`
 
 * Roll restart YARN roles with stale configs only:
 
- 	`cmcli.pl -c=cluster2 -s=yarn -a=rollingRestart -staleConfigsOnly=true`
+ 	`cmcli.pl -s=yarn -a=rollingRestart -staleConfigsOnly=true`
 
 	*or*
 
- 	`cmcli.pl -c=cluster2 -s=yarn -rFilter=stale -a=rollingRestart`
+ 	`cmcli.pl -s=yarn -rFilter=stale -a=rollingRestart`
 
 * Roll restart NameNode and JournalNode roles:
 
- 	`cmcli.pl -c=cluster2 -s=hdfs -a=rollingRestart -restartRoleTypes=namenode,journalnode`
+ 	`cmcli.pl -s=hdfs -a=rollingRestart -restartRoleTypes=namenode,journalnode`
 
 	*or*
 
- 	`cmcli.pl -c=cluster2 -s=hdfs —r='name|journal' -a=rollingRestart`
+ 	`cmcli.pl -s=hdfs —r='name|journal' -a=rollingRestart`
 
 * Roll restart all ZooKeeper and Flume services:
 
- 	`cmcli.pl -c=cluster2 -s='zoo|flume' -a=rollingRestart`
+ 	`cmcli.pl -s='zoo|flume' -a=rollingRestart`
 
-* Multi-action command: Add hosts to cluster 'cluster2', set rack Id, create HIVESERVER2 and GATEWAY roles (service 'hive1') and enable maintenance mode on the hosts:
+* Multi-action command: Add hosts to cluster 'cluster1', set rack Id, create HIVESERVER2 and GATEWAY roles (service 'hive1') and enable maintenance mode on the hosts:
 
- 	`cmcli.pl -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster2 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
+ 	`cmcli.pl -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster1 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
 
 	*`-addRole` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=... -a=roleTypes`.*
 
@@ -679,25 +708,25 @@ user5
 
 * Display the summary configuration of the 'flume1' service:
 
- 	`cmcli.pl -c=cluster2 -s=flume1 -a=getConfig`
+ 	`cmcli.pl -s=flume1 -a=getConfig`
 
 * Download the client configuration of all the Hive services:
 
- 	`cmcli.pl -c=cluster2 -s=hive -a=getConfig -clientConfig`
+ 	`cmcli.pl -s=hive -a=getConfig -clientConfig`
 
 * Display the role config groups of the HDFS service:
 
- 	`cmcli.pl -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroup`
+ 	`cmcli.pl -s=hdfs -a=getConfig -roleConfigGroup`
 
 * Display the full configuration of the default role config group:
 
- 	`cmcli.pl -c=cluster2 -s=hdfs -a=getConfig -roleConfigGroup=hdfs1-DATANODE-BASE -full`
+ 	`cmcli.pl -s=hdfs -a=getConfig -roleConfigGroup=hdfs1-DATANODE-BASE -full`
     
 	*In addition to `name` and `value`, the full view output includes the `validateState`, `validateMessage` and `displayName` properties (see [apiConfig](https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiConfig.html))*
 
 * Update the 'dfs_data_dir_list' property:
 
- 	`cmcli.pl -c=cluster2 -s=hdfs -a=updateConfig -roleConfigGroup=hdfs1-DATANODE-BASE -propertyName=dfs_data_dir_list -propertyValue=new_value`
+ 	`cmcli.pl -s=hdfs -a=updateConfig -roleConfigGroup=hdfs1-DATANODE-BASE -propertyName=dfs_data_dir_list -propertyValue=new_value`
 
 * Override the 'dfs_data_dir_list' property on a given host:
 
@@ -717,7 +746,7 @@ user5
 
 * Update the Flume Agent configuration file of the default config group:
 
-	`cmcli.pl -c=cluster2 -s=flume1 -a=updateConfig -roleConfigGroup=flume-AGENT-BASE -propertyName=agent_config_file -propertyValue="$(<flume1.conf)"`
+	`cmcli.pl -s=flume1 -a=updateConfig -roleConfigGroup=flume-AGENT-BASE -propertyName=agent_config_file -propertyValue="$(<flume1.conf)"`
 
 	*NOTE: The `flume1.conf` text file must have newline characters escaped to avoid an error like the following:*
 
@@ -732,7 +761,7 @@ user5
 
 * Refresh the Flume Agents of the default config group to apply the new configuration file:
 
-	`cmcli.pl -c=cluster2 -s=flume1 -roleConfigGroup=agent-base -rFilter=refreshable -a=refresh`
+	`cmcli.pl -s=flume1 -roleConfigGroup=agent-base -rFilter=refreshable -a=refresh`
 
 * List YARN applications from a certain date until now and return a maximum of 50:
 
