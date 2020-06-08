@@ -1,3 +1,18 @@
+### Table of Contents
+
+[Release Notes](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#release-notes)  
+[Synopsis](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#synopsis)  
+[Sample Output](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#sample-output)  
+[Installation](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#installation)  
+[Setting Credentials](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#setting-credentials)  
+[Usage](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#usage)  
+[Supported Cluster/Service/Role Commands](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#supported-clusterservicerole-commands)  
+[Cluster/Service/Role Output](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#clusterservicerole-output)  
+[Host Output](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#host-output)  
+[Command Output](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#command-output)  
+[How-To](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#how-to)  
+
+## Release Notes
 ### Version 9.1 is now available!
 
 - Added unattended installation script for RHEL-based distributions (see [Installation](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#installation) section for details)
@@ -89,8 +104,6 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/
 - Shortcut option (`-run`) for a commonly used combination of switches (namely, `-confirmed -trackCmd`)
 - Code enhancements regarding host management
 - Minor changes to improve code debugging and readability
-
-### ---
 
 ## Synopsis
 
