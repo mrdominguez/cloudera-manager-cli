@@ -637,23 +637,23 @@ user5
 
 * Delete the selected hosts from CM:
 
-	`cmcli.pl -hInfo=<perl_regex> -deleteHost`
+	`cmcli.pl -hInfo=... -deleteHost`
 
 * Remove the selected hosts from ANY cluster (if using API v11 or higher):
 
-	`cmcli.pl -hInfo=<perl_regex> -removeFromCluster`
+	`cmcli.pl -hInfo=... -removeFromCluster`
 
 	*If using API v10 or lower, remove hosts from 'cluster1':*
 
-	`cmcli.pl -hInfo=<perl_regex> -removeFromCluster=cluster1`
+	`cmcli.pl -hInfo=... -removeFromCluster=cluster1`
 
 * Roll restart all the roles on the selected hosts:
 
- 	`cmcli.pl -hInfo=<perl_regex> -a=rollingRestart`
+ 	`cmcli.pl -hInfo=... -a=rollingRestart`
 
 * Roll restart the HBase roles on the selected hosts:
 
- 	`cmcli.pl -hInfo=<perl_regex> -a=rollingRestart -s=hbase`
+ 	`cmcli.pl -hInfo=... -a=rollingRestart -s=hbase`
 
 * Roll restart the NodeManager roles of the YARN service with extra options:
 
@@ -687,7 +687,7 @@ user5
 
 * Multi-action command: Add hosts to cluster 'cluster1', set rack Id, create HIVESERVER2 and GATEWAY roles (service 'hive1') and enable maintenance mode on the hosts:
 
- 	`cmcli.pl -hInfo=<perl_regex> -setRackId=/rack_id -addToCluster=cluster1 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
+ 	`cmcli.pl -hInfo=... -setRackId=/rack_id -addToCluster=cluster1 -addRole=hiveserver2,gateway -serviceName=hive1 -hAction=enterMaintenanceMode`
 
 	*`-addRole` is NOT case-sensitive. Check the list of [role types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services_-serviceName-_roles.html) or use `-s=... -a=roleTypes`.*
 
