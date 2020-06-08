@@ -366,7 +366,7 @@ Service actions
 Cluster actions
 - All `/clusters/{clusterName}/commands/{commandName}` endpoints that don't require *Request Body*.
 
-For a complete list of commands, go to https://cloudera.github.io/cm_api/ and click on **Full API Docs > REST**.
+For a complete list of commands, go to https://cloudera.github.io/cm_api/ and click on *Full API Docs*.
 
 ## Cluster/Service/Role Output
 
