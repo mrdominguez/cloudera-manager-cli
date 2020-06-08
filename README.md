@@ -427,117 +427,117 @@ https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiCommand.html
 
 * Show all managed hosts:
 
- 	`$ cmcli.pl -hInfo`
+	`cmcli.pl -hInfo`
 
 * Show hosts not associated with any cluster:
 
- 	`$ cmcli.pl -hInfo -c='No cluster'`
+	`cmcli.pl -hInfo -c='No cluster'`
 
 * Show hosts with no roles:
 
- 	`$ cmcli.pl -hInfo -s='No roles'`
+	`cmcli.pl -hInfo -s='No roles'`
 
 * Show hosts assigned to the /default rack:
 
- 	`$ cmcli.pl -hInfo=/default`
+	`cmcli.pl -hInfo=/default`
 
 * Assign them to rack /rack1:
 
- 	`$ cmcli.pl -hInfo=/default -setRackId=/rack1`
+	`cmcli.pl -hInfo=/default -setRackId=/rack1`
 
 * Show information about a given host:
 
- 	`$ cmcli.pl -hInfo=host_name`
+	`cmcli.pl -hInfo=host_name`
 
 * Show role information:
 
- 	`$ cmcli.pl -hInfo=host_name -hRoles`
+	`cmcli.pl -hInfo=host_name -hRoles`
 
 * Show hosts associated with a given cluster:
 
- 	`$ cmcli.pl -hInfo -c=cluster_name`
+	`cmcli.pl -hInfo -c=cluster_name`
 
 * Decommission hosts in bad health:
 
- 	`$ cmcli.pl -c=cluster_name -hFilter=bad -hAction=decommission`
+	`cmcli.pl -c=cluster_name -hFilter=bad -hAction=decommission`
 
 * Show clusters and services:
 
- 	`$ cmcli.pl`
+	`cmcli.pl`
 
- 	`$ cmcli.pl -cm=<cm_server_host>`
+	`cmcli.pl -cm=<cm_server_host>`
 
 * Show the Cloudera Management Service instances:
 
- 	`$ cmcli.pl -mgmt -rInfo`
+	`cmcli.pl -mgmt -rInfo`
 
 	*or*
 
- 	`$ cmcli.pl -s=mgmt -rInfo`
+	`cmcli.pl -s=mgmt -rInfo`
 
 * Deploy the client configuration of any service with stale status:
 
-	`$ cmcli.pl -sFilter=stale -a=deployClientConfig`
+	`cmcli.pl -sFilter=stale -a=deployClientConfig`
 
 * Restart the services with stale configuration:
 
-	`$ cmcli.pl -sFilter=stale -a=restart`
+	`cmcli.pl -sFilter=stale -a=restart`
 
 * Show the roles of the HDFS service:
 
-	`$ cmcli.pl -s=hdfs -rInfo`
+	`cmcli.pl -s=hdfs -rInfo`
 
     *To replace the host id (UUID) in the output with the host name, simply add `-hInfo`.*
 
 * Show the DataNode instances:
 
- 	`$ cmcli.pl -s=hdfs -r=datanode`
+	`cmcli.pl -s=hdfs -r=datanode`
 
 * Show the stopped DataNodes:
 
- 	`$ cmcli.pl -s=hdfs -r=datanode -rFilter=stopped`
+	`cmcli.pl -s=hdfs -r=datanode -rFilter=stopped`
 
 * Start the stopped DataNodes:
 
- 	`$ cmcli.pl -s=hdfs -r=datanode -rFilter=stopped -a=start`
+	`cmcli.pl -s=hdfs -r=datanode -rFilter=stopped -a=start`
 
     *To execute the action, use `-confirmed`. To check the command execution status, add `-trackCmd`. To do both, just use the `-run` shortcut instead.*
 
 * Deploy the YARN client configuration at the service level:
 
- 	`$ cmcli.pl -s=yarn -a=deployClientConfig`
+	`cmcli.pl -s=yarn -a=deployClientConfig`
 
 * Restart all the Flume services:
 
- 	`$ cmcli.pl -s=flume -a=restart`
+	`cmcli.pl -s=flume -a=restart`
 
 * Restart the 'flume' service only:
 
- 	`$ cmcli.pl -s='flume$' -a=restart`
+	`cmcli.pl -s='flume$' -a=restart`
 
 * Restart the 'hive2' and 'oozie1' services:
 
- 	`$ cmcli.pl -s='hive2|oozie1' -a=restart`
+	`cmcli.pl -s='hive2|oozie1' -a=restart`
 
 * Start all the roles on a given host:
 
- 	`$ cmcli.pl -hInfo=host_name -hAction=startRoles`
+	`cmcli.pl -hInfo=host_name -hAction=startRoles`
 
 	*or*
 
- 	`$ cmcli.pl -hInfo=host_name -a=start`
+	`cmcli.pl -hInfo=host_name -a=start`
 
 * Decommission the NodeManager instance on a given host:
 
- 	`$ cmcli.pl -hInfo=host_name -r=nodemanager -a=decommission`
+	`cmcli.pl -hInfo=host_name -r=nodemanager -a=decommission`
 
 * Restart the DataNode instance on a given host:
 
-	`$ cmcli.pl -hInfo=host_name -r=datanode -a=restart`
+	`cmcli.pl -hInfo=host_name -r=datanode -a=restart`
 	
 * Restart the agent of the 'flume2' service on a given host:
 
- 	`$ cmcli.pl -hInfo=host_name -s=flume2 -a=restart`
+	`cmcli.pl -hInfo=host_name -s=flume2 -a=restart`
 
 * Create multiple CM users:
 
@@ -765,10 +765,10 @@ user5
 
 * List YARN applications from a certain date until now and return a maximum of 50:
 
-	`$ cmcli.pl -yarnApps='from=2020-06-06&limit=50'
+	`cmcli.pl -yarnApps='from=2020-06-06&limit=50'`
 
 	*List of [filter parameters](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services_-serviceName-_yarnApplications.html)*
 
 * Collect application logs for multiple jobs:
 
-	`$ cmcli -a=collectDiagnosticData -applicationIds=job_1591424769429_0001,job_1591424769429_0002 -download`
+	`cmcli.pl -a=collectDiagnosticData -applicationIds=job_1591424769429_0001,job_1591424769429_0002 -download`
