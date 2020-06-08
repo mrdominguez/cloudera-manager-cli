@@ -10,7 +10,7 @@
 [Cluster/Service/Role Output](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#clusterservicerole-output)  
 [Host Output](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#host-output)  
 [Command Output](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#command-output)  
-[How-To](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#how-to)  
+[How-To](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#how-to)
 
 ## Release Notes
 ### Version 9.1 is now available!
