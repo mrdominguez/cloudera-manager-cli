@@ -106,7 +106,7 @@ A separate REST client (`cmapi.pl`) is provided to call the endpoints not suppor
 
 Unless overridden by the `-api` option, `cmcli.pl` will use the default API version available:
 
-http://cloudera.github.io/cm_api/docs/releases/
+https://cloudera.github.io/cm_api/docs/releases/
 
 The `-cmVersion` option shows the default API version for a given CM server host:
 ```
@@ -394,8 +394,6 @@ Service actions
 
 Cluster actions
 - All `/clusters/{clusterName}/commands/{commandName}` endpoints that don't require *Request Body*.
-
-For a complete list of commands, go to https://cloudera.github.io/cm_api/ and click on *Full API Docs*.
 
 ## Cluster/Service/Role Output
 
