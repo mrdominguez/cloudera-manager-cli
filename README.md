@@ -378,11 +378,11 @@ Usage: cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
 
 In addition to the actions listed in the usage section, to execute a command endpoint, set `-a={commandName}` in the appropriate context. These are the supported commands:
 
-Role actions
+*Role actions*
 - `/clusters/{clusterName}/services/{serviceName}/roleCommands/{commandName}`
 - MGMT: `/cm/service/roleCommands/{commandName}`
 
-Service actions
+*Service actions*
 - All `/clusters/{clusterName}/services/{serviceName}/commands/{commandName}` endpoints that don't require *Request Body*, except the following supported commands:
   * `deployClientConfig`
   * `decommission`
@@ -391,7 +391,7 @@ Service actions
   * `yarnApplicationDiagnosticsCollection` (aliased by `collectDiagnosticData`)
 - MGMT: `/cm/service/commands/{commandName}`
 
-Cluster actions
+*Cluster actions*
 - All `/clusters/{clusterName}/commands/{commandName}` endpoints that don't require *Request Body*.
 
 ## Cluster/Service/Role Output
