@@ -1,5 +1,6 @@
 ### Version 9.1 is now available!
 
+- Unattended installation script for RHEL-based distributions added to README.md
 - Download command's downloadable result data, if any exists: `-download` (enables `-trackCmd`)
 - Collect the diagnostics data for Yarn applications:
 ```
@@ -178,7 +179,6 @@ The following is an example of an unattended installation script for RHEL-based 
 sudo yum -y install git cpan gcc openssl openssl-devel
 
 REPOSITORY=cloudera-manager-cli
-
 cd; git clone https://github.com/mrdominguez/$REPOSITORY
 
 cd $REPOSITORY
