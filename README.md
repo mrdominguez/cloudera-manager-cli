@@ -1,6 +1,6 @@
 ### Version 9.1 is now available!
 
-- Unattended installation script for RHEL-based distributions added to README.md
+- Added unattended installation [script](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#installation) for RHEL-based distributions
 - Download command's downloadable result data, if any exists: `-download` (enables `-trackCmd`)
 - Collect the diagnostics data for Yarn applications:
 ```
