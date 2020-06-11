@@ -208,7 +208,7 @@ perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 
 cpan CPAN::Meta::Requirements CPAN
 cpan Module::Metadata JSON REST::Client
 
-cmcli.pl -help
+cmcli -help
 echo "Run 'source ~/.bashrc' to refresh environment variables"
 ```
 
