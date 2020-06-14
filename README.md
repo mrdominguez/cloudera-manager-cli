@@ -15,27 +15,27 @@
 ## Release Notes
 ### Version 9.1 is now available!
 
-- Added unattended installation script for RHEL-based distributions (see [Installation](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#installation) section for details)
-- Download command's downloadable result data, if any exists: `-download` (enables `-trackCmd`)
-- Collect the diagnostics data for Yarn applications:
+- Collect the diagnostics data for Yarn applications:  
 ```
 -a=collectDiagnosticData
 	-applicationIds : Comma-separated list of application IDs
 	-ticketNumber : Ticket Number of the Cloudera Support Ticket (default: empty)
 	-comments : Comments to add to the support bundle (default: empty)
 ``` 
+- Download command's downloadable result data, if any exists: `-download` (enables `-trackCmd`)
+- Added unattended installation script for RHEL-based distributions (see [Installation](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#installation) section for details)
 
 ### Version 9.0
 
 - New service filters: `-sFilter`, `-maintenanceMode`
 - Added support for:
+  * HTTPS protocol: `-https`
   * URL redirection
   * Comma-separated list of command IDs: `-cmdId`
-  * HTTPS protocol: `-https`
 - Show HTTP response code and headers in debug mode (`-d`)
-- Overall code improvements
 - Revised user management logic
 - Updated `decommission` and `recommission` actions for both hosts and roles to use a list of items instead of a single item sequentially (to avoid concurrency issues while refreshing master nodes)
+- Overall code improvements
 
 ### Version 8.0
 
@@ -51,9 +51,8 @@
 	(delete) Delete user (args: -userName)
 	(show) Display users (args: [-userName] | default: all)
 ```
-Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiUser.html).
-
-- Minor changes
+Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiUser.html)
+- Minor code changes
 
 ### Version 7.0
 
@@ -62,7 +61,7 @@ Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v19/ns0
 - Update role config group: `-a=updateRoleGroup`
 - Delete role config group: `-a=deleteRoleGroup`
 
-Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services.html) and [role types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services_-serviceName-_roles.html).
+Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services.html) and [role types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services_-serviceName-_roles.html)
 
 ### Version 6.0
 
@@ -84,7 +83,7 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/
 - Update configuration: `-a=updateConfig`
 - Move roles to a config group: `-a=moveToRoleGroup -roleConfigGroup=<config_group_name>`
 - Move roles to the base (default) config group: `-a=moveToBaseGroup`
-- Minor improvements
+- Minor code improvements
 
 ### Version 4.0
 
@@ -103,7 +102,7 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/
 - Delete hosts from Cloudera Manager: `-deleteHost`
 - Shortcut option (`-run`) for a commonly used combination of switches (namely, `-confirmed -trackCmd`)
 - Code enhancements regarding host management
-- Minor changes to improve code debugging and readability
+- Enhanced code debugging and readability
 
 ## Synopsis
 
