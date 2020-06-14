@@ -102,7 +102,7 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/
 - Delete hosts from Cloudera Manager: `-deleteHost`
 - Shortcut option (`-run`) for a commonly used combination of switches (namely, `-confirmed -trackCmd`)
 - Code enhancements regarding host management
-- Enhanced code debugging and readability
+- Improved code debugging and readability
 
 ## Synopsis
 
