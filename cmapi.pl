@@ -29,7 +29,7 @@ if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 9.1\n";
-	print "Release date: 2020-06-07\n";
+	print "Release date: 2020-06-15\n";
 	exit;
 }
 
@@ -41,7 +41,7 @@ print "Credentials file $cm_cred_file " if $d;
 
 if ( -e $cm_cred_file ) {
 	print "found\n" if $d;
-	open my $fh, '<', $cm_cred_file || die "Can't open file $cm_cred_file: $!";
+	open my $fh, '<', $cm_cred_file or die "Can't open file $cm_cred_file: $!\n";
 	my @cm_cred = grep /CM_REST_/, <$fh>;
 	foreach ( @cm_cred ) {
 		# colon-separated key/value pair
@@ -88,7 +88,7 @@ if ( $f ) {
 	$body_type = 'json';
 	$body_content = do {
 	local $/ = undef;
-	open my $fh, "<", $file || die "Can't open file $file: $!";
+	open my $fh, '<', $file or die "Can't open file $file: $!\n";
 	<$fh>;
 	}
 }
