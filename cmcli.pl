@@ -37,7 +37,7 @@ if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 9.1\n";
-	print "Release date: 2020-06-07\n";
+	print "Release date: 2020-06-15\n";
 	exit;
 }
 
@@ -153,7 +153,7 @@ print "Credentials file $cm_cred_file " if $d;
 
 if ( -e $cm_cred_file ) {
 	print "found\n" if $d;
-	open my $fh, '<', $cm_cred_file || die "Can't open file $cm_cred_file: $!";
+	open my $fh, '<', $cm_cred_file or die "Can't open file $cm_cred_file: $!\n";
 	my @cm_cred = grep /CM_REST_/, <$fh>;
 	foreach ( @cm_cred ) {
 		# colon-separated key/value pair
@@ -262,7 +262,7 @@ if ( $userAction ) {
 				print "Loading file $f...\n";
 				$body_content = do {
 					local $/ = undef;
-					open my $fh, "<", $f || die "Can't open file $f: $!\n";
+					open my $fh, '<', $f or die "Can't open file $f: $!\n";
 					<$fh>;
 				};
 			} elsif ( $userName ) {
@@ -1503,7 +1503,7 @@ sub rest_call {
 	my $url_redirect = $client->responseHeader('location');
 
 	if ( $ret == 2 && !$url_redirect ) {
-		open(my $fh, '>', $fn) || die "Can't open file $fn: $!";
+		open my $fh, '>', $fn or die "Can't open file $fn: $!\n";
 		print $fh $content;
 		close $fh;
 	} else { 
