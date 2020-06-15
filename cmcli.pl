@@ -218,7 +218,7 @@ if ( $cmVersion || !$api ) {
 	$api_version = $api;
 }
 
-$api_version = ($api_version =~ /v(\d+)/) ? $1 : die "Invalid API version format: $api_version";
+$api_version = ($api_version =~ /v(\d+)/) ? $1 : die "Invalid API version format: $api_version\n";
 print "API version = $api_version\n" if $d;
 
 die "-yarnApps is only available since API v6\n" if ( $api_version < 6 && $yarnApps );
