@@ -106,7 +106,9 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/
 
 ## Synopsis
 
-AUTHOR: Mariano Dominguez, <marianodominguez@hotmail.com>
+AUTHOR: Mariano Dominguez  
+<marianodominguez@hotmail.com>  
+https://www.linkedin.com/in/marianodominguez
 
 FEEDBACK/BUGS: Please contact me by email.
 
