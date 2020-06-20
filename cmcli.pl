@@ -172,10 +172,10 @@ my $cm_user = $u || $ENV{'CM_REST_USER'} || 'admin';
 print "username = $cm_user\n" if $d;
 
 my $cm_password = $p || $ENV{'CM_REST_PASS'} || 'admin';
-print "Password file $cm_password " if $d;
+print "Password file " if $d;
 
 if ( -e $cm_password ) {
-	print "found\n" if $d;
+	print "$cm_password found\n" if $d;
 	$cm_password = qx/cat $cm_password/ || die "Can't get password from file $cm_password\n";
 	chomp($cm_password);
 } else {
