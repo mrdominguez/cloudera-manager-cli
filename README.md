@@ -13,7 +13,7 @@
 [How-To](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#how-to)
 
 ## Release Notes
-### Version 9.1 is now available!
+### Version 9.2 is now available!
 
 - Collect the diagnostics data for Yarn applications:  
 ```
@@ -23,6 +23,7 @@
 	-comments : Comments to add to the support bundle (default: empty)
 ``` 
 - Download command's downloadable result data, if any exists: `-download` (enables `-trackCmd`)
+- Save role log to file: `-log=... -download`
 - Added unattended installation script for RHEL-based distributions (see [Installation](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#installation) section for details)
 
 ### Version 9.0
@@ -363,6 +364,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -rChecks : Role health checks
 	 -rMetrics : Role metrics
 	 -log : Display role log (type: full, stdout, stderr /also stacks, stacksBundle for mgmt service/)
+	   -download : Save role log to file
 	 -yarnApps : Display YARN applications (example: -yarnApps='filter='executing=true'')
 	 -impalaQueries : Display Impala queries (example: -impalaQueries='filter='user=<userName>'')
 	 -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)
