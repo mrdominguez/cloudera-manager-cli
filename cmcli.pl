@@ -36,8 +36,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 9.1\n";
-	print "Release date: 2020-06-15\n";
+	print "Version: 9.2\n";
+	print "Release date: 2020-06-26\n";
 	exit;
 }
 
@@ -90,7 +90,7 @@ if ( $hAction && $hAction !~ /decommission|recommission|startRoles|enterMaintena
 	die "Host action '$hAction' not supported. Use -help for options\n" }
 
 ($confirmed, $trackCmd) = (1, 1) if $run;
-$trackCmd = 1 if $download && !$trackCmd;
+$trackCmd = 1 if $download && !$trackCmd && !$log;
 
 if ( $trackCmd && !$a && !$cmdId && !$hAction ) {
 	die "-trackCmd requires -a, -cmdId or -hAction\n" }
@@ -332,7 +332,6 @@ if ( $cmConfig || $deployment ) {
 		$cm_url = "$cm_api/cm/deployment";
 		$filename = "$cm_host-cm-deployment.json";
 	}
-	print "Saving to file $filename\n";
 	&rest_call('GET', $cm_url, 2, $filename);
 	exit;
 }
@@ -737,7 +736,16 @@ if ( $s && $s =~ /mgmt/ ) {
 				if ( $log =~ /^(stdout|stderr|full|stacks|stacksBundle)$/ ) {
 					print "Retrieving $log log...\n";
 					$cm_url = "$cm_api/cm/service/roles/$mgmt_role_name/logs/$log";
-					&rest_call('GET', $cm_url, 0);
+					my $ret = $download ? 2 : 0;
+					my $filename;
+					if ( $log eq 'stacks' ) {
+						$filename = "$mgmt_role_name.$log";
+					} elsif ( $log eq 'stacksBundle' ) {
+						$filename = "$mgmt_role_name.$log.zip";
+					} else {
+						$filename = "$mgmt_role_name\_$log.log";
+					}
+					&rest_call('GET', $cm_url, $ret, $filename);
 				} else {
 					print "Unknown log type: $log\n";
 					exit;
@@ -1103,8 +1111,8 @@ foreach my $cluster_name ( @clusters ) {
 						$cm_url .= "/clientConfig";
 						my $filename = "$cm_host-$cluster_name-$service_name-clientConfig.zip";
 						$filename =~ s/\s+//g;
+						print "\n";
 						&rest_call('GET', $cm_url, 2, $filename);
-						print "| Saving to file $filename\n";
 					} else {
 						&get_config($cm_url, $propertyName);
 					}
@@ -1258,12 +1266,10 @@ foreach my $cluster_name ( @clusters ) {
 						if ( $log ) {
 							if ( $log =~ /^(stdout|stderr|full)$/ ) {
 								print "Retrieving $log log...\n";
-#								my $cluster_name_w_spaces = $cluster_name;
-#								$cluster_name_w_spaces =~ s/ /%20/g;
-								# curl call (if https, add -k to allow connections to SSL sites without certs)
-#								$cm_url = "http://$cm_user:\'$cm_password\'\@$cm_api/clusters/$cluster_name_w_spaces/services/$service_name/roles/$role_name/logs/$log";
 								$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/roles/$role_name/logs/$log";
-								&rest_call('GET', $cm_url, 0);
+								my $ret = $download ? 2 : 0;
+								my $filename = "$role_name\_$log.log";
+								&rest_call('GET', $cm_url, $ret, $filename);
 							} else { 
 								print "Unknown log type: $log\n";
 							}
@@ -1503,6 +1509,7 @@ sub rest_call {
 	my $url_redirect = $client->responseHeader('location');
 
 	if ( $ret == 2 && !$url_redirect ) {
+		print "Saving to file $fn\n";
 		open my $fh, '>', $fn or die "Can't open file $fn: $!\n";
 		print $fh $content;
 		close $fh;
@@ -1652,7 +1659,6 @@ sub track_cmd {
 				if ( $cmd_list->{$id}->{'resultDataUrl'} ) {
 					my $resultDataUrl = $cmd_list->{$id}->{'resultDataUrl'};
 					my $filename = "$id-scm-command-result.zip";
-					print "Downloading and saving to file $filename\n";
 					&rest_call('GET', $resultDataUrl, 2, $filename);
 				} else {
 					print "No downloadable for commandId $id\n";
