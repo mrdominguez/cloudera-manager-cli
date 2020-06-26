@@ -28,8 +28,8 @@ use vars qw($help $version $u $p $m $d $f $i $bt $bc);
 if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 9.1\n";
-	print "Release date: 2020-06-15\n";
+	print "Version: 9.2\n";
+	print "Release date: 2020-06-26\n";
 	exit;
 }
 
