@@ -800,7 +800,7 @@ if ( $a && $a eq 'addCluster' ) {
 		my $cluster_full_version = $cluster->{'items'}[0]->{'fullVersion'};
 		print "Cluster '$clusterName' ";
 		print "-> '$cluster_display_name' " if $cluster_display_name;
-		print "(CDH $cluster_full_version) " if $cluster_full_version;
+		print "($cluster_full_version) " if $cluster_full_version;
 		print "created\n";
 	} else {
 		print "# Use -confirmed to execute action '$a'\n";
@@ -840,7 +840,7 @@ foreach my $cluster_name ( @clusters ) {
 
 		print "$cluster_name ";
 		print "| $cluster_maintenance_mode " if ( $maintenanceMode && $api_version > 1 );
-		print ">>> $cluster_display_name (CDH $cluster_full_version)" if $api_version > 5;
+		print ">>> $cluster_display_name ($cluster_full_version)" if $api_version > 5;
 		if ( $api_version > 10 ) {
 			my $cluster_status = $cluster->{'entityStatus'};
 			print " --- $cluster_status";
