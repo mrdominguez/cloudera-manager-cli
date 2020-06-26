@@ -1467,6 +1467,7 @@ sub usage {
 	print "\t -rChecks : Role health checks\n";
 	print "\t -rMetrics : Role metrics\n";
 	print "\t -log : Display role log (type: full, stdout, stderr /also stacks, stacksBundle for mgmt service/)\n";
+	print "\t   -download : Save role log to file\n";
 	print "\t -yarnApps : Display YARN applications (example: -yarnApps='filter='executing=true'')\n";
 	print "\t -impalaQueries : Display Impala queries (example: -impalaQueries='filter='user=<userName>'')\n";
 	print "\t -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)\n\n";
