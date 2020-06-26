@@ -143,7 +143,7 @@ By default, if not set explicitly, `-cm` points to `localhost:7180` (or `7183` i
 ```
 $ cmcli.pl
 Redirecting to https://localhost:7183/...
-Cluster 1 >>> Cluster 1 (CDH 6.3.3) --- GOOD_HEALTH
+Cluster 1 >>> Cluster 1 (6.3.3) --- GOOD_HEALTH
 |_ Cluster 1 | zookeeper | ZOOKEEPER | ZooKeeper --- STARTED GOOD FRESH FRESH
 |_ Cluster 1 | oozie | OOZIE | Oozie --- STARTED GOOD FRESH FRESH
 |_ Cluster 1 | hue | HUE | Hue --- STARTED GOOD FRESH FRESH
@@ -414,7 +414,7 @@ In addition to the actions listed in the usage section, to execute a command end
 
 <https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiCluster.html>
 
-`name | maintenanceMode >>> displayName (CDH fullVersion) --- entityStatus`
+`name | maintenanceMode >>> displayName (fullVersion) --- entityStatus`
 
 <https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiService.html>
 
