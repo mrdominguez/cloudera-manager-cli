@@ -306,7 +306,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -deleteHost : Delete the host from Cloudera Manager
 	 -setRackId : Update the rack ID of the host
 	 -addToCluster : Add the host to a cluster
-	 -addRole : Create new roles. Comma-separated list of role types (args: -serviceName, [-clusterName] /for API v10 or lower/)
+	 -addRole : Create new roles. Comma-separated list of role types (args: -serviceName /-clusterName for API v10 or lower/)
 	 -hAction : Host action
 	            (decommission|recommission) Decommission/recommission the host
 	            (startRoles) Start all the roles on the host
@@ -365,7 +365,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -sMetrics : Service metrics
 	 -rChecks : Role health checks
 	 -rMetrics : Role metrics
-	 -log : Display role log (type: full, stdout, stderr /also stacks, stacksBundle for mgmt service/)
+	 -log : Display role log (type: full, stdout, stderr /stacks, stacksBundle for mgmt service/)
 	   -download : Save role log to file
 	 -yarnApps : Display YARN applications
 	   -attributes : List of attributes that the Service Monitor can associate with YARN applications
