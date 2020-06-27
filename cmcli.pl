@@ -1462,7 +1462,7 @@ sub usage {
 	print "\t -deleteHost : Delete the host from Cloudera Manager\n";
 	print "\t -setRackId : Update the rack ID of the host\n";
 	print "\t -addToCluster : Add the host to a cluster\n";
-	print "\t -addRole : Create new roles. Comma-separated list of role types (args: -serviceName, [-clusterName] /for API v10 or lower/)\n";
+	print "\t -addRole : Create new roles. Comma-separated list of role types (args: -serviceName /-clusterName for API v10 or lower/)\n";
 	print "\t -hAction : Host action\n";
 	print "\t            (decommission|recommission) Decommission/recommission the host\n";
 	print "\t            (startRoles) Start all the roles on the host\n";
@@ -1521,7 +1521,7 @@ sub usage {
 	print "\t -sMetrics : Service metrics\n";
 	print "\t -rChecks : Role health checks\n";
 	print "\t -rMetrics : Role metrics\n";
-	print "\t -log : Display role log (type: full, stdout, stderr /also stacks, stacksBundle for mgmt service/)\n";
+	print "\t -log : Display role log (type: full, stdout, stderr /stacks, stacksBundle for mgmt service/)\n";
 	print "\t   -download : Save role log to file\n";
 	print "\t -yarnApps : Display YARN applications\n";
 	print "\t   -attributes : List of attributes that the Service Monitor can associate with YARN applications\n";
