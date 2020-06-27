@@ -28,16 +28,16 @@ use Data::Dumper;
 BEGIN { $| = 1 }
 
 use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword $userRole $https $api $sChecks $sMetrics $rChecks $rMetrics $cmConfig $u $p $cm
-	$c $s $r $rInfo $rFilter $sFilter $yarnApps $applicationIds $ticketNumber $comments $download $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles $hChecks $deployment
-	$mgmt $impalaQueries $trackCmd $setRackId $deleteHost $addToCluster $removeFromCluster $addRole $serviceName $clusterName
+	$c $s $r $rInfo $rFilter $sFilter $yarnApps $attributes $kill $appId $ticketNumber $comments $download $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles $hChecks $deployment
+	$mgmt $impalaQueries $cancel $queryId $format $trackCmd $setRackId $deleteHost $addToCluster $removeFromCluster $addRole $serviceName $clusterName
 	$hAction $run $maintenanceMode $roleConfigGroup $propertyName $propertyValue $clientConfig $full $displayName $fullVersion $serviceType $roleType
 	$slaveBatchSize $sleepSeconds $slaveFailCountThreshold $staleConfigsOnly $unUpgradedOnly $restartRoleTypes $copyFromRoleGroup);
 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 9.2\n";
-	print "Release date: 2020-06-26\n";
+	print "Version: 10\n";
+	print "Release date: 2020-06-27\n";
 	exit;
 }
 
@@ -45,8 +45,8 @@ if ( $version ) {
 
 my %opts = ('cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'sFilter'=>$sFilter, 'userAction'=>$userAction,
 	'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction,
-	'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName,
-	'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType, 'roleType'=>$roleType, 'copyFromRoleGroup'=>$copyFromRoleGroup,
+	'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName, 'queryId'=>$queryId, 'format'=>$format,
+	'appId'=>$appId, 'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType, 'roleType'=>$roleType, 'copyFromRoleGroup'=>$copyFromRoleGroup,
 	'f'=>$f, 'userName'=>$userName, 'userPassword'=>$userPassword, 'userRole'=>$userRole, 'propertyName'=>$propertyName, 'propertyValue'=>$propertyValue);
 
 my %hInfo_opts = ('hRoles'=>$hRoles, 'hChecks'=>$hChecks, 'setRackId'=>$setRackId, 'deleteHost'=>$deleteHost,
@@ -145,7 +145,7 @@ if ( $a ) {
 }
 
 $s = 'mgmt' if $mgmt;
-$s = '^yarn' if ( $yarnApps && !$s );
+$s = '^yarn' if ( ( $yarnApps || (  $a && $a eq 'diagData') ) && !$s );
 $s = '^impala' if ( $impalaQueries && !$s );
 
 my $cm_cred_file = "$ENV{'HOME'}/.cm_rest";
@@ -221,12 +221,18 @@ if ( $cmVersion || !$api ) {
 $api_version = ($api_version =~ /v(\d+)/) ? $1 : die "Invalid API version format: $api_version\n";
 print "API version = $api_version\n" if $d;
 
-die "-yarnApps is only available since API v6\n" if ( $api_version < 6 && $yarnApps );
-die "-impalaQueries is only available since API v4\n" if ( $api_version < 4 && $impalaQueries );
+if ( $yarnApps ) {
+	die "-yarnApps is available since API v6\n" if $api_version < 6;
+	die "Set -appId\n" if ( $kill && !$appId );
+}
+if ( $impalaQueries ) {
+	die "-impalaQueries is available since API v4\n" if $api_version < 4;
+	die "Set -queryId\n" if ( $cancel && !$queryId );
+}
 
-if ( $a && $a eq 'collectDiagnosticData' ) {
-	die "yarnApplicationDiagnosticsCollection is only available since API v8\n" if ( $api_version < 8 );
-	$applicationIds ? $s = '^yarn' : die "Set -applicationIds\n";
+if ( $a && $a eq 'diagData' ) {
+	die "yarnApplicationDiagnosticsCollection is available since API v8\n" if ( $api_version < 8 );
+	die "Set -appId\n" unless $appId;
 }
 
 if ( $addRole ) {
@@ -943,12 +949,28 @@ foreach my $cluster_name ( @clusters ) {
 	
 			$service_action_flag = 1 if $a;
 			
-			# Available since API v6
 			if ( $yarnApps ) {
-				if ( $yarnApps eq '1' ) {
-					$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/yarnApplications";
-				} else {
-					$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/yarnApplications?$yarnApps";
+				$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/yarnApplications";
+				$cm_url .= "?$yarnApps" unless $yarnApps eq '1';
+				if ( $attributes ) {
+					$cm_url .= '/attributes';
+					my $filename = "${service_name}_attributes.json";
+					rest_call('GET', $cm_url, 2, $filename);
+					exit;
+				}
+				if ( $kill ) {
+					if ( $confirmed ) {
+						$cm_url .= "/$appId/kill";
+						my $yarnKillResponse = rest_call('POST', $cm_url, 1);
+						if ( $yarnKillResponse->{'warning'} ) {
+							print "$yarnKillResponse->{'warning'}\n";
+						} else {
+							print "$appId killed\n"
+						}
+					} else {
+						print "# Use -confirmed to kill $appId\n";
+					}
+					exit;
 				}
 				my $applications = &rest_call('GET', $cm_url, 1);
 				my @app_properties = ('applicationId', 'name', 'startTime', 'endTime', 'user', 'pool', 'state', 'progress');
@@ -971,10 +993,43 @@ foreach my $cluster_name ( @clusters ) {
 			}
 
 			if ( $impalaQueries ) {
-				if ( $impalaQueries eq '1' ) {
-					$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/impalaQueries";
-				} else {
-					$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/impalaQueries?$impalaQueries";
+				$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/impalaQueries";
+				$cm_url .= "?$impalaQueries" unless $impalaQueries eq '1';
+				if ( $attributes ) {
+					$cm_url .= "/attributes";
+					my $filename = "${service_name}_attributes.json";
+					rest_call('GET', $cm_url, 2, $filename);
+					exit;
+				}
+				if ( $queryId && !$cancel ) {
+					$format='text' if !$format;
+					$format='thrift_encoded' if $format eq 'thrift';
+					$cm_url .= "/$queryId?format=$format";
+
+					my $filename = "${queryId}_${format}.profile";
+					my $impalaQueryDetailsResponse = rest_call('GET', $cm_url, 1);
+
+					print "$impalaQueryDetailsResponse->{'details'}\n" if $format eq 'text';
+					print "Saving query details to file $filename\n";
+
+					open my $fh, '>', $filename or die ; 
+					print $fh $impalaQueryDetailsResponse->{'details'};
+					close $fh;
+					exit;
+				}
+				if ( $cancel ) {
+					if ( $confirmed ) {
+						$cm_url .= "/$queryId/cancel";
+						my $impalaCancelResponse = rest_call('POST', $cm_url, 1);
+						if ( $impalaCancelResponse->{'warning'} ) {
+							print "$impalaCancelResponse->{'warning'}\n";
+						} else {
+							print "Query $queryId cancelled\n"
+						}
+					} else {
+						print "# Use -confirmed to cancel query $queryId\n";
+					}
+					exit;
 				}
 				my $queries = &rest_call('GET', $cm_url, 1);
 				my @query_properties = ('queryId', 'statement', 'queryType', 'queryState', 'startTime', 'endTime');
@@ -986,11 +1041,11 @@ foreach my $cluster_name ( @clusters ) {
 					my $property_index = 0;
 					foreach my $property ( @query_properties ) {
 						if ( $property eq 'attributes' ) {
-							print "\n\t| $queries->{'queries'}[$i]->{$property}->{'admission_result'} ";
-							print "| $queries->{'queries'}[$i]->{$property}->{'oom'} ";
-							print "| $queries->{'queries'}[$i]->{$property}->{'stats_missing'} ";
-							print "| $queries->{'queries'}[$i]->{$property}->{'session_type'} ";
-							print "| $queries->{'queries'}[$i]->{$property}->{'query_status'} ";
+							print "\n\t| $queries->{'queries'}[$i]->{$property}->{'admission_result'} " if $queries->{'queries'}[$i]->{$property}->{'admission_result'};
+							print "| $queries->{'queries'}[$i]->{$property}->{'oom'} " if $queries->{'queries'}[$i]->{$property}->{'oom'};
+							print "| $queries->{'queries'}[$i]->{$property}->{'stats_missing'} " if $queries->{'queries'}[$i]->{$property}->{'stats_missing'};
+							print "| $queries->{'queries'}[$i]->{$property}->{'session_type'} " if $queries->{'queries'}[$i]->{$property}->{'session_type'};
+							print "| $queries->{'queries'}[$i]->{$property}->{'query_status'} " if $queries->{'queries'}[$i]->{$property}->{'query_status'};
 						} elsif ( $property eq 'coordinator' ) {
 							print "| $queries->{'queries'}[$i]->{$property}->{'hostId'} ";
 						} elsif ( defined $queries->{'queries'}[$i]->{$property} ) {
@@ -1139,13 +1194,13 @@ foreach my $cluster_name ( @clusters ) {
 						$body_content = &rolling_restart($cluster_name, $service_name);						
 					} elsif ( $a eq 'deployClientConfig' ) {
 						$body_content = '{ "items" : [] }';
-					} elsif ( $a eq 'collectDiagnosticData' ) {
+					} elsif ( $a eq 'diagData' ) {
 						$a = 'yarnApplicationDiagnosticsCollection';
 						my $diag_info = {};
 						$diag_info->{'ticketNumber'} = $ticketNumber if $ticketNumber;
 						$diag_info->{'comments'} = $comments if $comments;
-						$applicationIds =~ s/\s+//g;
-						@{$diag_info->{'applicationIds'}} = split /,/, $applicationIds;
+						$appId =~ s/\s+//g;
+						@{$diag_info->{'applicationIds'}} = split /,/, $appId;
 						$body_content = to_json($diag_info);
 					}
 					$cm_url .= "/commands/$a";
@@ -1363,16 +1418,16 @@ foreach my $cluster_name ( @clusters ) {
 
 sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u=cm_user] [-p=cm_password]\n";
-	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=commandId_list [-cmdAction=abort|retry]]\n";
+	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_ids [-cmdAction=abort|retry]]\n";
 	print "\t[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]\n";
 	print "\t[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
-	print "\t  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command_name]]\n";
+	print "\t  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command]]\n";
 	print "\t[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter]\n";
 	print "\t[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=role_filter] [-rChecks] [-rMetrics] [-log=log_type]]\n";
 	print "\t[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]\n";
-	print "\t[-a[=command_name]] [-confirmed] [-trackCmd] [-download] [-run]\n";
-	print "\t[-yarnApps[=parameters]]\n";
-	print "\t[-impalaQueries[=parameters]]\n";
+	print "\t[-a[=command]] [-confirmed] [-trackCmd] [-download] [-run]\n";
+	print "\t[-yarnApps[=parameters] [-attributes] [-kill -appId=app_id]]\n";
+	print "\t[-impalaQueries[=parameters] [-attributes] [-queryId=query_id [-format=(text|thrift)|-cancel]]\n";
 	print "\t[-mgmt] (<> -s=mgmt)\n\n";
 
 	print "\t -help : Display usage\n";
@@ -1420,7 +1475,7 @@ sub usage {
 	print "\t -sFilter : Service state, health summary, configuration status, client configuration status (regex)\n";
 	print "\t -maintenanceMode : Display maintenance mode. Select hosts/services/roles based on status (YES/NO | default: all)\n";
 	print "\t -roleConfigGroup : Display role config group in the role information. Select roles based on config group name (regex | default: all)\n";
-	print "\t -a : Cluster/service/role action (default: list active commands)\n";
+	print "\t -a : Cluster/Service/Role action (default: list active commands)\n";
 	print "\t      (stop|start|restart|refresh|...)\n";
 	print "\t      (deployClientConfig) Deploy cluster-wide/service client configuration\n";
 	print "\t      (decommission|recommission) Decommission/recommission roles of a service\n";
@@ -1454,8 +1509,8 @@ sub usage {
 	print "\t      (updateService) Update service information (args: -displayName)\n";			# service context
 	print "\t      (deleteService) Delete service\n";							# service context
 	print "\t      (roleTypes) List the supported role types for a service\n";				# service context
-	print "\t      (collectDiagnosticData) Collect the diagnostics data for Yarn applications\n";		# service context
-	print "\t        -applicationIds : Comma-separated list of application IDs\n";
+	print "\t      (diagData) Collect diagnostics data for Yarn applications\n";		# service context
+	print "\t        -appId : Comma-separated list of application IDs\n";
 	print "\t        -ticketNumber : Ticket Number of the Cloudera Support Ticket (default: empty)\n";
 	print "\t        -comments : Comments to add to the support bundle (default: empty)\n";
 	print "\t -confirmed : Proceed with command execution\n";
@@ -1468,8 +1523,14 @@ sub usage {
 	print "\t -rMetrics : Role metrics\n";
 	print "\t -log : Display role log (type: full, stdout, stderr /also stacks, stacksBundle for mgmt service/)\n";
 	print "\t   -download : Save role log to file\n";
-	print "\t -yarnApps : Display YARN applications (example: -yarnApps='filter='executing=true'')\n";
-	print "\t -impalaQueries : Display Impala queries (example: -impalaQueries='filter='user=<userName>'')\n";
+	print "\t -yarnApps : Display YARN applications\n";
+	print "\t   -attributes : List of attributes that the Service Monitor can associate with YARN applications\n";
+	print "\t   -kill : Kill YARN application (-appId)\n";
+	print "\t -impalaQueries : Display Impala queries\n";
+	print "\t   -attributes : List of attributes that the Service Monitor can associate with Impala queries\n";
+	print "\t   -queryId : Return query details\n";
+	print "\t   -format : text (default) | thrift\n";
+	print "\t   -cancel : Cancel Impala query (-queryId)\n";
 	print "\t -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)\n\n";
 	exit;
 }
