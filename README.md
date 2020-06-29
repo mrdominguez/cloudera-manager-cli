@@ -103,7 +103,7 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/
 
 - Rolling restart of services and roles: `-a=rollingRestart`
 - Delete hosts from Cloudera Manager: `-deleteHost`
-- Alias (`-run`) for a commonly used combination of switches (namely, `-confirmed -trackCmd`)
+- Alias for a commonly used combination of switches: `-run` ≡ `-confirmed -trackCmd`
 - Code enhancements regarding host management
 - Improved code debugging and readability
 
