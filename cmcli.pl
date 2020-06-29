@@ -1422,13 +1422,12 @@ sub usage {
 	print "\t[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]\n";
 	print "\t[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
 	print "\t  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command]]\n";
-	print "\t[-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter]\n";
+	print "\t[-mgmt] [-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter]\n";
 	print "\t[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=role_filter] [-rChecks] [-rMetrics] [-log=log_type]]\n";
 	print "\t[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]\n";
 	print "\t[-a[=command]] [-confirmed] [-trackCmd] [-download] [-run]\n";
 	print "\t[-yarnApps[=parameters] [-attributes] [-kill -appId=app_id]]\n";
-	print "\t[-impalaQueries[=parameters] [-attributes] [-queryId=query_id [-format=(text|thrift)|-cancel]]\n";
-	print "\t[-mgmt]\n\n";
+	print "\t[-impalaQueries[=parameters] [-attributes] [-queryId=query_id [-format=(text|thrift)|-cancel]]\n\n";
 
 	print "\t -help : Display usage\n";
 	print "\t -version : Display version information\n";
