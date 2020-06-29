@@ -79,12 +79,12 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/
 
 ### Version 5.0
 
-- Create roles: `-hInfo=... -addRole=<role_types> -serviceName=<service_name>`
+- Create roles: `-hInfo=... -addRole=role_types -serviceName=service_name`
 - Delete roles: `-a=deleteRole`
 - Display configuration for services (including Cloudera Management), role groups and roles: `-a=getConfig`
-- Download service client configuration: `-s=<service_name> -a=getConfig -clientConfig`
+- Download service client configuration: `-s=service_name -a=getConfig -clientConfig`
 - Update configuration: `-a=updateConfig`
-- Move roles to a config group: `-a=moveToRoleGroup -roleConfigGroup=<config_group_name>`
+- Move roles to a config group: `-a=moveToRoleGroup -roleConfigGroup=config_group_name`
 - Move roles to the base (default) config group: `-a=moveToBaseGroup`
 - Minor code improvements
 
@@ -127,7 +127,7 @@ https://cloudera.github.io/cm_api/docs/releases/
 
 The `-cmVersion` option shows the default API version for a given CM server host:
 ```
-$ cmcli.pl -cm=<cm_server_host> -cmVersion
+$ cmcli.pl -cm=cm_server_host -cmVersion
 CM version: 5.7.4 (API: v12)
 ```
 
@@ -233,7 +233,7 @@ Then, add the following line to the Perl code at the beginning of the `use` bloc
 
 Cloudera Manager credentials can be passed by using the `-u` (username) and `-p` (password) options. The `-p` option can be set to the password string itself (**not recommended**) or to a file containing the password:
 
-`$ cmcli.pl -u=username -p=/path/to/password_file -cm=<cm_server_host>`
+`$ cmcli.pl -u=username -p=/path/to/password_file -cm=cm_server_host`
 
 Credentials can also be passed by using the `$CM_REST_USER` and `$CM_REST_PASS` environment variables. Just like the `-p` option, the `$CM_REST PASS` environment variable can be set to a file containing the password:
 ```
@@ -381,7 +381,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 **cmapi.pl**
 ```
 Usage: cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
-	[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] <ResourceUrl>
+	[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] ResourceUrl
 
 	 -help : Display usage
 	 -version : Display version information
@@ -395,7 +395,7 @@ Usage: cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
 	       To set multiple objects, use -bt=json or -f to pass a JSON file
 	 -i : Add the 'items' property to the body content (enabled by default if -bt=array)
 	 -f : JSON file containing body content (implies -bt=json)
-	 <ResourceUrl> : URL to REST resource (example: [http://]cm_server_host:7180/api/v19/clusters)
+	 ResourceUrl : URL to REST resource (example: [http://]cm_server_host:7180/api/v19/clusters)
 ```
 
 ## Supported Cluster/Service/Role Commands
@@ -486,7 +486,7 @@ https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiCommand.html
 
 	`cmcli.pl`
 
-	`cmcli.pl -cm=<cm_server_host>`
+	`cmcli.pl -cm=cm_server_host`
 
 * Show the Cloudera Management Service instances:
 
