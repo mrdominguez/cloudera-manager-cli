@@ -37,7 +37,7 @@ if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 10\n";
-	print "Release date: 2020-06-27\n";
+	print "Release date: 2020-06-28\n";
 	exit;
 }
 
@@ -1428,7 +1428,7 @@ sub usage {
 	print "\t[-a[=command]] [-confirmed] [-trackCmd] [-download] [-run]\n";
 	print "\t[-yarnApps[=parameters] [-attributes] [-kill -appId=app_id]]\n";
 	print "\t[-impalaQueries[=parameters] [-attributes] [-queryId=query_id [-format=(text|thrift)|-cancel]]\n";
-	print "\t[-mgmt] (<> -s=mgmt)\n\n";
+	print "\t[-mgmt]\n\n";
 
 	print "\t -help : Display usage\n";
 	print "\t -version : Display version information\n";
@@ -1531,7 +1531,7 @@ sub usage {
 	print "\t   -queryId : Return query details\n";
 	print "\t   -format : text (default) | thrift\n";
 	print "\t   -cancel : Cancel Impala query (-queryId)\n";
-	print "\t -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)\n\n";
+	print "\t -mgmt : Shortcut for '-s=mgmt' | Cloudera Management Service information (default: disabled)\n\n";
 	exit;
 }
 
