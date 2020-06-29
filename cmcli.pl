@@ -1516,7 +1516,7 @@ sub usage {
 	print "\t -confirmed : Proceed with command execution\n";
 	print "\t -trackCmd : Wait for all asynchronous commands to end before exiting (default: disabled)\n";
 	print "\t -download : Download command's downloadable result data, if any exists (enables -trackCmd, default: disabled)\n";
-	print "\t -run : Shortcut for '-confirmed -trackCmd'\n";
+	print "\t -run : Alias for '-confirmed -trackCmd'\n";
 	print "\t -sChecks : Service health checks\n";
 	print "\t -sMetrics : Service metrics\n";
 	print "\t -rChecks : Role health checks\n";
@@ -1531,7 +1531,7 @@ sub usage {
 	print "\t   -queryId : Return query details\n";
 	print "\t   -format : text (default) | thrift\n";
 	print "\t   -cancel : Cancel Impala query (-queryId)\n";
-	print "\t -mgmt : Shortcut for '-s=mgmt' | Cloudera Management Service information (default: disabled)\n\n";
+	print "\t -mgmt : Alias for '-s=mgmt' | Cloudera Management Service information (default: disabled)\n\n";
 	exit;
 }
 
