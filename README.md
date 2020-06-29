@@ -272,7 +272,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	[-a[=command]] [-confirmed] [-trackCmd] [-download] [-run]
 	[-yarnApps[=parameters] [-attributes] [-kill -appId=app_id]]
 	[-impalaQueries[=parameters] [-attributes] [-queryId=query_id [-format=(text|thrift)|-cancel]]
-	[-mgmt] (<> -s=mgmt)
+	[-mgmt]
 
 	 -help : Display usage
 	 -version : Display version information
@@ -375,7 +375,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	   -queryId : Return query details
 	   -format : text (default) | thrift
 	   -cancel : Cancel Impala query (-queryId)
-	 -mgmt (-s=mgmt) : Cloudera Management Service information (default: disabled)
+	 -mgmt : Shortcut for '-s=mgmt' | Cloudera Management Service information (default: disabled)
 ```
 
 **cmapi.pl**
