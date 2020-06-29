@@ -103,7 +103,7 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/
 
 - Rolling restart of services and roles: `-a=rollingRestart`
 - Delete hosts from Cloudera Manager: `-deleteHost`
-- Shortcut option (`-run`) for a commonly used combination of switches (namely, `-confirmed -trackCmd`)
+- Alias (`-run`) for a commonly used combination of switches (namely, `-confirmed -trackCmd`)
 - Code enhancements regarding host management
 - Improved code debugging and readability
 
@@ -360,7 +360,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -confirmed : Proceed with command execution
 	 -trackCmd : Wait for all asynchronous commands to end before exiting (default: disabled)
 	 -download : Download command's downloadable result data, if any exists (enables -trackCmd, default: disabled)
-	 -run : Shortcut for '-confirmed -trackCmd'
+	 -run : Alias for '-confirmed -trackCmd'
 	 -sChecks : Service health checks
 	 -sMetrics : Service metrics
 	 -rChecks : Role health checks
@@ -375,7 +375,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	   -queryId : Return query details
 	   -format : text (default) | thrift
 	   -cancel : Cancel Impala query (-queryId)
-	 -mgmt : Shortcut for '-s=mgmt' | Cloudera Management Service information (default: disabled)
+	 -mgmt : Alias for '-s=mgmt' | Cloudera Management Service information (default: disabled)
 ```
 
 **cmapi.pl**
@@ -522,7 +522,7 @@ https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiCommand.html
 
 	`cmcli.pl -s=hdfs -r=datanode -rFilter=stopped -a=start`
 
-    *To execute the action, use `-confirmed`. To check the command execution status, add `-trackCmd`. To do both, just use the `-run` shortcut instead.*
+    *To execute the action, use `-confirmed`. To check the command execution status, add `-trackCmd`. To do both, just use the `-run` alias instead.*
 
 * Deploy the YARN client configuration at the service level:
 
