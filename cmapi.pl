@@ -29,7 +29,7 @@ if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 10\n";
-	print "Release date: 2020-06-28\n";
+	print "Release date: 2020-06-29\n";
 	exit;
 }
 
