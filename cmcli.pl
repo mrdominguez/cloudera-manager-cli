@@ -1523,10 +1523,10 @@ sub usage {
 	print "\t -rMetrics : Role metrics\n";
 	print "\t -log : Display role log (type: full, stdout, stderr /stacks, stacksBundle for mgmt service/)\n";
 	print "\t   -download : Save role log to file\n";
-	print "\t -yarnApps : Display YARN applications\n";
+	print "\t -yarnApps : Display YARN applications (default: filter=empty, from=5_minutes, to=now, limit=100, offset=0)\n";
 	print "\t   -attributes : List of attributes that the Service Monitor can associate with YARN applications\n";
 	print "\t   -kill : Kill YARN application (-appId)\n";
-	print "\t -impalaQueries : Display Impala queries\n";
+	print "\t -impalaQueries : Display Impala queries (default: filter=empty, from=5_minutes, to=now, limit=100, offset=0)\n";
 	print "\t   -attributes : List of attributes that the Service Monitor can associate with Impala queries\n";
 	print "\t   -queryId : Return query details\n";
 	print "\t   -format : text (default) | thrift\n";
