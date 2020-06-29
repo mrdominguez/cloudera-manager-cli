@@ -34,7 +34,7 @@ if ( $version ) {
 }
 
 &usage if $help;
-die "Argument <ResourceUrl> is missing\nUse -help for options\n" if @ARGV == 0;
+die "Argument ResourceUrl is missing\nUse -help for options\n" if @ARGV == 0;
 
 my $cm_cred_file = "$ENV{'HOME'}/.cm_rest";
 print "Credentials file $cm_cred_file " if $d;
@@ -167,7 +167,7 @@ print "The request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d
 
 sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] [-u=username] [-p=password]\n";
-	print "\t[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] <ResourceUrl>\n\n";
+	print "\t[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] ResourceUrl\n\n";
 
 	print "\t -help : Display usage\n";
 	print "\t -version : Display version information\n";
@@ -182,6 +182,6 @@ sub usage {
 	print "\t       To set multiple objects, use -bt=json or -f to pass a JSON file\n";
 	print "\t -i : Add the 'items' property to the body content (enabled by default if -bt=array)\n";
 	print "\t -f : JSON file containing body content (implies -bt=json)\n";
-	print "\t <ResourceUrl> : URL to REST resource (example: [http://]cm_server_host:7180/api/v15/clusters)\n\n";
+	print "\t ResourceUrl : URL to REST resource (example: [http://]cm_server_host:7180/api/v15/clusters)\n\n";
 	exit;
 }
