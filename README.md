@@ -246,7 +246,7 @@ Cloudera Manager credentials can be passed by using the `-u` (username) and `-p`
 
 `$ cmcli.pl -u=username -p=/path/to/password_file -cm=cm_server_host`
 
-Both username and password values are optional. If no value is provided, there is a prompt for one.
+Both username and password values are optional. If no value is provided, there will be a prompt for one.
 
 Credentials can also be passed by using the `$CM_REST_USER` and `$CM_REST_PASS` environment variables. Just like the `-p` option, the `$CM_REST_PASS` environment variable can be set to a file containing the password:
 ```
