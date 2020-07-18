@@ -22,14 +22,15 @@ use REST::Client;
 use MIME::Base64;
 use JSON;
 use Data::Dumper;
+use IO::Prompter;
 
 use vars qw($help $version $u $p $m $d $f $i $bt $bc);
 
 if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 10\n";
-	print "Release date: 2020-06-29\n";
+	print "Version: 10.1\n";
+	print "Release date: 2020-07-18\n";
 	exit;
 }
 
@@ -56,8 +57,26 @@ if ( -e $cm_cred_file ) {
 	print "not found\n" if $d;
 }
 
+if ( $u && $u eq '1' ) {
+	$u = prompt 'Username [admin]:', -in=>*STDIN, -timeout=>30, -default=>'admin';
+	if ( $u->timedout ) {
+		print "Timed out\n";
+		exit;
+	}
+	print "Using default username\n" if $u->defaulted;
+}
+
 my $cm_user = $u || $ENV{'CM_REST_USER'} || 'admin';
 print "username = $cm_user\n" if $d;
+
+if ( $p && $p eq '1' ) {
+	$p = prompt 'Password [admin]:', -in=>*STDIN, -timeout=>30, -default=>'admin', -echo=>'';
+	if ( $p->timedout ) {
+		print "Timed out\n";
+		exit;
+	}
+	print "Using default password\n" if $p->defaulted;
+}
 
 my $cm_password = $p || $ENV{'CM_REST_PASS'} || 'admin';
 print "Password file " if $d;
@@ -166,7 +185,7 @@ print "$content\n";
 print "The request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d/;
 
 sub usage {
-	print "\nUsage: $0 [-help] [-version] [-d] [-u=username] [-p=password]\n";
+	print "\nUsage: $0 [-help] [-version] [-d] [-u[=username]] [-p[=password]]\n";
 	print "\t[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] ResourceUrl\n\n";
 
 	print "\t -help : Display usage\n";
