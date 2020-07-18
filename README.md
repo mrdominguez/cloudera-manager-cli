@@ -13,7 +13,17 @@
 [How-To](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#how-to)
 
 ## Release Notes
-### Version 10 is now available!
+### Version 10.1 is now available!
+
+- Prompt for username and/or password:
+```
+$ cmcli.pl -u -p
+Username [admin]: mdom
+Password [admin]: ****
+...
+```
+
+### Version 10
 
 - Collect diagnostics data for Yarn applications:  
 ```
@@ -186,6 +196,7 @@ These utilities are written in Perl and have been tested using *Perl 5.1x.x* on 
 Use [cpan](http://perldoc.perl.org/cpan.html) to install the following modules; alternately, download them from the [CPAN Search Site](http://search.cpan.org/) for manual installation:
 - **REST::Client**
 - **JSON**
+- **IO::Prompter** (for username/password prompt)
 
 Additionally, **LWP::Protocol::https** is required for HTTPS support.
 
@@ -210,7 +221,7 @@ echo | cpan
 
 perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->commit'
 cpan CPAN::Meta::Requirements CPAN
-cpan Module::Metadata JSON REST::Client
+cpan Module::Metadata JSON REST::Client IO::Prompter
 
 cmcli -help
 echo "Run 'source ~/.bashrc' to refresh environment variables"
@@ -235,7 +246,9 @@ Cloudera Manager credentials can be passed by using the `-u` (username) and `-p`
 
 `$ cmcli.pl -u=username -p=/path/to/password_file -cm=cm_server_host`
 
-Credentials can also be passed by using the `$CM_REST_USER` and `$CM_REST_PASS` environment variables. Just like the `-p` option, the `$CM_REST PASS` environment variable can be set to a file containing the password:
+Both username and password values are optional. If no value is provided, there is a prompt for one.
+
+Credentials can also be passed by using the `$CM_REST_USER` and `$CM_REST_PASS` environment variables. Just like the `-p` option, the `$CM_REST_PASS` environment variable can be set to a file containing the password:
 ```
 export CM_REST_USER=username
 export CM_REST_PASS=/path/to/password_file
@@ -261,7 +274,7 @@ The preference is as follows (highest first):
 
 **cmcli.pl**
 ```
-Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u=cm_user] [-p=cm_password]
+Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u[=username]] [-p[=password]]
 	[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_ids [-cmdAction=abort|retry]]
 	[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]
 	[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
@@ -379,7 +392,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 
 **cmapi.pl**
 ```
-Usage: cmapi.pl [-help] [-version] [-d] [-u=username] [-p=password]
+Usage: cmapi.pl [-help] [-version] [-d] [-u[=username]] [-p[=password]]
 	[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] ResourceUrl
 
 	 -help : Display usage
