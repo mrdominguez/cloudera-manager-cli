@@ -131,7 +131,7 @@ It is compatible with Cloudera Manager 5 and higher (API v6 and after).
 
 Use the general purpose CM REST client (`cmapi.pl`) to call the endpoints not supported by the CM CLI and to get any command's downloadable result data (`resultDataUrl`).
 
-Unless overridden by the `-api` option, `cmcli.pl` will use the default API version available:
+Unless overridden by the `-api` option, `cmcli.pl` will utilize the default API version available:
 
 https://cloudera.github.io/cm_api/docs/releases/
 
