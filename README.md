@@ -15,7 +15,7 @@
 ## Release Notes
 ### Version 10.1 is now available!
 
-- Prompt for username and/or password:
+- Prompt for username and/or password if no value is given in the command line:
 ```
 $ cmcli.pl -u -p
 Username [admin]: mdom
@@ -129,7 +129,7 @@ The Cloudera Manager CLI (`cmcli.pl`) is a utility that facilitates cluster mana
 
 It is compatible with Cloudera Manager 5 and higher (API v6 and after).
 
-A separate REST client (`cmapi.pl`) is provided to call the endpoints not supported by the CLI. `cmapi.pl` can also be used to get any command's downloadable result data, provided by`resultDataUrl`.
+A separate REST client (`cmapi.pl`) is provided to call the endpoints not supported by the CLI. `cmapi.pl` can also be used to get any command's downloadable result data (`resultDataUrl`).
 
 Unless overridden by the `-api` option, `cmcli.pl` will use the default API version available:
 
