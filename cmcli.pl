@@ -24,6 +24,7 @@ use MIME::Base64;
 use JSON;
 use Data::Dumper;
 #use YAML;
+use IO::Prompter;
 
 BEGIN { $| = 1 }
 
@@ -36,8 +37,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 10\n";
-	print "Release date: 2020-06-29\n";
+	print "Version: 10.1\n";
+	print "Release date: 2020-07-18\n";
 	exit;
 }
 
@@ -168,8 +169,26 @@ if ( -e $cm_cred_file ) {
 	print "not found\n" if $d;
 }
 
+if ( $u && $u eq '1' ) {
+	$u = prompt 'Username [admin]:', -in=>*STDIN, -timeout=>30, -default=>'admin';
+	if ( $u->timedout ) {
+		print "Timed out\n";
+		exit;
+	}
+	print "Using default username\n" if $u->defaulted;
+}
+
 my $cm_user = $u || $ENV{'CM_REST_USER'} || 'admin';
 print "username = $cm_user\n" if $d;
+
+if ( $p && $p eq '1' ) {
+	$p = prompt 'Password [admin]:', -in=>*STDIN, -timeout=>30, -default=>'admin', -echo=>'';
+	if ( $p->timedout ) {
+		print "Timed out\n";
+		exit;
+	}
+	print "Using default password\n" if $p->defaulted;
+}
 
 my $cm_password = $p || $ENV{'CM_REST_PASS'} || 'admin';
 print "Password file " if $d;
@@ -1417,7 +1436,7 @@ foreach my $cluster_name ( @clusters ) {
 &track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 
 sub usage {
-	print "\nUsage: $0 [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u=cm_user] [-p=cm_password]\n";
+	print "\nUsage: $0 [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u[=username]] [-p[=password]]\n";
 	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_ids [-cmdAction=abort|retry]]\n";
 	print "\t[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]\n";
 	print "\t[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
