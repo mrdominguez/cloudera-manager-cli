@@ -59,10 +59,7 @@ if ( -e $cm_cred_file ) {
 
 if ( $u && $u eq '1' ) {
 	$u = prompt 'Username [admin]:', -in=>*STDIN, -timeout=>30, -default=>'admin';
-	if ( $u->timedout ) {
-		print "Timed out\n";
-		exit;
-	}
+	die "Timed out\n" if $u->timedout;
 	print "Using default username\n" if $u->defaulted;
 }
 
@@ -71,10 +68,7 @@ print "username = $cm_user\n" if $d;
 
 if ( $p && $p eq '1' ) {
 	$p = prompt 'Password [admin]:', -in=>*STDIN, -timeout=>30, -default=>'admin', -echo=>'';
-	if ( $p->timedout ) {
-		print "Timed out\n";
-		exit;
-	}
+	die "Timed out\n" if $p->timedout;
 	print "Using default password\n" if $p->defaulted;
 }
 
