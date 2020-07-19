@@ -285,7 +285,7 @@ The preference is as follows (highest first):
 ```
 Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u[=username]] [-p[=password]]
 	[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_ids [-cmdAction=abort|retry]]
-	[-userAction=user_action [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]
+	[-userAction=user_action [-userName=user_name|-f=json_file -userPassword[=password] -userRole[=user_role]]]
 	[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
 	  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=host_action]]
 	[-mgmt] [-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter]
