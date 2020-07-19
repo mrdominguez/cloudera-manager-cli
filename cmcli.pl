@@ -37,8 +37,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 10.1\n";
-	print "Release date: 2020-07-18\n";
+	print "Version: 10.2\n";
+	print "Release date: 2020-07-19\n";
 	exit;
 }
 
@@ -46,9 +46,9 @@ if ( $version ) {
 
 my %opts = ('cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'sFilter'=>$sFilter, 'userAction'=>$userAction,
 	'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction,
-	'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName, 'queryId'=>$queryId, 'format'=>$format,
+	'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName,
 	'appId'=>$appId, 'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType, 'roleType'=>$roleType, 'copyFromRoleGroup'=>$copyFromRoleGroup,
-	'f'=>$f, 'userName'=>$userName, 'userPassword'=>$userPassword, 'userRole'=>$userRole, 'propertyName'=>$propertyName, 'propertyValue'=>$propertyValue);
+	'f'=>$f, 'userName'=>$userName, 'propertyName'=>$propertyName, 'propertyValue'=>$propertyValue, 'queryId'=>$queryId, 'format'=>$format);
 
 my %hInfo_opts = ('hRoles'=>$hRoles, 'hChecks'=>$hChecks, 'setRackId'=>$setRackId, 'deleteHost'=>$deleteHost,
 		'addToCluster'=>$addToCluster, 'removeFromCluster'=>$removeFromCluster, 'hAction'=>$hAction, 'addRole'=>$addRole);
@@ -73,21 +73,21 @@ unless ( $s || $hInfo ) {
 		die "-$_ requires -s or -hInfo\n" if $rr_opts{$_} } }
 
 if ( $userAction ) {
-	die "User action '$userAction' not supported. Use -help for options\n" if $userAction !~ /show|add|update|delete/;
+	die "User action '$userAction' not supported. Use -help for options\n" if $userAction !~ /^(show|add|update|delete|reset|sessions|expireSessions)$/;
 	die "Set -f or -userName\n" if ( $userAction eq 'add' && !$f && !$userName );
-	die "Set -userName\n" if ( $userAction !~ /show|add/ && !$userName );
-	die "Set -userPassword and/or -userRole\n" if ( $userAction eq 'update' && !$userPassword && !$userRole );
+	die "Set -userName\n" if ( $userAction !~ /^(show|add|sessions)/ && !$userName );
+	die "Set -userPassword and -userRole\n" if ( $userAction eq 'update' && ( !$userPassword || !$userRole ) );
 } else {
 	foreach ( keys %user_opts ) {
 		die "-$_ requires -userAction\n" if $user_opts{$_} }
 }
 
 if ( $cmdAction ) {
+	die "Command action '$cmdAction' not supported. Use -help for options\n" if $cmdAction !~ /^(abort|retry)$/;
 	die "-cmdAction requires -cmdId\n" if !$cmdId;
-	die "Command action '$cmdAction' not supported. Use -help for options\n" if $cmdAction !~ /abort|retry/;
 }
 
-if ( $hAction && $hAction !~ /decommission|recommission|startRoles|enterMaintenanceMode|exitMaintenanceMode/ ) {
+if ( $hAction && $hAction !~ /^(decommission|recommission|startRoles|enterMaintenanceMode|exitMaintenanceMode)$/ ) {
 	die "Host action '$hAction' not supported. Use -help for options\n" }
 
 ($confirmed, $trackCmd) = (1, 1) if $run;
@@ -241,16 +241,16 @@ $api_version = ($api_version =~ /v(\d+)/) ? $1 : die "Invalid API version format
 print "API version = $api_version\n" if $d;
 
 if ( $yarnApps ) {
-	die "-yarnApps is available since API v6\n" if $api_version < 6;
+	die "-yarnApps is available since API v6, but using v$api_version\n" if $api_version < 6;
 	die "Set -appId\n" if ( $kill && !$appId );
 }
 if ( $impalaQueries ) {
-	die "-impalaQueries is available since API v4\n" if $api_version < 4;
+	die "-impalaQueries is available since API v4, but using v$api_version\n" if $api_version < 4;
 	die "Set -queryId\n" if ( $cancel && !$queryId );
 }
 
 if ( $a && $a eq 'diagData' ) {
-	die "yarnApplicationDiagnosticsCollection is available since API v8\n" if ( $api_version < 8 );
+	die "Service action 'diagData' is available since API v8, but using v$api_version\n" if ( $api_version < 8 );
 	die "Set -appId\n" unless $appId;
 }
 
@@ -270,19 +270,75 @@ if ( $cmVersion ) {
 }
 
 if ( $userAction ) {
-	die "Set -api=v19 (currently v$api_version) and rerun user action '$userAction'\n" if ( $api_version > 19 && $userAction =~ /add|update/ );
+	die "Set -api=v19 (currently using v$api_version) and rerun user action '$userAction'\n" if ( $api_version > 19 && $userAction =~ /add|update|reset/ );
 	$cm_url = "$cm_api/users";
 	my $method;
-	if ( $userAction eq 'show' || $confirmed ) {
+	if ( $userAction =~ /^(show|sessions)/ || $confirmed ) {
+
+		if ( $userPassword && $userPassword eq '1' && $userAction ne 'reset' ) {
+			my $pass1 = prompt 'Enter password [changeme]:', -in=>*STDIN, -timeout=>30, -default=>'changeme', -echo=>'';
+			if ( $pass1->timedout ) {
+				print "Timed out\n";
+				exit;
+			}
+			my $pass2 = prompt 'Re-enter password [changeme]:', -in=>*STDIN, -timeout=>30, -default=>'changeme', -echo=>'';
+			if ( $pass2->timedout ) {
+				print "Timed out\n";
+				exit;
+			}
+			if ( $pass1 eq $pass2 ) {
+				$userPassword = "" . $pass1;	# force string by concatenating io::prompter object with an empty string
+			} else {
+				print "The passwords don't match... aborting\n";
+				exit;
+			}
+		}
+
+		if ( $userRole && $userRole eq '1' && $userAction ne 'reset' ) {
+			$userRole = prompt 'Enter role [ROLE_USER]:', -in=>*STDIN, -timeout=>30, -default=>'ROLE_USER';
+			if ( $userRole->timedout ) {
+				print "Timed out\n";
+				exit;
+			}
+			print "Using default role\n" if $userRole->defaulted;
+		}
+
+		$userPassword = 'changeme' if ( ( $userAction eq 'add' && !$userPassword ) || $userAction eq 'reset' );
+		$userRole = 'ROLE_USER' if ( ( $userAction eq 'add' && !$userRole ) || $userAction eq 'reset' );
+
 		my $user_info = {};
-		$user_info->{'name'} = $userName if $userName;
-		$user_info->{'password'} = $userPassword if $userPassword;
-		$user_info->{'password'} = 'changeme' if ( $userAction eq 'add' && !$userPassword );
-		my $user_role = $userRole // 'ROLE_USER';
-		push @{$user_info->{'roles'}}, uc $user_role;
+		$user_info->{'name'} = $userName;
+		$user_info->{'password'} = $userPassword;
+		push @{$user_info->{'roles'}}, uc $userRole if $userRole;
 		$body_content = to_json($user_info);
-		$cm_url .= "/$userName" unless $userAction eq 'add' || ( $userAction eq 'show' && !$userName );
-		if ( $userAction eq 'add') {
+
+		unless ( $userAction =~ /add|sessions/i || ( $userAction eq 'show' && !$userName ) ) {
+			$cm_url .= "/$userName";
+		} elsif ( $userAction =~ /sessions/i ) {
+			$cm_url .= "/$userAction";
+		}
+
+		if ( $userAction eq 'sessions') {
+			$method = 'GET';
+			my $user_sessions = &rest_call($method, $cm_url, 1);
+			if ( @{$user_sessions->{'items'}} ) {
+				for ( my $i=0; $i < @{$user_sessions->{'items'}}; $i++ ) {
+					my $user_name = $user_sessions->{'items'}[$i]{'name'};
+					my $remoteAddr = $user_sessions->{'items'}[$i]{'remoteAddr'};
+					my $lastRequest = $user_sessions->{'items'}[$i]{'lastRequest'};
+					print "$user_name | $remoteAddr | $lastRequest\n";
+				}
+			} else {
+				print "No sessions found\n";
+			}
+			exit;
+		} elsif ( $userAction eq 'expireSessions' ) {
+			die "User action 'expireSessions' is available since API v32, but using v$api_version\n" if ( $api_version < 32 );
+			print "Expiring sessions for user '$userName'...\n";
+			$cm_url .= "/$userName";
+			undef $body_content;
+			$method = 'POST';
+		} elsif ( $userAction eq 'add') {
 			if ( $f ) {
 				print "Loading file $f...\n";
 				$body_content = do {
@@ -295,8 +351,10 @@ if ( $userAction ) {
 				$body_content = "{ \"items\" : [ $body_content ] }"
 			}
 			$method = 'POST';
-		} elsif ( $userAction eq 'update' ) {
-			print "Updating user '$userName'...\n";
+		} elsif ( $userAction =~ /update|reset/ ) {
+			print "Updating " if $userAction eq 'update';
+			print "Resetting " if $userAction eq 'reset';
+			print "user '$userName'...\n";
 			$method = 'PUT';
 		} elsif ( $userAction eq 'delete' ) {
 			print "Deleting user '$userName'...\n";
@@ -314,7 +372,7 @@ if ( $userAction ) {
 					} else {
 						foreach my $role ( @{$user_list->{'items'}[$i]{'authRoles'}} ) {
 							my $user_role = $role->{'name'};
-							print " $user_role";
+							print " $user_role" if $user_role;
 						}
 						print " No roles assigned" if !@{$user_list->{'items'}[$i]{'authRoles'}};
 					}
@@ -1438,13 +1496,13 @@ foreach my $cluster_name ( @clusters ) {
 sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u[=username]] [-p[=password]]\n";
 	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_ids [-cmdAction=abort|retry]]\n";
-	print "\t[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]\n";
+	print "\t[-userAction=user_action [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]\n";
 	print "\t[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
-	print "\t  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command]]\n";
+	print "\t  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=host_action]]\n";
 	print "\t[-mgmt] [-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter]\n";
 	print "\t[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=role_filter] [-rChecks] [-rMetrics] [-log=log_type]]\n";
 	print "\t[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]\n";
-	print "\t[-a[=command]] [-confirmed] [-trackCmd] [-download] [-run]\n";
+	print "\t[-a[=action]] [-confirmed] [-trackCmd] [-download] [-run]\n";
 	print "\t[-yarnApps[=parameters] [-attributes] [-kill -appId=app_id]]\n";
 	print "\t[-impalaQueries[=parameters] [-attributes] [-queryId=query_id [-format=(text|thrift)|-cancel]]\n\n";
 
@@ -1459,13 +1517,16 @@ sub usage {
 	print "\t      Credentials file: \$HOME/.cm_rest (set env variables using colon-separated key/value pairs)\n";
 	print "\t -cmVersion : Display Cloudera Manager and default API versions\n";
 	print "\t -userAction: User action\n";
+	print "\t              (show) Display user details (args: [-userName] | default: all)\n";
 	print "\t              (add|update) Create/update user\n";
 	print "\t                -userName : User name\n";
 	print "\t                -userPassword : User password (default: 'changeme')\n";
-	print "\t                -userRole : User role (default: ROLE_USER)\n"; # List of roles -> https://cloudera.github.io/cm_api/apidocs/v16/ns0_apiUser.html
+	print "\t                -userRole : User role (default: ROLE_USER)\n";
 	print "\t                -f : JSON file to add users in bulk (instead of -userName)\n";
 	print "\t              (delete) Delete user (args: -userName)\n";
-	print "\t              (show) Display users (args: [-userName] | default: all)\n";
+	print "\t              (reset) Reset user password and role to default values (args: -userName)\n";
+	print "\t              (sessions) Display interactive user sessions\n";
+	print "\t              (expireSessions) Expire user session (args: -userName)\n";
 	print "\t -cmConfig : Save CM configuration to file\n";
 	print "\t -deployment : Retrieve full description of the entire CM deployment\n";
 	print "\t -cmdId : Retrieve information on asynchronous commands (comma-separated list of command IDs)\n";
