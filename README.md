@@ -13,7 +13,7 @@
 [How-To](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#how-to)
 
 ## Release Notes
-### Version 10.1 is now available!
+### Version 10.2 is now available!
 
 - Prompt for username and/or password if no value is given in the command line:
 ```
@@ -21,6 +21,15 @@ $ cmcli.pl -u -p
 Username [admin]: mdom
 Password [admin]: ****
 ...
+```
+- New user actions: `reset`, `sessions`, `expireSessions`
+- Prompt for password and role when adding or updating a CM user's information:
+```
+$ cmcli.pl -userAction=update -userName=mdom -userPassword -userRole
+Enter password [changeme]: ****
+Re-enter password [changeme]: ****
+Enter role [ROLE_USER]: ROLE_ADMIN
+Updating user 'mdom'...
 ```
 
 ### Version 10
@@ -56,13 +65,13 @@ Password [admin]: ****
 - Rewrote the user management section to make it consistent with the rest of the code:
 ```
 -userAction: User action
+	(show) Display users (args: [-userName] | default: all)
 	(add|update) Create/update user
 		-userName : User name
 		-userPassword : User password (default: 'changeme')
 		-userRole : User role (default: ROLE_USER)
 		-f : JSON file to add users in bulk (instead of -userName)
 	(delete) Delete user (args: -userName)
-	(show) Display users (args: [-userName] | default: all)
 ```
 Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiUser.html)
 - Minor code changes
@@ -276,13 +285,13 @@ The preference is as follows (highest first):
 ```
 Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u[=username]] [-p[=password]]
 	[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_ids [-cmdAction=abort|retry]]
-	[-userAction=show|add|update|delete [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]
+	[-userAction=user_action [-userName=user_name|-f=json_file -userPassword=password -userRole=user_role]]
 	[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
-	  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=command]]
+	  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=host_action]]
 	[-mgmt] [-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter]
 	[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=role_filter] [-rChecks] [-rMetrics] [-log=log_type]]
 	[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]
-	[-a[=command]] [-confirmed] [-trackCmd] [-download] [-run]
+	[-a[=action]] [-confirmed] [-trackCmd] [-download] [-run]
 	[-yarnApps[=parameters] [-attributes] [-kill -appId=app_id]]
 	[-impalaQueries[=parameters] [-attributes] [-queryId=query_id [-format=(text|thrift)|-cancel]]
 
@@ -297,13 +306,16 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	      Credentials file: $HOME/.cm_rest (set env variables using colon-separated key/value pairs)
 	 -cmVersion : Display Cloudera Manager and default API versions
 	 -userAction: User action
-	              (add|update) Create/update user
-	                -userName : User name
-	                -userPassword : User password (default: 'changeme')
-	                -userRole : User role (default: ROLE_USER)
-	                -f : JSON file to add users in bulk (instead of -userName)
-	              (delete) Delete user (args: -userName)
-	              (show) Display users (args: [-userName] | default: all)
+                      (show) Display user details (args: [-userName] | default: all)
+                      (add|update) Create/update user
+                        -userName : User name
+                        -userPassword : User password (default: 'changeme')
+                        -userRole : User role (default: ROLE_USER)
+                        -f : JSON file to add users in bulk (instead of -userName)
+                      (delete) Delete user (args: -userName)
+                      (reset) Reset user password and role to default values (args: -userName)
+                      (sessions) Display interactive user sessions
+                      (expireSessions) Expire user session (args: -userName)
 	 -cmConfig : Save CM configuration to file
 	 -deployment : Retrieve full description of the entire CM deployment
 	 -cmdId : Retrieve information on asynchronous commands (comma-separated list of command IDs)
