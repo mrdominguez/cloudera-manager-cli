@@ -23,7 +23,7 @@ Password [admin]: ****
 ...
 ```
 - New user actions: `reset`, `sessions`, `expireSessions`
-- Prompt for password and role when adding or updating a CM user's information:
+- Prompt for password and role when adding or updating a CM user:
 ```
 $ cmcli.pl -userAction=update -userName=mdom -userPassword -userRole
 Enter password [changeme]: ****
