@@ -171,10 +171,7 @@ if ( -e $cm_cred_file ) {
 
 if ( $u && $u eq '1' ) {
 	$u = prompt 'Username [admin]:', -in=>*STDIN, -timeout=>30, -default=>'admin';
-	if ( $u->timedout ) {
-		print "Timed out\n";
-		exit;
-	}
+	die "Timed out\n" if $u->timedout;
 	print "Using default username\n" if $u->defaulted;
 }
 
@@ -183,10 +180,7 @@ print "username = $cm_user\n" if $d;
 
 if ( $p && $p eq '1' ) {
 	$p = prompt 'Password [admin]:', -in=>*STDIN, -timeout=>30, -default=>'admin', -echo=>'';
-	if ( $p->timedout ) {
-		print "Timed out\n";
-		exit;
-	}
+	die "Timed out\n" if $p->timedout;
 	print "Using default password\n" if $p->defaulted;
 }
 
@@ -275,31 +269,23 @@ if ( $userAction ) {
 	my $method;
 	if ( $userAction =~ /^(show|sessions)/ || $confirmed ) {
 
-		if ( $userPassword && $userPassword eq '1' && $userAction ne 'reset' ) {
+		if ( $userPassword && $userPassword eq '1' && $userAction =~ /add|update/ ) {
 			my $pass1 = prompt 'Enter password [changeme]:', -in=>*STDIN, -timeout=>30, -default=>'changeme', -echo=>'';
-			if ( $pass1->timedout ) {
-				print "Timed out\n";
-				exit;
-			}
+			die "Timed out\n" if $pass1->timedout;
+
 			my $pass2 = prompt 'Re-enter password [changeme]:', -in=>*STDIN, -timeout=>30, -default=>'changeme', -echo=>'';
-			if ( $pass2->timedout ) {
-				print "Timed out\n";
-				exit;
-			}
+			die "Timed out\n" if $pass2->timedout;
+
 			if ( $pass1 eq $pass2 ) {
 				$userPassword = "" . $pass1;	# force string by concatenating io::prompter object with an empty string
 			} else {
-				print "The passwords don't match... aborting\n";
-				exit;
+				die "The passwords don't match... aborting\n";
 			}
 		}
 
-		if ( $userRole && $userRole eq '1' && $userAction ne 'reset' ) {
+		if ( $userRole && $userRole eq '1' && $userAction =~ /add|update/ ) {
 			$userRole = prompt 'Enter role [ROLE_USER]:', -in=>*STDIN, -timeout=>30, -default=>'ROLE_USER';
-			if ( $userRole->timedout ) {
-				print "Timed out\n";
-				exit;
-			}
+			die "Timed out\n" if $userRole->timedout;
 			print "Using default role\n" if $userRole->defaulted;
 		}
 
