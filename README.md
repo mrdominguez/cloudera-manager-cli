@@ -68,7 +68,7 @@ Updating user 'mdom'...
 - `-cmdAction=abort|retry` safeguarded by `-confirmed|-run` options
 - Rewrote the user management section to make it consistent with the rest of the code:
 ```
--userAction: User action
+-userAction: User action (default: show)
 	(show) Display users (args: [-userName] | default: all)
 	(add|update) Create/update user
 		-userName : User name
@@ -309,7 +309,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -p : CM password or path to password file (environment variable: $CM_REST_PASS | default: admin)
 	      Credentials file: $HOME/.cm_rest (set env variables using colon-separated key/value pairs)
 	 -cmVersion : Display Cloudera Manager and default API versions
-	 -userAction: User action
+	 -userAction: User action (default: show)
                       (show) Display user details (args: [-userName] | default: all)
                       (add|update) Create/update user
                         -userName : User name
@@ -627,7 +627,7 @@ Loading file users.json...
     "roles" : [ "ROLE_OPERATOR" ]
   } ]
 }
-$ cmcli.pl -userAction=show
+$ cmcli.pl -userAction ( ≡ cmcli.pl -userAction=show)
 admin
  ROLE_ADMIN
 user1
@@ -674,7 +674,7 @@ Deleting user 'user4'...
   "name" : "user4",
   "roles" : [ "ROLE_OPERATOR" ]
 }
-$ cmcli.pl -userAction=show
+$ cmcli.pl -userAction
 admin
  ROLE_ADMIN
 user1
