@@ -21,10 +21,8 @@ $ cmcli.pl -u -p
 Username [admin]: mdom
 Password [admin]: ****
 ```
-- New user actions:
+- New ` -userAction` commands:
 ```
- -userAction: User action
-	...
 	(reset) Reset user password and role to default values (args: -userName)
 	(sessions) Display interactive user sessions
 	(expireSessions) Expire user session (args: -userName)
