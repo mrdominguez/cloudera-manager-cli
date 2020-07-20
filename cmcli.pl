@@ -44,7 +44,7 @@ if ( $version ) {
 
 &usage if $help;
 
-my %opts = ('cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'sFilter'=>$sFilter, 'userAction'=>$userAction,
+my %opts = ('cmdAction'=>$cmdAction, 'c'=>$c, 's'=>$s, 'r'=>$r, 'rFilter'=>$rFilter, 'sFilter'=>$sFilter,
 	'hFilter'=>$hFilter, 'log'=>$log, 'setRackId'=>$setRackId, 'addToCluster'=>$addToCluster, 'hAction'=>$hAction,
 	'addRole'=>$addRole, 'serviceName'=>$serviceName, 'clusterName'=>$clusterName, 'displayName'=>$displayName,
 	'appId'=>$appId, 'fullVersion'=>$fullVersion, 'serviceType'=>$serviceType, 'roleType'=>$roleType, 'copyFromRoleGroup'=>$copyFromRoleGroup,
@@ -73,6 +73,7 @@ unless ( $s || $hInfo ) {
 		die "-$_ requires -s or -hInfo\n" if $rr_opts{$_} } }
 
 if ( $userAction ) {
+	$userAction = 'show' if $userAction eq '1';
 	die "User action '$userAction' not supported. Use -help for options\n" if $userAction !~ /^(show|add|update|delete|reset|sessions|expireSessions)$/;
 	die "Set -f or -userName\n" if ( $userAction eq 'add' && !$f && !$userName );
 	die "Set -userName\n" if ( $userAction !~ /^(show|add|sessions)/ && !$userName );
@@ -146,7 +147,7 @@ if ( $a ) {
 }
 
 $s = 'mgmt' if $mgmt;
-$s = '^yarn' if ( ( $yarnApps || (  $a && $a eq 'diagData') ) && !$s );
+$s = '^yarn' if ( ( $yarnApps || ( $a && $a eq 'diagData' ) ) && !$s );
 $s = '^impala' if ( $impalaQueries && !$s );
 
 my $cm_cred_file = "$ENV{'HOME'}/.cm_rest";
@@ -1502,7 +1503,7 @@ sub usage {
 	print "\t -p : CM password or path to password file (environment variable: \$CM_REST_PASS | default: admin)\n";
 	print "\t      Credentials file: \$HOME/.cm_rest (set env variables using colon-separated key/value pairs)\n";
 	print "\t -cmVersion : Display Cloudera Manager and default API versions\n";
-	print "\t -userAction: User action\n";
+	print "\t -userAction: User action (default: show)\n";
 	print "\t              (show) Display user details (args: [-userName] | default: all)\n";
 	print "\t              (add|update) Create/update user\n";
 	print "\t                -userName : User name\n";
