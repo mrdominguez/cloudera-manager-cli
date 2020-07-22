@@ -1076,7 +1076,7 @@ foreach my $cluster_name ( @clusters ) {
 					print "$impalaQueryDetailsResponse->{'details'}\n" if $format eq 'text';
 					print "Saving query details to file $filename\n";
 
-					open my $fh, '>', $filename or die ; 
+					open my $fh, '>', $filename or die "Can't open file $filename: $!\n";; 
 					print $fh $impalaQueryDetailsResponse->{'details'};
 					close $fh;
 					exit;
@@ -1602,7 +1602,7 @@ sub usage {
 }
 
 sub rest_call {
-	my ($method, $url, $ret, $fn, $bc) = @_;
+	my ($method, $url, $ret, $filename, $bc) = @_;
 	# ret:
 	# 0 -> print output
 	# 1 -> return output
@@ -1613,7 +1613,7 @@ sub rest_call {
 		$rest_debug_output .= " method = $method\n" if $method;
 		$rest_debug_output .= " url = $url\n" if $url;
 		$rest_debug_output .= " ret = $ret\n" if $ret;
-		$rest_debug_output .= " fn = $fn\n" if $fn;
+		$rest_debug_output .= " filename = $filename\n" if $filename;
 		$rest_debug_output .= " bc = $bc\n" if $bc;
 		$rest_debug_output .= "---\n";
 		print $rest_debug_output;
@@ -1637,8 +1637,8 @@ sub rest_call {
 	my $url_redirect = $client->responseHeader('location');
 
 	if ( $ret == 2 && !$url_redirect ) {
-		print "Saving to file $fn\n";
-		open my $fh, '>', $fn or die "Can't open file $fn: $!\n";
+		print "Saving to file $filename\n";
+		open my $fh, '>', $filename or die "Can't open file $filename: $!\n";
 		print $fh $content;
 		close $fh;
 	} else { 
@@ -1659,7 +1659,7 @@ sub rest_call {
 			print "Redirecting to $cm_redirect/...\n";
 #			print "Redirecting to $url_redirect...\n";
 
-			$content = &rest_call($method, $url_redirect, $ret, $fn, $bc);
+			$content = &rest_call($method, $url_redirect, $ret, $filename, $bc);
 		} else {
 			die "\nThe request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d/;
 		}
