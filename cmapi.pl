@@ -97,12 +97,12 @@ if ( $d ) {
 }
 
 if ( $f ) {
-	my $file = $f;
+	my $filename = $f;
 	$body_type = 'json';
 	$body_content = do {
-	local $/ = undef;
-	open my $fh, '<', $file or die "Can't open file $file: $!\n";
-	<$fh>;
+		local $/ = undef;
+		open my $fh, '<', $filename or die "Can't open file $filename: $!\n";
+		<$fh>;
 	}
 }
 
