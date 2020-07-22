@@ -1076,7 +1076,7 @@ foreach my $cluster_name ( @clusters ) {
 					print "$impalaQueryDetailsResponse->{'details'}\n" if $format eq 'text';
 					print "Saving query details to file $filename\n";
 
-					open my $fh, '>', $filename or die "Can't open file $filename: $!\n";; 
+					open my $fh, '>', $filename or die "Can't open file $filename: $!\n";
 					print $fh $impalaQueryDetailsResponse->{'details'};
 					close $fh;
 					exit;
