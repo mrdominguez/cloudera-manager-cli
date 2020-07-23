@@ -42,7 +42,7 @@ Updating user 'mdom'...
 ```
 -a=diagData
 	-appId : Comma-separated list of application IDs
-	-ticketNumber : Ticket Number of the Cloudera Support Ticket (default: empty)
+	-ticketNumber : Cloudera Support ticket number (default: empty)
 	-comments : Comments to add to the support bundle (default: empty)
 ``` 
 - Download command's downloadable result data, if any exists: `-download` (enables `-trackCmd`)
@@ -383,7 +383,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	      (roleTypes) List the supported role types for a service
 	      (diagData) Collect diagnostics data for Yarn applications
 	        -appId : Comma-separated list of application IDs
-	        -ticketNumber : Ticket Number of the Cloudera Support Ticket (default: empty)
+	        -ticketNumber : Cloudera Support ticket number (default: empty)
 	        -comments : Comments to add to the support bundle (default: empty)
 	 -confirmed : Proceed with command execution
 	 -trackCmd : Wait for all asynchronous commands to end before exiting (default: disabled)
