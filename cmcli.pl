@@ -1577,7 +1577,7 @@ sub usage {
 	print "\t      (roleTypes) List the supported role types for a service\n";				# service context
 	print "\t      (diagData) Collect diagnostics data for Yarn applications\n";		# service context
 	print "\t        -appId : Comma-separated list of application IDs\n";
-	print "\t        -ticketNumber : Ticket Number of the Cloudera Support Ticket (default: empty)\n";
+	print "\t        -ticketNumber : Cloudera Support ticket number (default: empty)\n";
 	print "\t        -comments : Comments to add to the support bundle (default: empty)\n";
 	print "\t -confirmed : Proceed with command execution\n";
 	print "\t -trackCmd : Wait for all asynchronous commands to end before exiting (default: disabled)\n";
