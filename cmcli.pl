@@ -29,7 +29,7 @@ use IO::Prompter;
 BEGIN { $| = 1 }
 
 use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword $userRole $https $api $sChecks $sMetrics $rChecks $rMetrics $cmConfig $u $p $cm
-	$c $s $r $rInfo $rFilter $sFilter $yarnApps $attributes $kill $appId $ticketNumber $comments $download $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles $hChecks $deployment
+	$c $s $r $rInfo $rFilter $sFilter $sConfig $yarnApps $attributes $kill $appId $ticketNumber $comments $download $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles $hChecks $deployment
 	$mgmt $impalaQueries $cancel $queryId $format $trackCmd $setRackId $deleteHost $addToCluster $removeFromCluster $addRole $serviceName $clusterName
 	$hAction $run $maintenanceMode $roleConfigGroup $propertyName $propertyValue $clientConfig $full $displayName $fullVersion $serviceType $roleType
 	$slaveBatchSize $sleepSeconds $slaveFailCountThreshold $staleConfigsOnly $unUpgradedOnly $restartRoleTypes $copyFromRoleGroup);
@@ -37,8 +37,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 10.2\n";
-	print "Release date: 2020-07-19\n";
+	print "Version: 10.3\n";
+	print "Release date: 2020-07-28\n";
 	exit;
 }
 
@@ -71,6 +71,8 @@ unless ( $hInfo ) {
 unless ( $s || $hInfo ) {
 	foreach ( keys %rr_opts ) {
 		die "-$_ requires -s or -hInfo\n" if $rr_opts{$_} } }
+
+die "-sConfig requires -sFilter\n" if ( $sConfig && !$sFilter );
 
 if ( $userAction ) {
 	$userAction = 'show' if $userAction eq '1';
@@ -991,7 +993,9 @@ foreach my $cluster_name ( @clusters ) {
 			my $service_config = $cm_services->{'items'}[$i]->{'configStalenessStatus'};
 			my $service_clientConfig = $cm_services->{'items'}[$i]->{'clientConfigStalenessStatus'};
 
-			if ( $sFilter ) {
+			if ( $sConfig ) {
+				next unless ( $service_clientConfig && $service_clientConfig =~ /$sFilter/i );
+			} elsif ( $sFilter ) {
 				next unless ( $service_state =~ /$sFilter/i || $service_health =~ /$sFilter/i
 					|| ( $service_config && $service_config =~ /$sFilter/i )
 					|| ( $service_clientConfig && $service_clientConfig =~ /$sFilter/i ) );
@@ -1486,7 +1490,7 @@ sub usage {
 	print "\t[-userAction=user_action [-userName=user_name|-f=json_file -userPassword[=password] -userRole[=user_role]]]\n";
 	print "\t[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
 	print "\t  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=host_action]]\n";
-	print "\t[-mgmt] [-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter]\n";
+	print "\t[-mgmt] [-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter [-sConfig]]\n";
 	print "\t[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=role_filter] [-rChecks] [-rMetrics] [-log=log_type]]\n";
 	print "\t[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]\n";
 	print "\t[-a[=action]] [-confirmed] [-trackCmd] [-download] [-run]\n";
@@ -1539,6 +1543,7 @@ sub usage {
 	print "\t -rInfo : Role information (regex UUID or set -hInfo | default: all)\n";
 	print "\t -rFilter : Role state, health summary, configuration status, commission state (regex)\n";
 	print "\t -sFilter : Service state, health summary, configuration status, client configuration status (regex)\n";
+	print "\t   -sConfig : Apply service filter only to client configuration status (default: disabled)\n";
 	print "\t -maintenanceMode : Display maintenance mode. Select hosts/services/roles based on status (YES/NO | default: all)\n";
 	print "\t -roleConfigGroup : Display role config group in the role information. Select roles based on config group name (regex | default: all)\n";
 	print "\t -a : Cluster/Service/Role action (default: list active commands)\n";
@@ -1591,7 +1596,7 @@ sub usage {
 	print "\t   -download : Save role log to file\n";
 	print "\t -yarnApps : Display YARN applications (default: filter=empty, from=5_minutes, to=now, limit=100, offset=0)\n";
 	print "\t   -attributes : List of attributes that the Service Monitor can associate with YARN applications\n";
-	print "\t   -kill : Kill YARN application (-appId)\n";
+	print "\t   -kill -appId : Kill YARN application\n";
 	print "\t -impalaQueries : Display Impala queries (default: filter=empty, from=5_minutes, to=now, limit=100, offset=0)\n";
 	print "\t   -attributes : List of attributes that the Service Monitor can associate with Impala queries\n";
 	print "\t   -queryId : Return query details\n";
