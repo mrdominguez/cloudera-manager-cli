@@ -17,7 +17,7 @@
 
 - Added new option to `-sFilter`:
 ```
--sConfig : Apply service filter only to client configuration status (default: disabled)
+-sClient : Apply service filter only to client configuration status (default: disabled)
 ```
 - Prompt for username and/or password if no value is given in the command line:
 ```
@@ -296,7 +296,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	[-userAction=user_action [-userName=user_name|-f=json_file -userPassword[=password] -userRole[=user_role]]]
 	[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
 	  [-setRackId=/rack_id] [-addToCluster=cluster_name] [-addRole=role_types -serviceName=service_name] [-hAction=host_action]]
-	[-mgmt] [-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter [-sConfig]]
+	[-mgmt] [-c=cluster_name] [-s=service_name [-sChecks] [-sMetrics]] [-sFilter=service_filter [-sClient]]
 	[-rInfo[=host_id] [-r=role_type|role_name] [-rFilter=role_filter] [-rChecks] [-rMetrics] [-log=log_type]]
 	[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]
 	[-a[=action]] [-confirmed] [-trackCmd] [-download] [-run]
@@ -349,7 +349,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -rInfo : Role information (regex UUID or set -hInfo | default: all)
 	 -rFilter : Role state, health summary, configuration status, commission state (regex)
 	 -sFilter : Service state, health summary, configuration status, client configuration status (regex)
-	   -sConfig : Apply service filter only to client configuration status (default: disabled)
+	   -sClient : Apply service filter only to client configuration status (default: disabled)
 	 -maintenanceMode : Display maintenance mode. Select hosts/services/roles based on status (YES/NO | default: all)
 	 -roleConfigGroup : Display role config group in the role information. Select roles based on config group name (regex | default: all)
 	 -a : Cluster/Service/Role action (default: list active commands)
