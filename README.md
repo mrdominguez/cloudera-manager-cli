@@ -386,7 +386,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	      (updateService) Update service information (args: -displayName)
 	      (deleteService) Delete service
 	      (roleTypes) List the supported role types for a service
-	      (diagData) Collect diagnostics data for Yarn applications
+	      (diagData) Collect diagnostics data for YARN applications
 	        -appId : Comma-separated list of application IDs
 	        -ticketNumber : Cloudera Support ticket number (default: empty)
 	        -comments : Comments to add to the support bundle (default: empty)
