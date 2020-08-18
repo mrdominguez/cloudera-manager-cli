@@ -42,7 +42,7 @@ Updating user 'mdom'...
 
 ### Version 10
 
-- Collect diagnostics data for Yarn applications:  
+- Collect diagnostics data for YARN applications:  
 ```
 -a=diagData
 	-appId : Comma-separated list of application IDs
