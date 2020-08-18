@@ -1580,7 +1580,7 @@ sub usage {
 	print "\t      (updateService) Update service information (args: -displayName)\n";			# service context
 	print "\t      (deleteService) Delete service\n";							# service context
 	print "\t      (roleTypes) List the supported role types for a service\n";				# service context
-	print "\t      (diagData) Collect diagnostics data for Yarn applications\n";		# service context
+	print "\t      (diagData) Collect diagnostics data for YARN applications\n";		# service context
 	print "\t        -appId : Comma-separated list of application IDs\n";
 	print "\t        -ticketNumber : Cloudera Support ticket number (default: empty)\n";
 	print "\t        -comments : Comments to add to the support bundle (default: empty)\n";
