@@ -59,8 +59,8 @@ Updating user 'mdom'...
 
 - New service filters: `-sFilter`, `-maintenanceMode`
 - Added support for:
+  * Automatic URL redirection
   * HTTPS protocol: `-https`
-  * URL redirection
   * Comma-separated list of command IDs: `-cmdId`
 - Show HTTP response code and headers in debug mode (`-d`)
 - Revised user management logic
