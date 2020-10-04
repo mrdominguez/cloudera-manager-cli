@@ -55,7 +55,7 @@ Updating user 'mdom'...
 - New `-impalaQueries` options: `-attributes`, `-queryId=query_id [-format=(text|thrift) | -cancel]`
 - Added unattended installation script for RHEL-based distributions (see [Installation](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#installation) section for details)
 
-### Version 9.0
+### Version 9
 
 - New service filters: `-sFilter`, `-maintenanceMode`
 - Added support for:
@@ -67,7 +67,7 @@ Updating user 'mdom'...
 - Updated `decommission` and `recommission` actions for both hosts and roles to use a list of items instead of a single item sequentially (to avoid concurrency issues while refreshing master nodes)
 - Overall code improvements
 
-### Version 8.0
+### Version 8
 
 - `-cmdAction=abort|retry` safeguarded by `-confirmed|-run` options
 - Rewrote the user management section to make it consistent with the rest of the code:
@@ -84,7 +84,7 @@ Updating user 'mdom'...
 Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v19/ns0_apiUser.html)
 - Minor code changes
 
-### Version 7.0
+### Version 7
 
 *New service actions*
 - Create role config group: `-a=createRoleGroup`
@@ -93,7 +93,7 @@ Check the list of [user roles](https://cloudera.github.io/cm_api/apidocs/v19/ns0
 
 Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services.html) and [role types](https://cloudera.github.io/cm_api/apidocs/v19/path__clusters_-clusterName-_services_-serviceName-_roles.html)
 
-### Version 6.0
+### Version 6
 
 - List the supported service types for a cluster: `-c=... -a=serviceTypes`
 - List the supported role types for a service: `-s=... -a=roleTypes`
@@ -104,7 +104,7 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/
 - Update service: `-s=... -a=updateService`
 - Delete service: `-s=... -a=deleteService`
 
-### Version 5.0
+### Version 5
 
 - Create roles: `-hInfo=... -addRole=role_types -serviceName=service_name`
 - Delete roles: `-a=deleteRole`
@@ -115,7 +115,7 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/
 - Move roles to the base (default) config group: `-a=moveToBaseGroup`
 - Minor code improvements
 
-### Version 4.0
+### Version 4
 
 - Improved functionality: `-removeFromCluster`
 - New options: `-maintenanceMode` and `-roleConfigGroup`
@@ -126,7 +126,7 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/
   * `-a=enterMaintenanceMode`
   * `-a=exitMaintenanceMode`
 
-### Version 3.0
+### Version 3
 
 - Rolling restart of services and roles: `-a=rollingRestart`
 - Delete hosts from Cloudera Manager: `-deleteHost`
