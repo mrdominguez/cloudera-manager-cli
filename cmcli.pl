@@ -1596,7 +1596,7 @@ sub usage {
 	print "\t   -download : Save role log to file\n";
 	print "\t -yarnApps : Display YARN applications (default: filter=empty, from=5_minutes, to=now, limit=100, offset=0)\n";
 	print "\t   -attributes : List of attributes that the Service Monitor can associate with YARN applications\n";
-	print "\t   -kill -appId : Kill YARN application\n";
+	print "\t   -kill : Kill YARN application (-appId)\n";
 	print "\t -impalaQueries : Display Impala queries (default: filter=empty, from=5_minutes, to=now, limit=100, offset=0)\n";
 	print "\t   -attributes : List of attributes that the Service Monitor can associate with Impala queries\n";
 	print "\t   -queryId : Return query details\n";
