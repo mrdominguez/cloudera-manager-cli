@@ -122,7 +122,7 @@ Check the list of [service types](https://cloudera.github.io/cm_api/apidocs/v19/
 ### Version 4
 
 - Improved functionality: `-removeFromCluster`
-- New options: `-maintenanceMode` and `-roleConfigGroup`
+- New options: `-maintenanceMode`, `-roleConfigGroup`
 
 *The following features are already supported for clusters/services*
 - List active role commands: `-a`
