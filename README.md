@@ -406,7 +406,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	   -download : Save role log to file
 	 -yarnApps : Display YARN applications (default: filter=empty, from=5_minutes, to=now, limit=100, offset=0)
 	   -attributes : List of attributes that the Service Monitor can associate with YARN applications
-	   -kill -appId : Kill YARN application
+	   -kill : Kill YARN application (-appId)
 	 -impalaQueries : Display Impala queries (default: filter=empty, from=5_minutes, to=now, limit=100, offset=0)
 	   -attributes : List of attributes that the Service Monitor can associate with Impala queries
 	   -queryId : Return query details
