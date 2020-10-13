@@ -51,8 +51,12 @@ Updating user 'mdom'...
 ``` 
 - Download command's downloadable result data, if any exists: `-download` (enables `-trackCmd`)
 - Save role log to file: `-log=log_type -download`
-- New `-yarnApps` options: `-attributes`, `-kill -appId=app_id`
-- New `-impalaQueries` options: `-attributes`, `-queryId=query_id [-format=(text|thrift) | -cancel]`
+- New `-yarnApps` options:
+  * `-attributes`
+  * `-kill -appId=app_id`
+- New `-impalaQueries` options:
+  * `-attributes`
+  * `-queryId=query_id [-format=(text|thrift) | -cancel]`
 - Added unattended installation script for RHEL-based distributions (see [Installation](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#installation) section for details)
 
 ### Version 9
