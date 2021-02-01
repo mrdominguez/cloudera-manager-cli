@@ -423,7 +423,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 **cmrest.pl**
 ```
 Usage: cmrest.pl [-help] [-version] [-d] [-u[=username]] [-p[=password]] [-https] [-cm=hostname[:port]]
-	[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r
+	[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r=rest_resource
 
 	 -help : Display usage
 	 -version : Display version information
