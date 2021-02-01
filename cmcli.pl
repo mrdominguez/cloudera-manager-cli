@@ -171,6 +171,11 @@ if ( -e $cm_cred_file ) {
 	print "not found\n" if $d;
 }
 
+if ( $d ) {
+	print "CM_REST_USER = $ENV{CM_REST_USER}\n" if $ENV{CM_REST_USER};
+	print "CM_REST_PASS is set\n" if $ENV{CM_REST_PASS};
+}
+
 if ( $u && $u eq '1' ) {
 	$u = prompt 'Username [admin]:', -in=>*STDIN, -timeout=>30, -default=>'admin';
 	die "Timed out\n" if $u->timedout;
