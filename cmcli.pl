@@ -193,7 +193,6 @@ if ( $p && $p eq '1' ) {
 
 my $cm_password = $p || $ENV{'CM_REST_PASS'} || 'admin';
 print "Password file " if $d;
-
 if ( -e $cm_password ) {
 	print "$cm_password found\n" if $d;
 	$cm_password = qx/cat $cm_password/ || die "Can't get password from file $cm_password\n";
