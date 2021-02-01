@@ -203,7 +203,7 @@ print "The request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d
 
 sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] [-u[=username]] [-p[=password]] [-https] [-cm=hostname[:port]]\n";
-	print "\t[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r\n\n";
+	print "\t[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r=rest_resource\n\n";
 
 	print "\t -help : Display usage\n";
 	print "\t -version : Display version information\n";
