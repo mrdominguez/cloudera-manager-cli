@@ -13,7 +13,12 @@
 [How-To](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#how-to)
 
 ## Release Notes
-### Version 10.3 is now available!
+### Version 10.4 is now available!
+- Changes to CM REST client (`cmrest.pl`):
+  * All arguments are now flag-based (see [Usage](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#usage))
+  * `-dumper : Use Data::Dumper to output the JSON response content (default: disabled)`
+
+### Version 10.3
 
 - Added new option to `-sFilter`:
 ```
@@ -150,7 +155,7 @@ The Cloudera Manager CLI (`cmcli.pl`) is a utility that facilitates cluster mana
 
 It is compatible with Cloudera Manager 5 and higher (API v6 and after).
 
-Use the general purpose CM REST client (`cmapi.pl`) to call the endpoints not supported by the CM CLI and to get any command's downloadable result data (`resultDataUrl`).
+Use the general purpose CM REST client (`cmrest.pl`) to call the endpoints not supported by the CM CLI and to get any command's downloadable result data (`resultDataUrl`).
 
 Unless overridden by the `-api` option, `cmcli.pl` will utilize the default API version available:
 
@@ -233,7 +238,7 @@ cd; git clone https://github.com/mrdominguez/$REPOSITORY
 cd $REPOSITORY
 chmod +x *.pl
 ln -s cmcli.pl cmcli
-ln -s cmapi.pl cmapi
+ln -s cmrest.pl cmrest
 
 cd; grep "PATH=.*$REPOSITORY" .bashrc || echo -e "\nexport PATH=\"\$HOME/$REPOSITORY:\$PATH\"" >> .bashrc
 
@@ -415,10 +420,10 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -mgmt : Alias for '-s=mgmt' | Cloudera Management Service information (default: disabled)
 ```
 
-**cmapi.pl**
+**cmrest.pl**
 ```
-Usage: cmapi.pl [-help] [-version] [-d] [-u[=username]] [-p[=password]]
-	[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] ResourceUrl
+Usage: cmrest.pl [-help] [-version] [-d] [-u[=username]] [-p[=password]] [-https] [-cm=hostname[:port]]
+	[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r
 
 	 -help : Display usage
 	 -version : Display version information
@@ -426,13 +431,16 @@ Usage: cmapi.pl [-help] [-version] [-d] [-u[=username]] [-p[=password]]
 	 -u : CM username (environment variable: $CM_REST_USER | default: admin)
 	 -p : CM password or path to password file (environment variable: $CM_REST_PASS | default: admin)
 	      Credentials file: $HOME/.cm_rest (set env variables using colon-separated key/value pairs)
+	 -https : Use HTTPS to communicate with CM (default: HTTP)
+	 -cm : CM hostname:port (default: localhost:7180, or 7183 if using HTTPS)
 	 -m : Method | GET, POST, PUT, DELETE (default: GET)
 	 -bt : Body type | array, hash, json (default: hash)
-	 -bc : Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)
+	 -bc : Body content. Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)
 	       To set multiple objects, use -bt=json or -f to pass a JSON file
 	 -i : Add the 'items' property to the body content (enabled by default if -bt=array)
 	 -f : JSON file containing body content (implies -bt=json)
-	 ResourceUrl : URL to REST resource (example: [http://]cm_server_host:7180/api/v19/clusters)
+	 -dumper : Use Data::Dumper to output the JSON response content (default: disabled)
+	 -r : REST endpoint|resource (example: /api/v15/clusters)
 ```
 
 ## Supported Cluster/Service/Role Commands
