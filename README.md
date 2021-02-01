@@ -440,7 +440,7 @@ Usage: cmrest.pl [-help] [-version] [-d] [-u[=username]] [-p[=password]] [-https
 	 -i : Add the 'items' property to the body content (enabled by default if -bt=array)
 	 -f : JSON file containing body content (implies -bt=json)
 	 -dumper : Use Data::Dumper to output the JSON response content (default: disabled)
-	 -r : REST endpoint|resource (example: /api/v15/clusters)
+	 -r : REST resource|endpoint (example: /api/v15/clusters)
 ```
 
 ## Supported Cluster/Service/Role Commands
