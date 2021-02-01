@@ -287,7 +287,7 @@ CM_REST_USER:username
 CM_REST_PASS:/path/to/password_file
 ```
 
-NOTE: For passwords containing white spaces, quote them and, instead of using the credentials file, set the `-p` option or `export CM_REST_PASS`.
+NOTE: Quote passwords containing white spaces and, instead of using the credentials file, set the `-p` option or `export CM_REST_PASS`.
 
 The preference is as follows (highest first):
 
