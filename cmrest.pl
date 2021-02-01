@@ -221,6 +221,6 @@ sub usage {
 	print "\t -i : Add the 'items' property to the body content (enabled by default if -bt=array)\n";
 	print "\t -f : JSON file containing body content (implies -bt=json)\n";
 	print "\t -dumper : Use Data::Dumper to output the JSON response content (default: disabled)\n";
-	print "\t -r : REST endpoint|resource (example: /api/v15/clusters)\n\n";
+	print "\t -r : REST resource|endpoint (example: /api/v15/clusters)\n\n";
 	exit;
 }
