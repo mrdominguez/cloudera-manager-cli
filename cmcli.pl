@@ -1,6 +1,6 @@
 #!/usr/bin/perl -ws
 
-# Copyright 2020 Mariano Dominguez
+# Copyright 2021 Mariano Dominguez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 10.3\n";
-	print "Release date: 2020-07-30\n";
+	print "Version: 10.4\n";
+	print "Release date: 2021-02-01\n";
 	exit;
 }
 
@@ -160,10 +160,9 @@ if ( -e $cm_cred_file ) {
 	open my $fh, '<', $cm_cred_file or die "Can't open file $cm_cred_file: $!\n";
 	my @cm_cred = grep /CM_REST_/, <$fh>;
 	foreach ( @cm_cred ) {
-		# colon-separated key/value pair
-#		chomp;
-#		my ($env_var, $env_val) = split /:/, $_, 2;
-		# quote credentials containing white spaces and use the -u/-p options or the environment variables instead of the credentials file
+		# Colon-separated key/value pair
+		# For credentials containing white spaces, use quotes and -u|-p options
+		# or environment variables instead of the credentials file
 		my ($env_var, $env_val) = $_ =~ /([^\s]+)\s*:\s*([^\s]+)/;
 		$ENV{$env_var} = $env_val if ( defined $env_var && defined $env_val );
 	}
@@ -215,14 +214,13 @@ print "CM protocol = $cm_protocol\nCM host = $cm_host\nCM port = $cm_port\n" if 
 # http://search.cpan.org/~ether/libwww-perl/lib/LWP/UserAgent.pm#CONSTRUCTOR_METHODS
 #  verify_hostname => $bool
 #   This option is initialized from the PERL_LWP_SSL_VERIFY_HOSTNAME environment variable. If this environment variable isn't set; then verify_hostname defaults to 1.
+#$ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
 
 # SSL connect attempt failed error:14090086:SSL routines:ssl3_get_server_certificate:certificate verify failed
 
-#$ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
-
 # http://search.cpan.org/~kkane/REST-Client/lib/REST/Client.pm
 my $client = REST::Client->new();
-$client->getUseragent()->ssl_opts( verify_hostname => 0 ); # or set $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME};
+$client->getUseragent()->ssl_opts( verify_hostname => 0 );
 
 my $cm_url = "$cm_protocol://$cm_host:$cm_port/api/version";
 my $api_version;
@@ -280,7 +278,7 @@ if ( $userAction ) {
 			die "Timed out\n" if $pass2->timedout;
 
 			if ( $pass1 eq $pass2 ) {
-				$userPassword = "" . $pass1;	# force string by concatenating io::prompter object with an empty string
+				$userPassword = "" . $pass1;	# Force string by concatenating io::prompter object with an empty string
 			} else {
 				die "The passwords don't match... aborting\n";
 			}
@@ -510,7 +508,7 @@ if ( $hInfo ) {
 		my $service_name;
 		if ( $hRoles || $role_info_flag ) {
 			if ( @{$hosts->{'items'}[$i]->{'roleRefs'}} ) {
-				# use <=> operator to compare numbers
+				# Use <=> operator to compare numbers
 				my @sorted = sort { $a->{'serviceName'} cmp $b->{'serviceName'} } @{$hosts->{'items'}[$i]->{'roleRefs'}};
 #				print join("\n", map { $host_name." | ".$_->{'serviceName'}." | ".$_->{'roleName'} } @sorted),"\n";
 				for ( my $j=0; $j < @sorted; $j++ ) {
@@ -698,7 +696,7 @@ if ( $hInfo ) {
 	
 	if ( $role_info_flag ) {
 		if ( @services && !$s ) {
-			# match exact word -> wrap around \b
+			# Match exact word -> wrap around \b
 			$s = '\b';
 			$s .= join '\b|\b', @services;
 			$s .= '\b';
@@ -789,7 +787,7 @@ if ( $s && $s =~ /mgmt/ ) {
 
 			if ( $hInfo ) {
 				$host_id = $uuid_host_map->{$host_id};
-#				$host_id =~ s/\..*$//; # remove domain name
+#				$host_id =~ s/\..*$//; # Remove domain name
 			}
 
 			++$mgmt_role_summary->{$mgmt_role_type}->{'instances'};
@@ -979,11 +977,11 @@ foreach my $cluster_name ( @clusters ) {
 	my $cm_services = &rest_call('GET', $cm_url, 1);
 	my $service_action_flag = 0;
 	my $role_action_flag = 0;
-	# services
+	# Services
 	for ( my $i=0; $i < @{$cm_services->{'items'}}; $i++ ) {
 		my $service_name = $cm_services->{'items'}[$i]->{'name'};
 		$service_header = "$cluster_name | $service_name";
-		# service instance
+		# Service instance
 		if ( !$s || $service_name =~ /$s/i ) {
 			my $service_type = $cm_services->{'items'}[$i]->{'type'};
 			my $service_state = $cm_services->{'items'}[$i]->{'serviceState'};
@@ -1287,12 +1285,12 @@ foreach my $cluster_name ( @clusters ) {
 
 			$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/roles";
 			my $cm_roles = &rest_call('GET', $cm_url, 1);
-			# roles
+			# Roles
 			my $role_summary;
 			my $roleName_list = {};
 			for ( my $i=0; $i < @{$cm_roles->{'items'}}; $i++ ) {
 				my $host_id = $cm_roles->{'items'}[$i]->{'hostRef'}->{'hostId'};
-				# role instance
+				# Role instance
 				if ( $host_id =~ /$rInfo/ ) {
 					my $role_type = $cm_roles->{'items'}[$i]->{'type'};
 					my $role_name = $cm_roles->{'items'}[$i]->{'name'};
@@ -1324,7 +1322,7 @@ foreach my $cluster_name ( @clusters ) {
 
 						if ( $hInfo ) {
 							$host_id = $uuid_host_map->{$host_id};
-#							$host_id =~ s/\..*$//; # remove domain name
+#							$host_id =~ s/\..*$//; # Remove domain name
 							$role_host_map->{$role_name} = $host_id;
 						}
 
@@ -1454,8 +1452,8 @@ foreach my $cluster_name ( @clusters ) {
 							}
 						}
 					}
-				} # role instance
-			} # roles
+				} # Role instance
+			} # Roles
 			&display_role_summary($role_summary, $cluster_name, $service_name, undef);
 			if ( $a && $confirmed && $a =~ /rollingRestart|decommission|recommission/ ) {
 				print "... $cluster_name | $service_name | ACTION: $a ";
@@ -1471,8 +1469,8 @@ foreach my $cluster_name ( @clusters ) {
 				print "| CMDID: $id\n";
 				$trackCmd ? $cmd_list->{$id} = $cmd : &cmd_id(\%{$cmd});
 			}
-		} # service instance
-	} # services
+		} # Service instance
+	} # Services
 	if ( $a && $a !~ /roleTypes|getConfig/ && !$confirmed && !$list_active_commands ) {
 		if ( $role_action_flag ) {
 			print "# Use -confirmed or -run to execute role action '$a'\n" if $role_action_flag;
@@ -1480,7 +1478,7 @@ foreach my $cluster_name ( @clusters ) {
 			print "# Use -confirmed or -run to execute service action '$a'\n";
 		}
 	}
-} # clusters
+} # Clusters
 
 &track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 
@@ -1500,12 +1498,12 @@ sub usage {
 	print "\t -help : Display usage\n";
 	print "\t -version : Display version information\n";
 	print "\t -d : Enable debug mode\n";
-	print "\t -cm : CM hostname:port (default: localhost:7180, or 7183 if using HTTPS)\n";
-	print "\t -https : Use HTTPS to communicate with CM (default: HTTP)\n";
-	print "\t -api : CM API version (v<integer> | default: response from <cm>/api/version)\n";
 	print "\t -u : CM user name (environment variable: \$CM_REST_USER | default: admin)\n";
 	print "\t -p : CM password or path to password file (environment variable: \$CM_REST_PASS | default: admin)\n";
 	print "\t      Credentials file: \$HOME/.cm_rest (set env variables using colon-separated key/value pairs)\n";
+	print "\t -https : Use HTTPS to communicate with CM (default: HTTP)\n";
+	print "\t -cm : CM hostname:port (default: localhost:7180, or 7183 if using HTTPS)\n";
+	print "\t -api : CM API version (v<integer> | default: response from <cm>/api/version)\n";
 	print "\t -cmVersion : Display Cloudera Manager and default API versions\n";
 	print "\t -userAction: User action (default: show)\n";
 	print "\t              (show) Display user details (args: [-userName] | default: all)\n";
@@ -1567,20 +1565,20 @@ sub usage {
 	print "\t        -propertyName : Configuration parameter name. Required for -updateConfig. Regex filter for -getConfig (default: all)\n";
 	print "\t        -propertyValue : User-defined value. When absent, the default value (if any) will be used\n";
 	print "\t        -full : Full view (default view: summary)\n";
-	print "\t      (createRoleGroup) Create role config group (args: -displayName, -roleType, [-copyFromRoleGroup])\n";	# service context
-	print "\t      (updateRoleGroup) Update role config group (args: -displayName, -copyFromRoleGroup)\n";		# service context
-	print "\t      (deleteRoleGroup) Delete role config group\n";						# service context
-	print "\t      (moveToRoleGroup) Move roles to a config group (args: -roleConfigGroup)\n";		# role context
-	print "\t      (moveToBaseGroup) Move roles to the base role config group\n";				# role context
+	print "\t      (createRoleGroup) Create role config group (args: -displayName, -roleType, [-copyFromRoleGroup])\n";	# Service context
+	print "\t      (updateRoleGroup) Update role config group (args: -displayName, -copyFromRoleGroup)\n";		# Service context
+	print "\t      (deleteRoleGroup) Delete role config group\n";						# Service context
+	print "\t      (moveToRoleGroup) Move roles to a config group (args: -roleConfigGroup)\n";		# Role context
+	print "\t      (moveToBaseGroup) Move roles to the base role config group\n";				# Role context
 	print "\t      (addCluster) Create cluster (args: -clusterName, -displayName, -fullVersion)\n"; 
-	print "\t      (updateCluster) Update cluster information (args: -displayName, -fullVersion)\n";	# cluster context
-	print "\t      (deleteCluster) Delete cluster\n";							# cluster context
-	print "\t      (serviceTypes) List the supported service types for a cluster\n";			# cluster context
-	print "\t      (addService) Create service (args: -serviceName, -serviceType, -displayName)\n";		# cluster context
-	print "\t      (updateService) Update service information (args: -displayName)\n";			# service context
-	print "\t      (deleteService) Delete service\n";							# service context
-	print "\t      (roleTypes) List the supported role types for a service\n";				# service context
-	print "\t      (diagData) Collect diagnostics data for YARN applications\n";		# service context
+	print "\t      (updateCluster) Update cluster information (args: -displayName, -fullVersion)\n";	# Cluster context
+	print "\t      (deleteCluster) Delete cluster\n";							# Cluster context
+	print "\t      (serviceTypes) List the supported service types for a cluster\n";			# Cluster context
+	print "\t      (addService) Create service (args: -serviceName, -serviceType, -displayName)\n";		# Cluster context
+	print "\t      (updateService) Update service information (args: -displayName)\n";			# Service context
+	print "\t      (deleteService) Delete service\n";							# Service context
+	print "\t      (roleTypes) List the supported role types for a service\n";				# Service context
+	print "\t      (diagData) Collect diagnostics data for YARN applications\n";		# Service context
 	print "\t        -appId : Comma-separated list of application IDs\n";
 	print "\t        -ticketNumber : Cloudera Support ticket number (default: empty)\n";
 	print "\t        -comments : Comments to add to the support bundle (default: empty)\n";
@@ -1608,10 +1606,10 @@ sub usage {
 
 sub rest_call {
 	my ($method, $url, $ret, $filename, $bc) = @_;
-	# ret:
-	# 0 -> print output
-	# 1 -> return output
-	# 2 -> write output to file
+	# Values for $ret:
+	# 	Print output		-> 0
+	# 	Print output		-> 1
+	# 	Write output to file	-> 2
 
 	if ( $d ) {
 		my $rest_debug_output = "---\n";
@@ -1625,26 +1623,26 @@ sub rest_call {
 	}
 
 	if ( $method =~ m/GET/i ) {
-		$client->GET($url, $headers); 
+		$client->GET($url, $headers);
 	} elsif ( $method =~ m/POST/i ) {
-		$client->POST($url, $bc, $headers); 
+		$client->POST($url, $bc, $headers);
 	} elsif ( $method =~ m/PUT/i ) {
-		$client->PUT($url, $bc, $headers); 
+		$client->PUT($url, $bc, $headers);
 	} elsif ( $method =~ m/DELETE/i ) {
-		$client->DELETE($url, $headers); 
+		$client->DELETE($url, $headers);
 	} else {
-		die "Invalid method: $method";
+		die "Invalid method: $method\n";
 	}
 
 	my $http_rc = $client->responseCode();
-	my $content = $client->responseContent();
-	my $content_redirect = $content;
+	my $response_content = $client->responseContent();
+	my $response_content_redirect = $response_content;
 	my $url_redirect = $client->responseHeader('location');
 
 	if ( $ret == 2 && !$url_redirect ) {
 		print "Saving to file $filename\n";
 		open my $fh, '>', $filename or die "Can't open file $filename: $!\n";
-		print $fh $content;
+		print $fh $response_content;
 		close $fh;
 	} else { 
 		if ( $d ) {
@@ -1652,9 +1650,11 @@ sub rest_call {
 				print 'Header: ' . $_ . '=' . $client->responseHeader($_) . "\n";
 			}
 			print "Response code: $http_rc\n";
-			print "Response content:\n";
+			print "Response content:\n" if $response_content;
 		}
-		print "$content\n" if ( $content && ( !$ret || $http_rc !~ /2\d\d/ || $d ) );
+
+		print "$response_content\n" if ( $response_content && ( !$ret || $http_rc !~ /2\d\d/ || $d ) );
+
 		if ( $url_redirect ) {
 			($cm_protocol, $cm_host, $cm_port) = $url_redirect =~ /(.*):\/\/(.*):(\d*)/;
 
@@ -1664,14 +1664,15 @@ sub rest_call {
 			print "Redirecting to $cm_redirect/...\n";
 #			print "Redirecting to $url_redirect...\n";
 
-			$content = &rest_call($method, $url_redirect, $ret, $filename, $bc);
+			$response_content = &rest_call($method, $url_redirect, $ret, $filename, $bc);
 		} else {
 			die "\nThe request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d/;
 		}
+
 		if ( $ret ) {
-			$content = from_json($content) if ( $content_redirect && $url !~ /api\/version/ );
-#			print Dumper($content);
-			return $content;
+			$response_content = from_json($response_content) if ( $response_content_redirect && $url !~ /api\/version/ );
+#			print Dumper($response_content);
+			return $response_content;
 		}
 	}
 }
@@ -1732,7 +1733,7 @@ sub cmd_id {
 
 sub track_cmd {
 	my $cmd_list = shift;
-	my $track_pause = 10; # seconds
+	my $track_pause = 10; # Seconds
 	my $cmd_list_summary;
 	my $first_iteration = 1;
 	$cmd_list_summary->{'active'} = keys %{$cmd_list};
@@ -1813,8 +1814,8 @@ sub rolling_restart {
 			$body_content .= "\"$arg\" : ";
 			if ( $arg =~ /restartRoleTypes|restartRoleNames/ ) {
 				$rr_opts{$arg} =~ s/\s+//g;
-				my @role_types = split /,/, uc $rr_opts{$arg}; # uppercase
-				my $role_types_json = join ', ', map { qq("$_") } @role_types; # double quote
+				my @role_types = split /,/, uc $rr_opts{$arg}; # Uppercase
+				my $role_types_json = join ', ', map { qq("$_") } @role_types; # Double quote
 				$body_content .= "[ $role_types_json ]";
 			} else {
 				$body_content .= "\"$rr_opts{$arg}\"";
