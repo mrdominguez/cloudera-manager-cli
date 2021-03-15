@@ -37,8 +37,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 10.4\n";
-	print "Release date: 2021-02-01\n";
+	print "Version: 10.5\n";
+	print "Release date: 2021-03-15\n";
 	exit;
 }
 
@@ -210,22 +210,9 @@ $cm_host = 'localhost' unless $cm_host;
 unless ( $cm_port ) {
 	$cm_port = $https ? 7183 : 7180
 }
-print "CM protocol = $cm_protocol\nCM host = $cm_host\nCM port = $cm_port\n" if $d;
+print "Scheme = $cm_protocol\nCM host = $cm_host\nCM port = $cm_port\n" if $d;
 
-# http://search.cpan.org/dist/libwww-perl/lib/LWP.pm
-#  PERL_LWP_SSL_VERIFY_HOSTNAME
-#   The default verify_hostname setting for LWP::UserAgent. If not set the default will be 1. Set it as 0 to disable hostname verification (the default prior to libwww-perl 5.840).
-# http://search.cpan.org/~ether/libwww-perl/lib/LWP/UserAgent.pm#CONSTRUCTOR_METHODS
-#  verify_hostname => $bool
-#   This option is initialized from the PERL_LWP_SSL_VERIFY_HOSTNAME environment variable. If this environment variable isn't set; then verify_hostname defaults to 1.
-#$ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
-
-# SSL connect attempt failed error:14090086:SSL routines:ssl3_get_server_certificate:certificate verify failed
-
-# http://search.cpan.org/~kkane/REST-Client/lib/REST/Client.pm
 my $client = REST::Client->new();
-$client->getUseragent()->ssl_opts( verify_hostname => 0 );
-
 my $cm_url = "$cm_protocol://$cm_host:$cm_port/api/version";
 my $api_version;
 
@@ -1611,8 +1598,8 @@ sub usage {
 sub rest_call {
 	my ($method, $url, $ret, $filename, $bc) = @_;
 	# Values for $ret:
-	# 	Print output		-> 0
-	# 	Print output		-> 1
+	# 	Print response		-> 0
+	# 	Return decoded JSON	-> 1
 	# 	Write output to file	-> 2
 
 	if ( $d ) {
@@ -1625,6 +1612,8 @@ sub rest_call {
 		$rest_debug_output .= "---\n";
 		print $rest_debug_output;
 	}
+
+	$client->getUseragent()->ssl_opts( verify_hostname => 0 ) if ( $https || $url =~ /^https/i );
 
 	if ( $method =~ m/GET/i ) {
 		$client->GET($url, $headers);
