@@ -24,13 +24,13 @@ use JSON;
 use Data::Dumper;
 use IO::Prompter;
 
-use vars qw($help $version $d $u $p $https $cm $m $bt $bc $i $f $dumper $r);
+use vars qw($help $version $d $u $p $https $cm $noredirect $noauth $m $bt $bc $i $f $dumper $r);
 
 if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 10.4\n";
-	print "Release date: 2021-02-01\n";
+	print "Version: 10.5\n";
+	print "Release date: 2021-03-15\n";
 	exit;
 }
 
@@ -95,8 +95,12 @@ unless ( $cm_port ) {
 }
 $r = $2 if $r =~ /(\/*)(.*)/; # Remove leading slashes if any
 
-my $url = "$scheme://$cm_host:$cm_port/$r";
-my $headers = { 'Content-Type' => 'application/json', 'Authorization' => 'Basic ' . encode_base64($cm_user . ':' . $cm_password) };
+my $url = "$scheme://$cm_host:$cm_port";
+$url .= "/$r" if $r;
+
+my $headers = { 'Content-Type' => 'application/json' };
+$headers->{'Authorization'} = 'Basic ' . encode_base64($cm_user . ':' . $cm_password) unless $noauth;
+
 my $method = $m || 'GET';
 my $body_type = $bt || 'hash';
 my $body_content = $bc || undef;
@@ -161,53 +165,64 @@ if ( $d && defined $body_content ) {
 
 # http://search.cpan.org/~kkane/REST-Client/lib/REST/Client.pm
 my $client = REST::Client->new();
-$client->getUseragent()->ssl_opts( verify_hostname => 0 ) if $https;
 
-if ( $method =~ m/GET/i ) {
-	$client->GET($url, $headers);
-} elsif ( $method =~ m/POST/i ) {
-	$client->POST($url, $body_content, $headers);
-} elsif ( $method =~ m/PUT/i ) {
-	$client->PUT($url, $body_content, $headers);
-} elsif ( $method =~ m/DELETE/i ) {
-	$client->DELETE($url, $headers);
-} else {
-	die "Invalid method: $method\n";
-}
+while ( $url ) {
+	$client->getUseragent()->ssl_opts( verify_hostname => 0 ) if ( $https || $url =~ /^https/i );
 
-my $http_rc = $client->responseCode();
-my $response_content = $client->responseContent();
-
-if ( $d ) {
-	foreach ( $client->responseHeaders() ) {
-		print 'Header: ' . $_ . '=' . $client->responseHeader($_) . "\n";
-	}
-	print "Response code: $http_rc\n";
-	print "Response content:\n" if $response_content;
-}
-
-my $is_json;
-if ( $response_content ) {
-	$is_json = eval { from_json("$response_content"); 1 };
-	$is_json or print "No JSON format detected\n" if $d;
-	if ( $is_json && $dumper ) {
-		#use JSON::PP qw(decode_json);
-		$JSON::PP::true  = 'true';
-		$JSON::PP::false = 'false';
-		my $decoded_json = decode_json($response_content);
-		print Dumper $decoded_json;
+	if ( $method =~ m/GET/i ) {
+		$client->GET($url, $headers);
+	} elsif ( $method =~ m/POST/i ) {
+		$client->POST($url, $body_content, $headers);
+	} elsif ( $method =~ m/PUT/i ) {
+		$client->PUT($url, $body_content, $headers);
+	} elsif ( $method =~ m/DELETE/i ) {
+		$client->DELETE($url, $headers);
 	} else {
-		print "$response_content\n";
+		die "Invalid method: $method\n";
 	}
-} else {
-	print "No response content\n" if $d;
-}
 
-print "The request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d/;
+	my $http_rc = $client->responseCode();
+	my $response_content = $client->responseContent();
+
+	if ( $d ) {
+		foreach ( $client->responseHeaders() ) {
+			print 'Header: ' . $_ . '=' . $client->responseHeader($_) . "\n";
+		}
+		print "Response code: $http_rc\n";
+		print "Response content:\n" if $response_content;
+	}
+
+	if ( $client->responseHeader('location') && !$noredirect ) {
+		my $location =  $client->responseHeader('location');
+		if ( $location =~ '^/' ) { $url .= $location } else { $url = $location }
+		print "Redirecting to $url\n";
+	} else {
+		undef $url;
+	}
+
+	my $is_json;
+	if ( $response_content ) {
+		$is_json = eval { from_json("$response_content"); 1 };
+		$is_json or print "No JSON format detected\n" if $d;
+		if ( $is_json && $dumper ) {
+			#use JSON::PP qw(decode_json);
+			$JSON::PP::true  = 'true';
+			$JSON::PP::false = 'false';
+			my $decoded_json = decode_json($response_content);
+			print Dumper $decoded_json;
+		} else {
+			print "$response_content\n";
+		}
+	} else {
+		print "No response content\n" if $d;
+	}
+
+	print "The request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d/;
+}
 
 sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] [-u[=username]] [-p[=password]] [-https] [-cm=hostname[:port]]\n";
-	print "\t[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r=rest_resource\n\n";
+	print "\t[-noredirect] [-noauth] [-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r=rest_resource\n\n";
 
 	print "\t -help : Display usage\n";
 	print "\t -version : Display version information\n";
@@ -217,6 +232,8 @@ sub usage {
 	print "\t      Credentials file: \$HOME/.cm_rest (set env variables using colon-separated key/value pairs)\n";
 	print "\t -https : Use HTTPS to communicate with CM (default: HTTP)\n";
 	print "\t -cm : CM hostname:port (default: localhost:7180, or 7183 if using HTTPS)\n";
+	print "\t -noredirect : Do not follow redirects\n";
+	print "\t -noauth : Do not add Authorization header\n";
 	print "\t -m : Method | GET, POST, PUT, DELETE (default: GET)\n";
 	print "\t -bt : Body type | array, hash, json (default: hash)\n";
 	print "\t -bc : Body content. Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)\n";
