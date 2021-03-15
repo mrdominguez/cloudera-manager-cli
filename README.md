@@ -13,7 +13,17 @@
 [How-To](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#how-to)
 
 ## Release Notes
-### Version 10.4 is now available!
+### Version 10.5 is now available!
+- Changes to CM REST client (`cmrest.pl`):
+  * Support for redirections
+  * Added option to not use `Authorization` header in the HTTP request
+
+```
+-noredirect : Do not follow redirects
+-noauth : Do not add Authorization header
+```
+
+### Version 10.4
 - Changes to CM REST client (`cmrest.pl`):
   * All arguments are now flag-based (see [Usage](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#usage))
   * `-dumper : Use Data::Dumper to output the JSON response content (default: disabled)`
@@ -423,7 +433,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 **cmrest.pl**
 ```
 Usage: cmrest.pl [-help] [-version] [-d] [-u[=username]] [-p[=password]] [-https] [-cm=hostname[:port]]
-	[-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r=rest_resource
+	[-noredirect] [-noauth] [-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r=rest_resource
 
 	 -help : Display usage
 	 -version : Display version information
@@ -433,6 +443,8 @@ Usage: cmrest.pl [-help] [-version] [-d] [-u[=username]] [-p[=password]] [-https
 	      Credentials file: $HOME/.cm_rest (set env variables using colon-separated key/value pairs)
 	 -https : Use HTTPS to communicate with CM (default: HTTP)
 	 -cm : CM hostname:port (default: localhost:7180, or 7183 if using HTTPS)
+	 -noredirect : Do not follow redirects
+	 -noauth : Do not add Authorization header
 	 -m : Method | GET, POST, PUT, DELETE (default: GET)
 	 -bt : Body type | array, hash, json (default: hash)
 	 -bc : Body content. Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)
