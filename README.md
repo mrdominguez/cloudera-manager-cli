@@ -365,7 +365,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -c : Cluster name
 	 -s : Service name (regex)
 	 -r : Role type/name (regex)
-	 -rInfo : Role information (regex UUID or set -hInfo | default: all)
+	 -rInfo : Role information (regex UUID, superseded by -hInfo | default: all)
 	 -rFilter : Role state, health summary, configuration status, commission state (regex)
 	 -sFilter : Service state, health summary, configuration status, client configuration status (regex)
 	   -sClient : Apply service filter only to client configuration status (default: disabled)
