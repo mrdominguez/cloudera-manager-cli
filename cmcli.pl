@@ -700,7 +700,7 @@ if ( $hInfo ) {
 	exit unless ( $rInfo && ( $c || @clusters || $s =~ /mgmt/ ) );
 }
 
-$rInfo = '.' if ( $rInfo && $rInfo eq '1' ) || ( $r || $rFilter );
+$rInfo = '.' if ( $rInfo && $rInfo eq '1' ) || ( !$rInfo && ( $r || $rFilter ) );
 $s = '.' if !$rInfo && !$s && ( $sFilter || ( $maintenanceMode && $maintenanceMode ne 1 ) );
 die "-a=$a is not available for roles\n" if ( $rInfo && $a && $a eq 'deployClientConfig' );
 
@@ -1529,7 +1529,7 @@ sub usage {
 	print "\t -c : Cluster name\n";
 	print "\t -s : Service name (regex)\n";
 	print "\t -r : Role type/name (regex)\n";
-	print "\t -rInfo : Role information (regex UUID or set -hInfo | default: all)\n";
+	print "\t -rInfo : Role information (regex UUID, superseded by -hInfo | default: all)\n";
 	print "\t -rFilter : Role state, health summary, configuration status, commission state (regex)\n";
 	print "\t -sFilter : Service state, health summary, configuration status, client configuration status (regex)\n";
 	print "\t   -sClient : Apply service filter only to client configuration status (default: disabled)\n";
