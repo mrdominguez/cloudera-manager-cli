@@ -38,7 +38,7 @@ if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
 	print "Version: 10.5\n";
-	print "Release date: 2021-03-15\n";
+	print "Release date: 2021-12-09\n";
 	exit;
 }
 
@@ -387,11 +387,11 @@ if ( $cmConfig || $deployment ) {
 	if ( $cmConfig ) {
 		print "Retrieving Cloudera Manager settings...\n";
 		$cm_url = "$cm_api/cm/config?view=full";
-		$filename = "$cm_host\_cm\_config.json";
+		$filename = "${cm_host}_cm_config.json";
 	} else {
 		print "Retrieving full description of the entire CM deployment...\n";
 		$cm_url = "$cm_api/cm/deployment";
-		$filename = "$cm_host-cm-deployment.json";
+		$filename = "${cm_host}_cm_deployment.json";
 	}
 	&rest_call('GET', $cm_url, 2, $filename);
 	exit;
@@ -804,7 +804,7 @@ if ( $s && $s =~ /mgmt/ ) {
 					} elsif ( $log eq 'stacksBundle' ) {
 						$filename = "$mgmt_role_name.$log.zip";
 					} else {
-						$filename = "$mgmt_role_name\_$log.log";
+						$filename = "${mgmt_role_name}_$log.log";
 					}
 					&rest_call('GET', $cm_url, $ret, $filename);
 				} else {
@@ -1063,7 +1063,7 @@ foreach my $cluster_name ( @clusters ) {
 					$format='thrift_encoded' if $format eq 'thrift';
 					$cm_url .= "/$queryId?format=$format";
 
-					my $filename = "${queryId}_${format}.profile";
+					my $filename = "${queryId}_$format.profile";
 					my $impalaQueryDetailsResponse = rest_call('GET', $cm_url, 1);
 
 					print "$impalaQueryDetailsResponse->{'details'}\n" if $format eq 'text';
@@ -1221,7 +1221,7 @@ foreach my $cluster_name ( @clusters ) {
 						}
 					} elsif ( $clientConfig ) {
 						$cm_url .= "/clientConfig";
-						my $filename = "$cm_host-$cluster_name-$service_name-clientConfig.zip";
+						my $filename = "${cm_host}_${cluster_name}_${service_name}_clientConfig.zip";
 						$filename =~ s/\s+//g;
 						print "\n";
 						&rest_call('GET', $cm_url, 2, $filename);
@@ -1380,7 +1380,7 @@ foreach my $cluster_name ( @clusters ) {
 								print "Retrieving $log log...\n";
 								$cm_url = "$cm_api/clusters/$cluster_name/services/$service_name/roles/$role_name/logs/$log";
 								my $ret = $download ? 2 : 0;
-								my $filename = "$role_name\_$log.log";
+								my $filename = "${role_name}_$log.log";
 								&rest_call('GET', $cm_url, $ret, $filename);
 							} else { 
 								print "Unknown log type: $log\n";
@@ -1484,7 +1484,7 @@ sub usage {
 	print "\t[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]\n";
 	print "\t[-a[=action]] [-confirmed] [-trackCmd] [-download] [-run]\n";
 	print "\t[-yarnApps[=parameters] [-attributes] [-kill -appId=app_id]]\n";
-	print "\t[-impalaQueries[=parameters] [-attributes] [-queryId=query_id [-format=(text|thrift)|-cancel]]\n\n";
+	print "\t[-impalaQueries[=parameters] [-attributes] [-queryId=query_id [-format=text|thrift] [-cancel]]\n\n";
 
 	print "\t -help : Display usage\n";
 	print "\t -version : Display version information\n";
@@ -1785,7 +1785,7 @@ sub track_cmd {
 			if ( $cmd_list->{$id}->{'success'} ) {
 				if ( $cmd_list->{$id}->{'resultDataUrl'} ) {
 					my $resultDataUrl = $cmd_list->{$id}->{'resultDataUrl'};
-					my $filename = "$id-scm-command-result.zip";
+					my $filename = "${id}_scm_command_result.zip";
 					&rest_call('GET', $resultDataUrl, 2, $filename);
 				} else {
 					print "No downloadable for commandId $id\n";
