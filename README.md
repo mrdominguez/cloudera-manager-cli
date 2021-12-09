@@ -71,7 +71,7 @@ Updating user 'mdom'...
   * `-kill -appId=app_id`
 - New `-impalaQueries` options:
   * `-attributes`
-  * `-queryId=query_id [-format=(text|thrift) | -cancel]`
+  * `-queryId=query_id [-format=text|thrift] [-cancel]`
 - Added unattended installation script for RHEL-based distributions (see [Installation](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#installation) section for details)
 
 ### Version 9
@@ -320,7 +320,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	[-maintenanceMode[=YES|NO]] [-roleConfigGroup[=config_group_name]]
 	[-a[=action]] [-confirmed] [-trackCmd] [-download] [-run]
 	[-yarnApps[=parameters] [-attributes] [-kill -appId=app_id]]
-	[-impalaQueries[=parameters] [-attributes] [-queryId=query_id [-format=(text|thrift)|-cancel]]
+	[-impalaQueries[=parameters] [-attributes] [-queryId=query_id [-format=text|thrift] [-cancel]]
 
 	 -help : Display usage
 	 -version : Display version information
@@ -425,9 +425,9 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -impalaQueries : Display Impala queries (default: filter=empty, from=5_minutes, to=now, limit=100, offset=0)
 	   -attributes : List of attributes that the Service Monitor can associate with Impala queries
 	   -queryId : Return query details
-	   -format : text (default) | thrift
-	   -cancel : Cancel Impala query (-queryId)
-	 -mgmt : Alias for '-s=mgmt' | Cloudera Management Service information (default: disabled)
+	     -format : text (default) | thrift
+	     -cancel : Cancel Impala query
+	 -mgmt : Alias for '-s=mgmt', Cloudera Management Service (default: disabled)
 ```
 
 **cmrest.pl**
