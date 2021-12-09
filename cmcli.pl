@@ -1589,9 +1589,9 @@ sub usage {
 	print "\t -impalaQueries : Display Impala queries (default: filter=empty, from=5_minutes, to=now, limit=100, offset=0)\n";
 	print "\t   -attributes : List of attributes that the Service Monitor can associate with Impala queries\n";
 	print "\t   -queryId : Return query details\n";
-	print "\t   -format : text (default) | thrift\n";
-	print "\t   -cancel : Cancel Impala query (-queryId)\n";
-	print "\t -mgmt : Alias for '-s=mgmt' | Cloudera Management Service information (default: disabled)\n\n";
+	print "\t     -format : text (default) | thrift\n";
+	print "\t     -cancel : Cancel Impala query\n";
+	print "\t -mgmt : Alias for '-s=mgmt', Cloudera Management Service (default: disabled)\n\n";
 	exit;
 }
 
