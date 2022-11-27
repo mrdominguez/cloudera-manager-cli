@@ -15,7 +15,7 @@
 ## Release Notes
 ### Version 10.5 is now available!
 - Changes to CM REST client (`cmrest.pl`):
-  * Support for redirections
+  * Support for redirections (follow redirects is enabled by default)
   * Added option to not use `Authorization` header in the HTTP request
 
 ```
