@@ -15,6 +15,7 @@
 ## Release Notes
 ### Version 10.5.1 is now available!
 - Changes to CM REST client (`cmrest.pl`):
+  * Resolved an issue with a conflicting method name (`decode_json`) when using the `-dumper` option
   * Support for redirections (follow redirects is enabled by default)
   * Added option to not use `Authorization` header in the HTTP request
 
