@@ -1,6 +1,6 @@
 #!/usr/bin/perl -ws
 
-# Copyright 2021 Mariano Dominguez
+# Copyright 2022 Mariano Dominguez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 10.5\n";
-	print "Release date: 2021-12-09\n";
+	print "Version: 10.5.1\n";
+	print "Release date: 2022-12-08\n";
 	exit;
 }
 
@@ -512,7 +512,7 @@ if ( $hInfo ) {
 						my $role_name = $sorted[$j]->{'roleName'};
 						if ( $r && $role_name !~ /$r/i ) { next } else { $hInfo_match = 1 };
 						unless ( $role_info_flag ) {
-							$hInfo_output .= "|_ $host_name";
+							$hInfo_output .= "\\_ $host_name";
 							$hInfo_output .= " | $cluster_name" if $cluster_name;
 							$hInfo_output .= " | $service_name";
 							$hInfo_output .= " | $role_name\n";
@@ -529,7 +529,7 @@ if ( $hInfo ) {
 					}
 				}
 			} else {
-				$hInfo_output .= "|_ $host_name | No roles\n" if $hRoles;
+				$hInfo_output .= "\\_ $host_name | No roles\n" if $hRoles;
 				$hInfo_match = 1 if ( $s && $s eq 'No roles' );
 			}
 		}
@@ -787,7 +787,7 @@ if ( $s && $s =~ /mgmt/ ) {
 			++$mgmt_role_summary->{$mgmt_role_type}->{'role_config'}->{$mgmt_role_config} if ( $api_version > 5 && $mgmt_role_config ne 'FRESH' );
 
 			my $mgmt_header = "$mgmt_name | $host_id";
-			print "|_ $mgmt_header | $mgmt_role_type ";
+			print "\\_ $mgmt_header | $mgmt_role_type ";
 			print "| $mgmt_role_maintenance_mode " if ( $maintenanceMode && $api_version > 1 );
 			print "| $mgmt_role_name --- $mgmt_role_state $mgmt_role_health ";
 			print $mgmt_role_config if $api_version > 5;
@@ -995,7 +995,7 @@ foreach my $cluster_name ( @clusters ) {
 				&& $maintenanceMode ne '1'
 				&& $service_maintenance_mode ne $maintenanceMode );
 
-			print "|_ $service_header | $service_type ";
+			print "\\_ $service_header | $service_type ";
 			if ( $api_version > 1 ) {
 				print "| $service_maintenance_mode " if $maintenanceMode;
 				print "| $service_display_name ";
@@ -1324,7 +1324,7 @@ foreach my $cluster_name ( @clusters ) {
 						++$role_summary->{$role_type}->{'role_commission_state'}->{$role_commission_state} if ( $api_version > 1 && $role_commission_state ne 'COMMISSIONED' );
 
 						my $role_header = "$service_header | $host_id | $role_type";
-						print "  |_ $role_header | ";
+						print "  \\_ $role_header | ";
 						print "$role_config_group | " if ( $roleConfigGroup && $api_version > 2 );
 						if ( $api_version > 1 ) {
 							print "$role_maintenance_mode | " if $maintenanceMode;
@@ -1701,7 +1701,7 @@ sub cmd_id {
 			print "\n";
 			if ( $cmd->{$ref}->{'items'} ) {
 				foreach my $cmd_children ( sort { $a->{'id'} <=> $b->{'id'} } @{$cmd->{$ref}->{'items'}} ) {
-					print "|_ ";
+					print "\\_ ";
 					&cmd_id(\%{$cmd_children});
 				}
 			}
