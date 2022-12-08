@@ -1,6 +1,6 @@
 #!/usr/bin/perl -ws
 
-# Copyright 2021 Mariano Dominguez
+# Copyright 2022 Mariano Dominguez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ use vars qw($help $version $d $u $p $https $cm $noredirect $noauth $m $bt $bc $i
 if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 10.5\n";
-	print "Release date: 2021-12-09\n";
+	print "Version: 10.5.1\n";
+	print "Release date: 2022-12-08\n";
 	exit;
 }
 
 &usage if $help;
-die "Set -r\nUse -help for options\n" if !$r;
+die "Set -r (REST resource|endpoint)\nUse -help for options\n" if !$r;
 
 my $cm_cred_file = "$ENV{'HOME'}/.cm_rest";
 print "Credentials file $cm_cred_file " if $d;
@@ -205,10 +205,10 @@ while ( $url ) {
 		$is_json = eval { from_json("$response_content"); 1 };
 		$is_json or print "No JSON format detected\n" if $d;
 		if ( $is_json && $dumper ) {
-			#use JSON::PP qw(decode_json);
-			$JSON::PP::true  = 'true';
+			use JSON::PP ();
+			$JSON::PP::true = 'true';
 			$JSON::PP::false = 'false';
-			my $decoded_json = decode_json($response_content);
+			my $decoded_json = JSON::PP::decode_json($response_content);
 			print Dumper $decoded_json;
 		} else {
 			print "$response_content\n";
