@@ -27,7 +27,10 @@
 ### Version 10.4
 - Changes to CM REST client (`cmrest.pl`):
   * All arguments are now flag-based (see [Usage](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#usage))
-  * New output format: `-dumper : Use Data::Dumper to output the JSON response content (default: disabled)`
+  * New output format `-dumper`:
+```
+-dumper : Use Data::Dumper to output the JSON response content (default: disabled)
+```
 
 ### Version 10.3
 
