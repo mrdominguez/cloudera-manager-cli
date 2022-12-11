@@ -28,7 +28,7 @@ use IO::Prompter;
 
 BEGIN { $| = 1 }
 
-use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword $userRole $https $api $sChecks $sMetrics $rChecks $rMetrics $cmConfig $u $p $cm $c $s $r
+use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword $userRole $https $rc $api $sChecks $sMetrics $rChecks $rMetrics $cmConfig $u $p $cm $c $s $r
 	$rInfo $rFilter $sFilter $sClient $yarnApps $attributes $kill $appId $ticketNumber $comments $download $log $a $confirmed $cmdId $cmdAction $hInfo $hFilter $hRoles
 	$hChecks $deployment $mgmt $impalaQueries $cancel $queryId $format $trackCmd $setRackId $deleteHost $addToCluster $removeFromCluster $addRole $serviceName $clusterName
 	$hAction $run $maintenanceMode $roleConfigGroup $propertyName $propertyValue $clientConfig $full $displayName $fullVersion $serviceType $roleType
@@ -37,8 +37,8 @@ use vars qw($help $version $d $cmVersion $userAction $f $userName $userPassword 
 if ( $version ) {
 	print "Cloudera Manager Command-Line Interface\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 10.5.1\n";
-	print "Release date: 2022-12-08\n";
+	print "Version: 10.5.2\n";
+	print "Release date: 2022-12-11\n";
 	exit;
 }
 
@@ -1474,7 +1474,8 @@ foreach my $cluster_name ( @clusters ) {
 &track_cmd(\%{$cmd_list}) if keys %{$cmd_list};
 
 sub usage {
-	print "\nUsage: $0 [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u[=username]] [-p[=password]]\n";
+	print "\nUsage: $0 [-help] [-version] [-d] [-u[=username]] [-p[=password]]\n";
+	print "\t[-https] [-rc] [-cm=[hostname]:[port]] [-api=v<integer>]\n";
 	print "\t[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_ids [-cmdAction=abort|retry]]\n";
 	print "\t[-userAction=user_action [-userName=user_name|-f=json_file -userPassword[=password] -userRole[=user_role]]]\n";
 	print "\t[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \\\n";
@@ -1493,9 +1494,16 @@ sub usage {
 	print "\t -p : CM password or path to password file (environment variable: \$CM_REST_PASS | default: admin)\n";
 	print "\t      Credentials file: \$HOME/.cm_rest (set env variables using colon-separated key/value pairs)\n";
 	print "\t -https : Use HTTPS to communicate with CM (default: HTTP)\n";
+	print "\t -rc : Show HTTP response status codes\n";
 	print "\t -cm : CM hostname:port (default: localhost:7180, or 7183 if using HTTPS)\n";
 	print "\t -api : CM API version (v<integer> | default: response from <cm>/api/version)\n";
 	print "\t -cmVersion : Display Cloudera Manager and default API versions\n";
+	print "\t -cmConfig : Save CM configuration to file\n";
+	print "\t -deployment : Retrieve full description of the entire CM deployment\n";
+	print "\t -cmdId : Retrieve information on asynchronous commands (comma-separated list of command IDs)\n";
+	print "\t -cmdAction : Command action\n";
+	print "\t              (abort) Abort a running command\n";
+	print "\t              (retry) Try to rerun a command\n";
 	print "\t -userAction: User action (default: show)\n";
 	print "\t              (show) Display user details (args: [-userName] | default: all)\n";
 	print "\t              (add|update) Create/update user\n";
@@ -1507,12 +1515,6 @@ sub usage {
 	print "\t              (reset) Reset user password and role to default values (args: -userName)\n";
 	print "\t              (sessions) Display interactive user sessions\n";
 	print "\t              (expireSessions) Expire user session (args: -userName)\n";
-	print "\t -cmConfig : Save CM configuration to file\n";
-	print "\t -deployment : Retrieve full description of the entire CM deployment\n";
-	print "\t -cmdId : Retrieve information on asynchronous commands (comma-separated list of command IDs)\n";
-	print "\t -cmdAction : Command action\n";
-	print "\t              (abort) Abort a running command\n";
-	print "\t              (retry) Try to rerun a command\n";
 	print "\t -hInfo : Host information (regex UUID, hostname, IP, rackId | default: all)\n";
 	print "\t -hFilter : Host health summary, entity status, commission state (regex)\n";
 	print "\t -hRoles : Display roles associated with host\n";
@@ -1659,7 +1661,7 @@ sub rest_call {
 
 			$response_content = &rest_call($method, $url_redirect, $ret, $filename, $bc);
 		} else {
-			die "\nThe request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d/;
+			die "\n[ HTTP response status code = $http_rc ]\n" if ( $rc || $http_rc !~ /2\d\d/ );
 		}
 
 		if ( $ret ) {
