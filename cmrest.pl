@@ -121,7 +121,7 @@ if ( $f ) {
 	}
 }
 
-$body_content = "{ \"items\" \: $body_content }" if ( !$f && $i && $body_type eq 'json' );
+$body_content = "{ \"items\" : $body_content }" if ( !$f && $i && $body_type eq 'json' );
 
 if ( defined $body_content && $body_type ne 'json' ) {
 	$body_content =~ s/\s+//g; # remove whitespaces
