@@ -24,13 +24,13 @@ use JSON;
 use Data::Dumper;
 use IO::Prompter;
 
-use vars qw($help $version $d $u $p $https $cm $noredirect $noauth $m $bt $bc $i $f $dumper $r);
+use vars qw($help $version $d $u $p $https $cm $noredirect $noauth $rc $m $bt $bc $i $f $dumper $r);
 
 if ( $version ) {
 	print "Cloudera Manager REST API client\n";
 	print "Author: Mariano Dominguez\n";
-	print "Version: 10.5.1\n";
-	print "Release date: 2022-12-08\n";
+	print "Version: 10.5.2\n";
+	print "Release date: 2022-12-11\n";
 	exit;
 }
 
@@ -214,15 +214,15 @@ while ( $url ) {
 			print "$response_content\n";
 		}
 	} else {
-		print "No response content\n" if $d;
+		print "No response content found\n" if $d;
 	}
 
-	print "The request did not succeed [HTTP RC = $http_rc]\n" if $http_rc !~ /2\d\d/;
+	print "[ HTTP response status code = $http_rc ]\n" if ( $rc || $http_rc !~ /2\d\d/ );
 }
 
 sub usage {
 	print "\nUsage: $0 [-help] [-version] [-d] [-u[=username]] [-p[=password]] [-https] [-cm=hostname[:port]]\n";
-	print "\t[-noredirect] [-noauth] [-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r=rest_resource\n\n";
+	print "\t[-noredirect] [-noauth] [-rc] [-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r=rest_resource\n\n";
 
 	print "\t -help : Display usage\n";
 	print "\t -version : Display version information\n";
@@ -234,6 +234,7 @@ sub usage {
 	print "\t -cm : CM hostname:port (default: localhost:7180, or 7183 if using HTTPS)\n";
 	print "\t -noredirect : Do not follow redirects\n";
 	print "\t -noauth : Do not add Authorization header\n";
+	print "\t -rc : Show HTTP response status codes\n";
 	print "\t -m : Method | GET, POST, PUT, DELETE (default: GET)\n";
 	print "\t -bt : Body type | array, hash, json (default: hash)\n";
 	print "\t -bc : Body content. Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)\n";
