@@ -13,11 +13,11 @@
 [How-To](https://github.com/mrdominguez/cloudera-manager-cli/blob/master/README.md#how-to)
 
 ## Release Notes
-### Version 10.5.1 is now available!
+### Version 10.5.2 is now available!
 - Changes to CM REST client (`cmrest.pl`):
   * Resolved an issue with a conflicting method name (`decode_json`) when using the `-dumper` option
-  * Support for redirections (follow redirects is enabled by default)
-  * Added option to not use `Authorization` header in the HTTP request
+  * Support for redirections (Follow redirects is enabled by default)
+  * Added option to skip using `Authorization` header in the HTTP request
 
 ```
 -noredirect : Do not follow redirects
@@ -314,7 +314,8 @@ The preference is as follows (highest first):
 
 **cmcli.pl**
 ```
-Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v<integer>] [-u[=username]] [-p[=password]]
+Usage: cmcli.pl [-help] [-version] [-d] [-u[=username]] [-p[=password]]
+	[-https] [-rc] [-cm=[hostname]:[port]] [-api=v<integer>]
 	[-cmVersion] [-cmConfig|-deployment] [-cmdId=command_ids [-cmdAction=abort|retry]]
 	[-userAction=user_action [-userName=user_name|-f=json_file -userPassword[=password] -userRole[=user_role]]]
 	[-hInfo[=host_info] [-hFilter=host_filter] [-hRoles] [-hChecks] [-removeFromCluster] [-deleteHost] \
@@ -329,13 +330,20 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 	 -help : Display usage
 	 -version : Display version information
 	 -d : Enable debug mode
-	 -cm : CM hostname:port (default: localhost:7180, or 7183 if using HTTPS)
-	 -https : Use HTTPS to communicate with CM (default: HTTP)
-	 -api : CM API version (v<integer> | default: response from <cm>/api/version)
 	 -u : CM user name (environment variable: $CM_REST_USER | default: admin)
 	 -p : CM password or path to password file (environment variable: $CM_REST_PASS | default: admin)
 	      Credentials file: $HOME/.cm_rest (set env variables using colon-separated key/value pairs)
+	 -https : Use HTTPS to communicate with CM (default: HTTP)
+	 -rc : Show HTTP response status codes
+	 -cm : CM hostname:port (default: localhost:7180, or 7183 if using HTTPS)
+	 -api : CM API version (v<integer> | default: response from <cm>/api/version)
 	 -cmVersion : Display Cloudera Manager and default API versions
+	 -cmConfig : Save CM configuration to file
+	 -deployment : Retrieve full description of the entire CM deployment
+	 -cmdId : Retrieve information on asynchronous commands (comma-separated list of command IDs)
+	 -cmdAction : Command action
+	              (abort) Abort a running command
+	              (retry) Try to rerun a command
 	 -userAction: User action (default: show)
                       (show) Display user details (args: [-userName] | default: all)
                       (add|update) Create/update user
@@ -347,12 +355,6 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
                       (reset) Reset user password and role to default values (args: -userName)
                       (sessions) Display interactive user sessions
                       (expireSessions) Expire user session (args: -userName)
-	 -cmConfig : Save CM configuration to file
-	 -deployment : Retrieve full description of the entire CM deployment
-	 -cmdId : Retrieve information on asynchronous commands (comma-separated list of command IDs)
-	 -cmdAction : Command action
-	              (abort) Abort a running command
-	              (retry) Try to rerun a command
 	 -hInfo : Host information (regex UUID, hostname, IP, rackId | default: all)
 	 -hFilter : Host health summary, entity status, commission state (regex)
 	 -hRoles : Display roles associated with host
@@ -437,7 +439,7 @@ Usage: cmcli.pl [-help] [-version] [-d] [-cm=[hostname]:[port]] [-https] [-api=v
 **cmrest.pl**
 ```
 Usage: cmrest.pl [-help] [-version] [-d] [-u[=username]] [-p[=password]] [-https] [-cm=hostname[:port]]
-	[-noredirect] [-noauth] [-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r=rest_resource
+	[-noredirect] [-noauth] [-rc] [-m=method] [-bt=body_type] [-bc=body_content [-i]] [-f=json_file] [-dumper] -r=rest_resource
 
 	 -help : Display usage
 	 -version : Display version information
@@ -449,6 +451,7 @@ Usage: cmrest.pl [-help] [-version] [-d] [-u[=username]] [-p[=password]] [-https
 	 -cm : CM hostname:port (default: localhost:7180, or 7183 if using HTTPS)
 	 -noredirect : Do not follow redirects
 	 -noauth : Do not add Authorization header
+	 -rc : Show HTTP response status codes
 	 -m : Method | GET, POST, PUT, DELETE (default: GET)
 	 -bt : Body type | array, hash, json (default: hash)
 	 -bc : Body content. Colon-separated list of property/value pairs for a single object (use ~ as delimiter in array properties if -bt=hash)
