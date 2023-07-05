@@ -231,7 +231,7 @@ $
 
 ## Installation
 
-These utilities are written in *Perl* and have been tested using version *5.1x.x* on *RHEL 6/7*, as well as *macOS Sierra (10.12)* and after.
+These utilities are written in Perl and have been tested using version 5.1x.x on RHEL 6/7, as well as macOS Sierra (10.12) and after.
 
 Use [cpan](http://perldoc.perl.org/cpan.html) to install the following modules; alternately, download them from the [CPAN Search Site](http://search.cpan.org/) for manual installation:
 - **REST::Client**
